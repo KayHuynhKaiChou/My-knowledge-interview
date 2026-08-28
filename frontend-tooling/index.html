@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="PWA, Hot Reloading, SDK, Nx monorepo, OpenIM, Refine.">
+<title>Frontend & Tooling — Interview Knowledge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body data-root="../">
+
+<header class="topbar">
+  <a class="topbar-brand" href="../index.html" aria-label="Interview Knowledge — trang chủ">
+    <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true">
+      <defs><linearGradient id="ikBadge" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#f0b355"/><stop offset="1" stop-color="#b9752a"/>
+      </linearGradient></defs>
+      <rect x="2" y="2" width="60" height="60" rx="15" fill="url(#ikBadge)"/>
+      <path d="M21 21 L33 32 L21 43" fill="none" stroke="#0b0e13" stroke-width="7"
+            stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M37 43 H46" stroke="#0b0e13" stroke-width="7" stroke-linecap="round"/>
+    </svg>
+    <span class="brand-text">Interview Knowledge</span>
+  </a>
+  <nav class="topbar-nav">
+    <details class="nav-group">
+      <summary>Backend</summary>
+      <div class="nav-dropdown">
+        <a href="../advanced-backend/index.html">Advanced Backend</a>
+        <a href="../backend-dotnet-nestjs/index.html">.NET &amp; NestJS</a>
+        <a href="../database-sql/index.html">Database &amp; SQL</a>
+        <a href="../backend-infrastructure/index.html">Hạ tầng</a>
+        <a href="../realtime-socket/index.html">Realtime &amp; Socket</a>
+        <a href="../case-studies/index.html">Case studies</a>
+      </div>
+    </details>
+    <details class="nav-group has-active">
+      <summary>Frontend</summary>
+      <div class="nav-dropdown">
+        <a href="../javascript-core/index.html">JavaScript &amp; TS</a>
+        <a href="../react/index.html">React &amp; State</a>
+        <a href="../nextjs/index.html">Next.js</a>
+        <a href="../css-html/index.html">CSS &amp; HTML</a>
+        <a href="../browser-web-api/index.html">Browser &amp; Web API</a>
+        <a href="../react-native/index.html">React Native</a>
+        <a href="../frontend-tooling/index.html" class="active">Frontend Tooling</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Quy trình &amp; Nền tảng</summary>
+      <div class="nav-dropdown">
+        <a href="../git/index.html">Git</a>
+        <a href="../testing-environments/index.html">Testing</a>
+        <a href="../saas-platforms/index.html">SaaS &amp; Nền tảng</a>
+        <a href="../auth-blockchain/index.html">Auth &amp; Blockchain</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Khác</summary>
+      <div class="nav-dropdown">
+        <a href="../interview-intro/index.html">Giới thiệu &amp; English</a>
+        <a href="../project-notes/index.html">Ghi chú dự án</a>
+      </div>
+    </details>
+  </nav>
+  <button class="search-trigger" id="searchTrigger" aria-label="Tìm kiếm nội dung">
+    <span class="search-icon" aria-hidden="true">⌕</span>
+    <span class="search-label">Tìm kiếm</span>
+    <kbd>/</kbd>
+  </button>
+</header>
+
+<div class="search-overlay" id="searchOverlay" hidden>
+  <div class="search-box" role="dialog" aria-label="Tìm kiếm nội dung">
+    <input type="search" id="searchInput" autocomplete="off" spellcheck="false"
+           placeholder="Tìm trong toàn bộ nội dung — closure, saga, index, rebase…">
+    <div class="search-results" id="searchResults"></div>
+    <div class="search-hint">Enter mở mục · ↑↓ chọn · Esc đóng</div>
+  </div>
+</div>
+
+<div class="shell">
+  <button class="mobile-toggle" id="navToggle" aria-label="Mở mục lục">☰ Mục lục</button>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">Frontend &amp; Tooling</div>
+    <div class="brand-sub">6 mục &middot; sổ tay ôn phỏng vấn</div>
+
+    <div class="nav-block">
+      <p class="nav-label">Nội dung</p>
+      <ul class="nav-list">
+        <li><a href="#pwa"><span class="nav-num">01</span><span class="nav-text">Progressive Web App (PWA)</span></a></li>
+        <li><a href="#hot-reloading"><span class="nav-num">02</span><span class="nav-text">Hot Reloading</span></a></li>
+        <li><a href="#sdk"><span class="nav-num">03</span><span class="nav-text">SDK</span></a></li>
+        <li><a href="#nx-monorepo"><span class="nav-num">04</span><span class="nav-text">Nx &amp; Monorepo</span></a></li>
+        <li><a href="#openim"><span class="nav-num">05</span><span class="nav-text">OpenIM</span></a></li>
+        <li><a href="#refine"><span class="nav-num">06</span><span class="nav-text">Refine</span></a></li>
+      </ul>
+    </div>
+  </aside>
+  <main>
+    <div class="hero">
+      <div class="hero-kicker">Interview prep · Frontend / Developer tooling</div>
+      <h1>Frontend &amp; Tooling</h1>
+      <p class="lede">PWA khác web thường ở chỗ nào, hot reload thực chất là gì, SDK gồm những gì, monorepo với Nx giải quyết vấn đề gì, và vài thư viện hay xuất hiện trong JD.</p>
+    </div>
+
+<!-- ============ PWA ============ -->
+    <section class="qa" id="pwa" data-nav="Progressive Web App (PWA)">
+      <div class="q-tag"><span class="n">1</span> Phía client</div>
+      <h2 class="q-title">PWA là gì, khác web thường ở chỗ nào?</h2>
+      <div class="callout answer">
+        <span class="callout-label">Đáp án</span>
+        <p>PWA (Progressive Web App) là ứng dụng web hiện đại được thiết kế để mang lại trải nghiệm gần giống ứng dụng gốc (native app), nhưng vẫn chạy trên trình duyệt — kết hợp tính linh hoạt của web với hiệu suất và khả năng hoạt động offline của app di động.</p>
+      </div>
+
+      <h3 class="sub">Những điểm tạo nên một PWA</h3>
+      <ul>
+        <li><b>Service Worker</b> — nhờ nó PWA có thể chạy kể cả khi không có internet.</li>
+        <li><b>Lưu trữ phía client</b> — vì hoạt động offline nên dữ liệu được lưu và query ở IndexedDB / LocalStorage / Cache API.</li>
+        <li><b>Manifest.json</b> — bản chất vẫn là code web (React, Angular, Vue), nhưng nhờ file manifest mà cài và chạy được trên mobile, desktop như một app.</li>
+        <li><b>Responsive</b> — khi chạy trên mobile, UI phải responsive để tương thích với màn hình nhỏ.</li>
+      </ul>
+
+      <div class="interview-line">
+        <span class="callout-label">Trả lời mẫu khi phỏng vấn</span>
+        <p>"PWA vẫn là web app viết bằng React/Vue bình thường, nhưng bổ sung service worker để cache tài nguyên và dữ liệu nên chạy được offline, cộng thêm manifest.json để người dùng cài lên màn hình chính như app native. Dữ liệu offline em lưu ở IndexedDB hoặc Cache API tuỳ loại. Ưu điểm là không phải build hai app riêng cho iOS/Android, nhược điểm là bị giới hạn quyền truy cập phần cứng so với native."</p>
+      </div>
+    </section>
+
+    <!-- ============ Hot Reloading ============ -->
+    <section class="qa" id="hot-reloading" data-nav="Hot Reloading">
+      <div class="q-tag"><span class="n">2</span> Công cụ phát triển</div>
+      <h2 class="q-title">Hot reloading là gì?</h2>
+      <p class="lede">Chỉnh sửa code xong, trình duyệt tự cập nhật ngay — <b>giữ nguyên state, không reload cả trang</b>. Đây là điểm khác biệt so với live reload (tải lại toàn trang, mất hết state đang có).</p>
+
+      <table>
+        <thead><tr><th>Công cụ</th><th>Tên gọi cơ chế</th></tr></thead>
+        <tbody>
+          <tr><td>Next.js</td><td>Fast Refresh</td></tr>
+          <tr><td>Vite</td><td>HMR — Hot Module Replacement</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ============ SDK ============ -->
+    <section class="qa" id="sdk" data-nav="SDK">
+      <div class="q-tag"><span class="n">3</span> Khái niệm chung</div>
+      <h2 class="q-title">SDK là gì?</h2>
+      <p>SDK — <b>Software Development Kit</b> (bộ công cụ phát triển phần mềm) — là một gói công cụ / thư viện giúp lập trình viên tạo ra ứng dụng nhanh hơn cho một nền tảng, hệ thống hoặc dịch vụ cụ thể (Android, Solana, Firebase…).</p>
+
+      <h3 class="sub">Một SDK thường gồm</h3>
+      <ul>
+        <li>Thư viện — các file <code>.dll</code>, <code>.jar</code>, <code>.js</code>…</li>
+        <li>Tài liệu (docs) hướng dẫn tích hợp</li>
+        <li>Công cụ hỗ trợ (tools): CLI, emulator, debugger…</li>
+      </ul>
+
+      <div class="callout">
+        <span class="callout-label">Phân biệt nhanh với API</span>
+        <p>API là <b>giao diện</b> để gọi tới một dịch vụ; SDK là <b>bộ đồ nghề</b> đóng gói sẵn (thường bao gồm cả client gọi API đó) để bạn tích hợp nhanh mà không phải tự viết lại tầng giao tiếp.</p>
+      </div>
+    </section>
+
+    <!-- ============ Nx monorepo ============ -->
+    <section class="qa" id="nx-monorepo" data-nav="Nx &amp; Monorepo">
+      <div class="q-tag"><span class="n">4</span> Công cụ phát triển</div>
+      <h2 class="q-title">nx.dev giải quyết vấn đề gì?</h2>
+      <p class="lede">Nx là build system và monorepo manager hiện đại cho JavaScript/TypeScript, dùng để quản lý nhiều ứng dụng và thư viện trong một repo lớn (monorepo) một cách tối ưu và hiệu quả.</p>
+
+      <h3 class="sub">Cấu trúc repo điển hình</h3>
+      <div class="code-label neutral">Monorepo với Nx</div>
+      <pre><code>my-monorepo/
+├── apps/
+│   ├── web/            # Next.js app (frontend)
+│   ├── api/            # NestJS app (backend)
+│   └── mobile/         # Expo app (React Native)
+├── libs/
+│   ├── ui/             # UI components (web &amp; mobile dùng chung)
+│   └── utils/          # Logic dùng chung giữa web/api/mobile
+├── tools/
+├── nx.json
+├── package.json
+└── tsconfig.base.json</code></pre>
+
+      <div class="callout">
+        <span class="callout-label">Vì sao chọn monorepo</span>
+        <p>Code dùng chung (types, validation, UI component) nằm ở <code>libs/</code> nên không phải publish package nội bộ hay copy code giữa các repo. Nx còn biết app nào phụ thuộc lib nào, nên chỉ build / test lại đúng phần bị ảnh hưởng thay vì chạy lại toàn bộ repo.</p>
+      </div>
+    </section>
+
+<section class="qa" id="openim" data-nav="OpenIM">
+      <div class="q-tag"><span class="n">5</span> React Native &amp; Libs</div>
+      <h2 class="q-title">OpenIM</h2>
+      <p>Bao gồm OpenIMSDK client và server</p>
+      <p>Hỗ trợ chat cá nhân &amp; nhóm lớn</p>
+    </section>
+
+    <section class="qa" id="refine" data-nav="Refine">
+      <div class="q-tag"><span class="n">6</span> React Native &amp; Libs</div>
+      <h2 class="q-title">Refine</h2>
+      <p><a href="https://github.com/refinedev/refine" target="_blank" rel="noopener">https://github.com/refinedev/refine</a></p>
+      <p><b>Refine</b> là một React-based framework (hoặc gọi là meta-framework) giúp bạn:</p>
+      <ul>
+        <li>Xây dựng nhanh chóng admin panel, dashboard, CMS, CRM, nội dung quản trị…</li>
+        <li>Quản lý data CRUD (Create, Read, Update, Delete) dễ dàng</li>
+        <li>Tích hợp sẵn với các UI framework: <b>Ant Design, Material UI, Chakra UI, Tailwind CSS</b></li>
+        <li>Hỗ trợ data provider (REST, GraphQL, Supabase, Strapi, Hasura, Firebase…)</li>
+      </ul>
+    </section>
+  </main>
+</div>
+
+<footer>
+  Interview Knowledge — sổ tay ôn phỏng vấn tổng hợp từ ghi chép cá nhân.
+  Ưu tiên trả lời theo cấu trúc: vấn đề → giải pháp → vì sao chọn cách này thay vì cách khác.
+</footer>
+
+<script src="../assets/search-index.js" defer></script>
+<script src="../assets/js/main.js" defer></script>
+</body>
+</html>

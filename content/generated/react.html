@@ -1,0 +1,285 @@
+    <section class="qa" id="state" data-nav="State">
+      <div class="q-tag"><span class="n">1</span> Kiến thức nền</div>
+      <h2 class="q-title">State</h2>
+      <p>là một đối tượng dùng để lưu trữ dữ liệu hoặc trạng thái của một component. State được quản lý và có thể thay đổi trong chính component đó. Khi state thay đổi, React sẽ tự động render lại giao diện để phản ánh sự thay đổi.</p>
+    </section>
+
+    <section class="qa" id="prop" data-nav="Prop">
+      <div class="q-tag"><span class="n">1</span> Kiến thức nền</div>
+      <h2 class="q-title">Prop</h2>
+      <p>là đối số của function component trong react, được dùng để truyền dữ liệu từ comp cha xuống comp con, bên cạnh đó props là object read only</p>
+    </section>
+
+    <section class="qa" id="prop-key-trong-react" data-nav="prop key trong React">
+      <div class="q-tag"><span class="n">1</span> Kiến thức nền</div>
+      <h2 class="q-title">prop key trong React</h2>
+      <p><a href="https://viblo.asia/p/su-quan-trong-cua-key-props-trong-reactjs-jvElaAXolkw" target="_blank" rel="noopener">Bài tham khảo ↗</a></p>
+    </section>
+
+    <section class="qa" id="prop-drilling" data-nav="Prop drilling">
+      <div class="q-tag"><span class="n">1</span> Kiến thức nền</div>
+      <h2 class="q-title">Prop drilling</h2>
+      <figure class="doc-figure"><img src="../assets/img/react-prop-drilling-01.png" alt="Minh hoạ" loading="lazy"></figure>
+    </section>
+
+    <section class="qa" id="dangerouslysetinnerhtml" data-nav="dangerouslySetInnerHTML">
+      <div class="q-tag"><span class="n">1</span> Kiến thức nền</div>
+      <h2 class="q-title">dangerouslySetInnerHTML</h2>
+      <ul>
+        <li>là một thuộc tính đặc biệt được sử dụng để chèn nội dung HTML thô (raw HTML) trực tiếp vào DOM. Điều này thường được sử dụng khi bạn cần hiển thị nội dung HTML được tạo động từ một nguồn bên ngoài, như từ cơ sở dữ liệu hoặc API.</li>
+        <li>Tuy nhiên, vì nội dung HTML thô có thể chứa mã độc (như XSS - Cross-Site Scripting), React đánh dấu tính năng này là "nguy hiểm" và yêu cầu bạn sử dụng nó một cách cẩn thận.</li>
+      </ul>
+      <figure class="doc-figure"><img src="../assets/img/react-dangerouslysetinnerhtml-01.png" alt="Minh hoạ" loading="lazy"></figure>
+    </section>
+
+    <section class="qa" id="stateful-va-stateless-component" data-nav="stateful và stateless component">
+      <div class="q-tag"><span class="n">1</span> Kiến thức nền</div>
+      <h2 class="q-title">stateful và stateless component</h2>
+      <p>The difference between stateful and stateless is that one has state, and the other doesn’t. That means the stateful components are keeping track of changing data, while stateless components print out what is given to them via props, or they always render the same thing.</p>
+    </section>
+
+    <section class="qa" id="qua-trinh-update-value-moi-tren-ui-sau-khi-thuc-hien-1-tac-v" data-nav="quá trình update value mới trên UI sau khi t…">
+      <div class="q-tag"><span class="n">1</span> Kiến thức nền</div>
+      <h2 class="q-title">quá trình update value mới trên UI sau khi thực hiện 1 tác vụ</h2>
+      <ul>
+        <li>gồm 3 steps:</li>
+        <li>Trigger a render : bằng cách gọi setState trong useState</li>
+        <li>Rendering a component :</li>
+      </ul>
+      <p>b1: gọi lại function component đó</p>
+      <p>b2: react snapshot một bản sao mới của DOM ảo dựa trên state và props mới.</p>
+      <p>b3: react so sánh cây DOM ảo mới với cây DOM ảo cũ bằng thuật toán diff để xác định các điểm khác biệt hay nói cách khác là tìm ra các phần tử bị thay đổi ( quá trình này gọi là reconciliation )</p>
+      <p>Commit to real DOM : áp dụng các phần tử có sự thay đổi từ virtual DOM vào real DOM thông qua lib React DOM</p>
+    </section>
+
+    <section class="qa" id="lifecycle-react" data-nav="lifecycle react">
+      <div class="q-tag"><span class="n">1</span> Kiến thức nền</div>
+      <h2 class="q-title">lifecycle react</h2>
+      <p>https://files.fullstack.edu.vn/f8-prod/blog_posts/923/616999882d4d4.pngVới function component thì react hook lifecycle sinh ra để thay thế các method lifecycle trong class component ( ví dụ : useEffect được sử dụng để thay thế cho các lifecycle method như componentDidMount, componentDidUpdate, componentWillReceiveProps, componentWillUnMount )</p>
+    </section>
+
+    <section class="qa" id="hydrate" data-nav="Hydrate">
+      <div class="q-tag"><span class="n">1</span> Kiến thức nền</div>
+      <h2 class="q-title">Hydrate</h2>
+      <p>Khi máy chủ render trước một trang web, nó sẽ gửi HTML tĩnh đến trình duyệt. Sau khi tải trang xong, trình duyệt sẽ sử dụng JavaScript để "hydrate" trang đó. Hydrate là quá trình kết hợp giữa HTML tĩnh và JavaScript để làm cho giao diện người dùng trở nên động và tương tác.</p>
+    </section>
+
+    <section class="qa" id="react-hooks" data-nav="React Hooks">
+      <div class="q-tag"><span class="n">1</span> Kiến thức nền</div>
+      <h2 class="q-title">React Hooks</h2>
+      <p>là một tính năng trong thư viện React, được giới thiệu từ phiên bản React 16.8, giúp bạn sử dụng các tính năng của React trong các functional components thay vì chỉ trong các class component. Hooks giúp bạn quản lý trạng thái (state), hiệu suất và các vòng đời của component một cách dễ dàng và gọn gàng hơn.</p>
+      <p><b>Code splitting</b> (tách mã)</p>
+      <ul>
+        <li>là kỹ thuật chia bundle JavaScript lớn thành <b>nhiều “chunk” nhỏ</b>, rồi <b>chỉ tải khi cần</b>.</li>
+        <li>cách triển khai trong react và next</li>
+      </ul>
+      <figure class="doc-figure"><img src="../assets/img/react-react-hooks-01.png" alt="Minh hoạ" loading="lazy"></figure>
+    </section>
+
+    <section class="qa" id="component-driven-development-cdd" data-nav="Component-Driven Development (CDD)">
+      <div class="q-tag"><span class="n">1</span> Kiến thức nền</div>
+      <h2 class="q-title">Component-Driven Development (CDD)</h2>
+      <p>là một phương pháp phát triển phần mềm – đặc biệt phổ biến trong front-end development – tập trung vào việc xây dựng các UI component độc lập và có thể tái sử dụng, rồi ghép chúng lại để tạo nên toàn bộ ứng dụng.</p>
+    </section>
+
+    <section class="qa" id="immutable-trong-redux" data-nav="Immutable trong Redux">
+      <div class="q-tag"><span class="n">1</span> Kiến thức nền</div>
+      <h2 class="q-title">Immutable trong Redux</h2>
+      <ul>
+        <li>Immutable : nghĩa là ko được phép thay đổi state gốc , hay nói cách khác thì ko đc lấy state.field = new value=&gt; Trong Redux thuần, bạn phải tạo bản sao mới mỗi khi thay đổi state = cách dùng toán từ spread (...) , ví dụ return { ..state, isLoading: true}, ko đc state.isLoading = true trong reducer</li>
+        <li>RTK dùng thư viện Immer để giúp bạn viết code nhìn như "mutable" nhưng thực chất vẫn đảm bảo "immutable" dưới hood.</li>
+      </ul>
+      <p>=&gt; Cụ thể là ở RTK , bạn chỉ cần state.field = new value , khi đó Immer sẽ tự track mọi "mutation" và tự tạo bản sao mới</p>
+    </section>
+
+    <section class="qa" id="createselector" data-nav="createSelector">
+      <div class="q-tag"><span class="n">1</span> Kiến thức nền</div>
+      <h2 class="q-title">createSelector</h2>
+      <p>là một hàm từ thư viện Reselect (được Redux Toolkit tích hợp sẵn), dùng để tạo selector có khả năng memoization.</p>
+      <figure class="doc-figure"><img src="../assets/img/react-createselector-01.png" alt="Minh hoạ" loading="lazy"></figure>
+    </section>
+
+    <section class="qa" id="hook-use-trong-react" data-nav="hook use() trong react">
+      <div class="q-tag"><span class="n">1</span> Kiến thức nền</div>
+      <h2 class="q-title">hook use() trong react</h2>
+      <p>chỉ trong Server Component (Next.js App Router) để chờ một Promise trả về dữ liệu mà không cần useEffect hay state.</p>
+      <p><code>-use()</code> là một <b>React server-only hook</b>, cho phép bạn <b>"chờ" kết quả từ Promise (thường là fetch)</b> trong quá trình render server component.</p>
+      <ul>
+        <li>Chỉ dùng trong Server Component, ko đc dùng ở client component</li>
+        <li>Tuy nhiên nếu use() của react 19 thì dùng đc ở cả client và server</li>
+        <li>use() tích hợp cơ chế streaming</li>
+        <li>Code mẫu</li>
+      </ul>
+      <p>theo doc thì default page.tsx và layout.tsx là server component nên đc dùng use() và trong quá trình đợi use resolve() thì nếu trong router có dùng loading.tsx thì file này sẽ auto run</p>
+      <figure class="doc-figure"><img src="../assets/img/react-hook-use-trong-react-01.png" alt="Minh hoạ" loading="lazy"></figure>
+      <p>vì server component ko cho dùng useState hay dispatch trong redux để update state redux , … nên ko bao giờ bị re-render , nó chỉ đc call lại khi navigate hay reload page =&gt; use() cx chỉ call có 1 lần</p>
+    </section>
+
+    <section class="qa" id="sentry-react" data-nav="@sentry/react">
+      <div class="q-tag"><span class="n">1</span> Kiến thức nền</div>
+      <h2 class="q-title">@sentry/react</h2>
+      <p>Đây là SDK chính thức của<a href="https://sentry.io" target="_blank" rel="noopener">Sentry</a> cho <b>React</b>, dùng để:</p>
+      <ul>
+        <li>Theo dõi lỗi runtime</li>
+        <li>Gửi lỗi JavaScript (và error boundary)</li>
+        <li>Báo cáo performance, trace, slow API, crash frontend</li>
+      </ul>
+      <p><b>Tích hợp cực kỳ dễ</b> và rất phổ biến với production React app.</p>
+    </section>
+
+    <section class="qa" id="xyflow-react" data-nav="@xyflow/react">
+      <div class="q-tag"><span class="n">1</span> Kiến thức nền</div>
+      <h2 class="q-title">@xyflow/react</h2>
+      <p>Đây là thư viện <b>vẽ sơ đồ flowchart / node editor bằng React</b>. Cực kỳ mạnh và tùy biến cao, dùng để làm:</p>
+      <ul>
+        <li>Flowchart, BPMN editor</li>
+        <li>No-code platform (giống Zapier, n8n)</li>
+        <li>UI biểu đồ quan hệ</li>
+        <li>Logic graph cho AI/ML</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="flow-render-server-comp-gt-client-comp" data-nav="Flow render server comp =&gt; client comp">
+      <div class="q-tag"><span class="n">1</span> Kiến thức nền</div>
+      <h2 class="q-title">Flow render server comp =&gt; client comp</h2>
+      <p>cụ thể là quá trình render server comp ở server side và sau đó tiếp tục render client comp ở client side</p>
+      <pre><code>[Server side]</code></pre>
+      <ul>
+        <li><b>Server Components</b> sẽ được render thành <b>React Server Component Payload (RSC Payload)</b> — một định dạng dữ liệu đặc biệt, hay nó là 1 cây DOM server comp</li>
+        <li>Trong cây DOM server comp, Client Component được thay thế = placeholder , nôn na là tách client comp ra khỏi server comp nhưng có đánh dấu (placeholder)</li>
+        <li>RSC Payload kết hợp với Client Component để tạo HTML sẵn (ở server thì client comp chưa đc render)</li>
+        <li>Gửi HTML tĩnh + RSC Payload + JS bundle của Client component</li>
+        <li>Bên cạnh đó có thể gửi thông qua streaming , tức là HTML tĩnh của comp nào xong trước thì stream trước cho client</li>
+      </ul>
+      <pre><code>[Client side]</code></pre>
+      <p>React dùng RSC Payload để <b>reconcile</b> cây DOM server component với Client component thông qua chỗ đc đánh dáu (placeholder), nói nôn na là gắn vô lại- React hydrate JS bundle của Client component, đồng nghĩa với việc render client component và gắn sự kiện , …</p>
+    </section>
+
+    <section class="qa" id="infinite-scroll-cuon-vo-han" data-nav="Infinite Scroll (Cuộn vô hạn)">
+      <div class="q-tag"><span class="n">1</span> Kiến thức nền</div>
+      <h2 class="q-title">Infinite Scroll (Cuộn vô hạn)</h2>
+      <p>Là kỹ thuật load thêm nội dung khi người dùng cuộn đến gần cuối trang – tự động thêm dữ liệu mới vào danh sách hiển thị.</p>
+    </section>
+
+    <section class="qa" id="virtual-scroll-cuon-ao-windowing" data-nav="Virtual Scroll (Cuộn ảo / Windowing)">
+      <div class="q-tag"><span class="n">1</span> Kiến thức nền</div>
+      <h2 class="q-title">Virtual Scroll (Cuộn ảo / Windowing)</h2>
+      <p>là kỹ thuật chỉ render một số phần tử hiển thị trong viewport cùng vùng đệm (buffer). Khi cuộn, phần tử ngoài vùng nhìn thấy sẽ bị loại bỏ khỏi DOM và phần tử mới hiện vào DOM.</p>
+    </section>
+
+    <section class="qa" id="concurrent-rendering" data-nav="Concurrent Rendering">
+      <div class="q-tag"><span class="n">1</span> Kiến thức nền</div>
+      <h2 class="q-title">Concurrent Rendering</h2>
+      <ul>
+        <li>là một cơ chế mới (giới thiệu từ React 18) để giải quyết các vấn đề về UI như UI block, bị delay khi hiển thị trên UI</li>
+        <li>React có thể <b>tạm dừng render</b>, <b>hủy render giữa chừng</b>, hoặc <b>ưu tiên render</b> những phần quan trọng hơn (ví dụ: nhập văn bản, animation).</li>
+        <li>Do đó UI luôn <b>mượt mà</b>, không bị block bởi render nặng.</li>
+        <li>Nó không thay đổi <b>kết quả cuối cùng</b>, chỉ thay đổi <b>cách React lên lịch render</b>.</li>
+        <li>Cung cấp các hooks để giải quyết: useTransition , useDeferredValue</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="slice-trong-rtk" data-nav="Slice trong RTK">
+      <div class="q-tag"><span class="n">1</span> Kiến thức nền</div>
+      <h2 class="q-title">Slice trong RTK</h2>
+      <ul>
+        <li>đại diện cho 1 module <b>điều khiển một phần state + actions + reducers</b>., nó bao gồm:</li>
+        <li><b>state ban đầu (initialState)</b></li>
+        <li><b>các reducers đồng bộ</b> (synchronous reducers)</li>
+        <li><b>các actions</b> được tạo tự động từ reducers</li>
+        <li><b>extraReducers</b> nếu bạn muốn xử lý async thunks</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="reactquery" data-nav="ReactQuery">
+      <div class="q-tag"><span class="n">1</span> React Native &amp; Libs</div>
+      <h2 class="q-title">ReactQuery</h2>
+      <ul>
+        <li>invalidateQueries: đánh dấu dữ liệu của một query là “lỗi thời” (stale) và sẽ trigger refetch khi query này nằm ở component được mount</li>
+        <li>refetchQueries: trigger refetch ngay lập tức</li>
+        <li>staleTime trong useQuery:</li>
+        <li>default là 0 , tức là cứ mỗi lần mounted lại component dùng query data này sẽ tự động refetch lại query đó</li>
+        <li>giả sử là 5 phút , tức là trong 5 phút query data đc xem là fresh(mới) =&gt; ko refetch , còn qua 5 phút thì query data đc xem là stale(cũ) =&gt; trigger refetch (khi mount lại component)</li>
+        <li>queryClient.prefetchQuery: đúng với thuật ngữ prefetch tức là chuẩn bị trước rồi sau đó dùng</li>
+        <li>placeholderData : nó cx giống như initialData nhưng Nó KHÔNG ghi vào cache, KHÔNG phải dữ liệu thật, còn initialData thì có ghi vào cache, thường dùng khi show 1 list skeleton trong khi chờ data thật fetching, hoặc pagination với keepPreviousData (tức là khi chuyển sang trang thứ 2 thì vẫn giữ data trang 1 để hiển thị , rồi chờ data thật của trang 2 fetch xong và thay thế vào)</li>
+        <li>Query Cancellation: khi đang fetch query A nhưng user bỗng chuyển sang phần khác trên UI rất nhanh , khiến cho comp chứa query A unmount =&gt; query A ko còn cần nữa =&gt; dùng AbortSignal để hủy query A này . Bởi vì mặc định query sẽ ko bị hủy tự động khi đã đang trong quá trình fetching dù comp có unmount tại thời điểm đó đi chăn nữa</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="createentityadapter" data-nav="createEntityAdapter">
+      <div class="q-tag"><span class="n">1</span> React Native &amp; Libs</div>
+      <h2 class="q-title">createEntityAdapter</h2>
+      <ul>
+        <li>là 1 method trong redux toolkit</li>
+        <li>là <b>cách tối ưu nhất để lưu và quản lý state là danh sách (Array) chứa các object (CRUD).</b></li>
+        <li>Tự tạo state normalized (ids + entities)</li>
+        <li>Tự sinh reducer</li>
+        <li>Tự sinh selector</li>
+        <li>Nhanh, ít bug, code ngắn</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="react-hooks-2" data-nav="React hooks">
+      <div class="q-tag"><span class="n">1</span> JS · React · Git</div>
+      <h2 class="q-title">React hooks</h2>
+      <ul>
+        <li>là một tính năng được giới thiệu từ phiên bản React 16.8, cho phép bạn sử dụng state và các tính năng khác của React như vòng đời (lifecycle) trong các function component mà không cần phải sử dụng class component.</li>
+        <li>useState: quản lý state (dữ liệu) cục bộ trong 1 function component.</li>
+        <li>useEffect: xử lý side effects như gọi API, thao tác DOM… Bên cạnh đó trả về một <b>"cleanup function"</b> – được dùng để dọn dẹp (cleanup) sau khi component unmount hoặc trước khi effect chạy lại (khi dependency thay đổi).</li>
+        <li>useContext: truy cập dữ liệu global từ React Context.</li>
+        <li>useRef: tham chiếu tới DOM hoặc lưu giữ giá trị mà khi thay đổi giá trị sẽ ko gây re-render component</li>
+        <li>useMemo: lưu giá trị của các thao tác xử lí logic phức tạp, bên cạnh đó có thể lưu lại 1 function component để tránh re-render ko cần thiết</li>
+        <li>useCallback: ghi nhớ hàm để tránh tạo lại trong mỗi lần render</li>
+      </ul>
+      <p>Với useEffect, useMemo, useCallback sẽ có param thứ 2 là 1 array dependency</p>
+      <p>trường hợp dependency</p>
+      <p>useEffect</p>
+      <p>useMemo</p>
+      <p>useCallback</p>
+      <p>Không tuyền dependency</p>
+      <p>Chạy sau khi re-render</p>
+      <p>Tính lại sau khi re-render</p>
+      <p>Tạo lại sau khi re-render</p>
+      <p>Truyền []</p>
+      <p>Chạy 1 lần duy nhất sau khi render</p>
+      <p>Tính 1 lần duy nhất sau khi render</p>
+      <p>Tạo 1 lần duy nhất sau khi render</p>
+      <p>Truyền [a,b]</p>
+      <p>Chạy lại khi a hoặc b đổi</p>
+      <p>Tính lại khi a hoặc b đổi</p>
+      <p>Tạo lại khi a hoặc b đổi</p>
+    </section>
+
+    <section class="qa" id="redux" data-nav="Redux">
+      <div class="q-tag"><span class="n">1</span> JS · React · Git</div>
+      <h2 class="q-title">Redux</h2>
+      <ul>
+        <li>là một thư viện quản lý trạng thái (state management)</li>
+        <li>Nhiều components =&gt; nhiều states . Việc truyền state thông qua props theo cách truyền thống từ cha xuống con sẽ không còn hiệu quả nếu như 2 component cần sử dụng chung 1 state nằm quá xa nhau =&gt; gây props drilling</li>
+        <li>Luồng của redux:</li>
+      </ul>
+      <figure class="doc-figure"><img src="../assets/img/react-redux-01.png" alt="Minh hoạ" loading="lazy"></figure>
+      <ul>
+        <li>redux gồm các thành phần:</li>
+        <li>Store: nơi Redux dùng để lưu toàn bộ global state của ứng dụng</li>
+      </ul>
+      <figure class="doc-figure"><img src="../assets/img/react-redux-02.png" alt="Minh hoạ" loading="lazy"></figure>
+      <ul>
+        <li>Dispatch: Khi cần dùng 1 action ở component, ta gọi action đó đơn giản bằng cách sử dụng phương thức dispatch , action nhận 1 params là 1 obj gồm 2 field là type : ENUM và payload</li>
+        <li>Action: định nghĩa các action bằng cách khai báo các tên của hành động trong ứng dụng. Lấy ví dụ ta có 1 state là counter và cần 2 phương thức để tăng và giảm giá trị của counter. Lúc này ta định nghĩa 2 action có tên là 'INCREMENT' và 'DECREMENT' , bên cạnh đó, việc xử lý thay đổi state của counter sẽ nhường cho reducer.</li>
+      </ul>
+      <figure class="doc-figure"><img src="../assets/img/react-redux-03.png" alt="Minh hoạ" loading="lazy"></figure>
+      <p>Reducer: hàm xử lý các hành động cụ thể và thay đổi state trong store, gồm 2 params: state, action. Reducer nhận {type, payload} từ action ở param action</p>
+      <figure class="doc-figure"><img src="../assets/img/react-redux-04.png" alt="Minh hoạ" loading="lazy"></figure>
+    </section>
+
+    <section class="qa" id="redux-thunk" data-nav="Redux Thunk">
+      <div class="q-tag"><span class="n">1</span> JS · React · Git</div>
+      <h2 class="q-title">Redux Thunk</h2>
+      <ul>
+        <li>là một Middleware cho phép bạn viết các Action (action thunk) trả về một function (func chứa param là dispatch) thay vì một plain javascript object ({payload, state}) bằng cách trì hoãn việc đưa action đến reducer.</li>
+        <li>Redux Thunk được sử dụng để xử lý các logic bất đồng bộ phức tạp (call API, …)</li>
+      </ul>
+      <figure class="doc-figure"><img src="../assets/img/react-redux-thunk-01.png" alt="Minh hoạ" loading="lazy"></figure>
+      <pre><code>======================================================================</code></pre>
+    </section>

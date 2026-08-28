@@ -1,0 +1,103 @@
+    <section class="qa" id="dom-va-virtual-dom" data-nav="DOM và Virtual DOM">
+      <div class="q-tag"><span class="n">1</span> Kiến thức nền</div>
+      <h2 class="q-title">DOM và Virtual DOM</h2>
+      <figure class="doc-figure"><img src="../assets/img/browser-web-api-dom-va-virtual-dom-01.png" alt="Minh hoạ" loading="lazy"></figure>
+      <p>DOM ảo được đồng bộ với DOM thật thông qua lib React Dom</p>
+      <figure class="doc-figure"><img src="../assets/img/browser-web-api-dom-va-virtual-dom-02.png" alt="Minh hoạ" loading="lazy"></figure>
+      <p>https://viblo.asia/p/original-dom-vs-shadow-dom-vs-virtual-dom-GrLZDQO3lk0#_bonus-virtual-dom-trong-reactjs-11</p>
+      <p><b>DOM API</b>- Là bộ API nằm trong Web API có mặt trên những môi trường hỗ trợ duyệt web - như trên trình duyệt. DOM API cung cấp các đối tượng và phương thức hỗ trợ truy xuất, chỉnh sửa các đối tượng / thành phần trong DOM- DOM API là cầu nối giữa JavaScript và DOM</p>
+    </section>
+
+    <section class="qa" id="cookies-local-storage-session-storage" data-nav="Cookies - Local Storage - Session Storage">
+      <div class="q-tag"><span class="n">1</span> Kiến thức nền</div>
+      <h2 class="q-title">Cookies - Local Storage - Session Storage</h2>
+      <figure class="doc-figure"><img src="../assets/img/browser-web-api-cookies-local-storage-session-storage-01.png" alt="Minh hoạ" loading="lazy"></figure>
+      <p><b>Babel</b></p>
+      <p><b>Babel</b> là một trình biên dịch <a href="https://vi.wikipedia.org/wiki/Javascript" target="_blank" rel="noopener">Javascript</a> <a href="https://vi.wikipedia.org/wiki/Ph%E1%BA%A7n_m%E1%BB%81m_ngu%E1%BB%93n_m%E1%BB%9F" target="_blank" rel="noopener">mã nguồn mở</a> và <a href="https://vi.wikipedia.org/wiki/Ph%E1%BA%A7n_m%E1%BB%81m_t%E1%BB%B1_do" target="_blank" rel="noopener">miễn phí</a> có chức năng chính dùng để biên dịch ES6 thành phiên bản cũ cho <a href="https://vi.wikipedia.org/wiki/JavaScript" target="_blank" rel="noopener">JavaScript</a> có thể chạy trên các môi trường <a href="https://vi.wikipedia.org/wiki/JavaScript" target="_blank" rel="noopener">JavaScript</a> cũ hơn</p>
+      <p><b>JSX</b></p>
+      <ul>
+        <li>Context: ReactDOM.render(react element, document.getElementById(‘root’)) chỉ nhận React Element (ex:React.createElement(‘ul’, …)) chứ ko nhận JSX . Do đó cần babel để biên dịch JSX thành React Element</li>
+        <li>Concept: <b>JSX</b> (JavaScript XML) là một cú pháp mở rộng của JavaScript được sử dụng trong React. Nó giúp tạo ra cú pháp giống HTML trong JS để mô tả cấu trúc và giao diện người dùng trong các ứng dụng web.</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="blob" data-nav="Blob">
+      <div class="q-tag"><span class="n">1</span> Kiến thức nền</div>
+      <h2 class="q-title">Blob</h2>
+      <p>là một đối tượng đại diện cho dữ liệu nhị phân (dữ liệu thô) như văn bản, hình ảnh, âm thanh, v.v. Nó thường được dùng trong các thao tác như: Tạo file ảo, Gửi dữ liệu qua mạng (upload), Tạo URL tạm thời để tải về, Xử lý file từ &lt;input type=”file”&gt;</p>
+    </section>
+
+    <section class="qa" id="formdata" data-nav="FormData">
+      <div class="q-tag"><span class="n">1</span> Kiến thức nền</div>
+      <h2 class="q-title">FormData</h2>
+      <p>là một đối tượng dùng để tạo body của request dạng multipart/form-data, thường được dùng để gửi file (ảnh, tài liệu, video...) hoặc dữ liệu có cấu trúc hỗn hợp (text + file) từ client đến server.</p>
+    </section>
+
+    <section class="qa" id="indexeddb" data-nav="IndexedDB">
+      <div class="q-tag"><span class="n">1</span> Kiến thức nền</div>
+      <h2 class="q-title">IndexedDB</h2>
+      <ul>
+        <li>Là một cơ sở dữ liệu dạng key-value.</li>
+        <li>Dữ liệu được lưu trữ theo dạng object và được đánh chỉ mục để truy vấn hiệu quả.</li>
+        <li>Hỗ trợ thao tác bất đồng bộ (asynchronous), phù hợp với hoạt động của trình duyệt.</li>
+        <li>Có khả năng lưu trữ dữ liệu phức tạp, như: object, array, blob, date, file…</li>
+        <li><b>Dữ liệu không bị mất</b> khi reload hay tắt trình duyệt.</li>
+        <li>Cho phép lưu dữ liệu khi không có kết nối internet, vì vậy khi offline vẫn có thể truy cập dữ liệu</li>
+        <li><b>Dung lượng lưu trữ lớn</b> hơn so với <code>localStorage</code> (hàng chục hoặc hàng trăm MB).</li>
+        <li><b>Hỗ trợ index và cursor</b> giúp tìm kiếm hiệu quả.</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="dexie-js" data-nav="Dexie.js">
+      <div class="q-tag"><span class="n">1</span> Kiến thức nền</div>
+      <h2 class="q-title">Dexie.js</h2>
+      <ul>
+        <li>Là một thư viện JavaScript mã nguồn mở được xây dựng để đơn giản hóa việc làm việc với IndexedDB</li>
+        <li>Cho phép tạo và truy vấn dữ liệu local trong trình duyệt một cách nhanh chóng, an toàn, và có thể mở rộng.</li>
+        <li>Tương thích tốt với các ứng dụng <b>offline-first</b>, <b>Progressive Web App (PWA)</b>, hoặc bất kỳ ứng dụng nào cần lưu trữ dữ liệu trên máy người dùng.</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="popstate" data-nav="popstate">
+      <div class="q-tag"><span class="n">1</span> Kiến thức nền</div>
+      <h2 class="q-title">popstate</h2>
+      <ul>
+        <li>window.addEventListener('popstate', function (event) { ... }) là một đoạn JavaScript dùng để <b>lắng nghe sự kiện "popstate"</b> – sự kiện xảy ra khi người dùng <b>nhấn nút Back hoặc Forward</b> trên trình duyệt.</li>
+        <li>Khi bạn dùng <b>history.pushState()</b><b> hoặc </b><b>history.replaceState()</b> để thay đổi URL <b>mà không reload trang</b>, thì khi người dùng nhấn <b>nút Back/Forward</b>, sự kiện "popstate" sẽ được kích hoạt.</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="getboundingclientrect" data-nav="getBoundingClientRect">
+      <div class="q-tag"><span class="n">1</span> CSS</div>
+      <h2 class="q-title">getBoundingClientRect</h2>
+      <p>gồm .top , .left , .right, .bottom so với viewport</p>
+      <figure class="doc-figure"><img src="../assets/img/browser-web-api-getboundingclientrect-01.png" alt="Minh hoạ" loading="lazy"></figure>
+    </section>
+
+    <section class="qa" id="window-scrolly" data-nav="window.scrollY">
+      <div class="q-tag"><span class="n">1</span> CSS</div>
+      <h2 class="q-title">window.scrollY</h2>
+      <p>khoảng cách từ viewport đến document body , hay là số px mà scroll đã cuộn tính từ đỉnh document body</p>
+    </section>
+
+    <section class="qa" id="window-location-hash" data-nav="window.location.hash">
+      <div class="q-tag"><span class="n">1</span> CSS</div>
+      <h2 class="q-title">window.location.hash</h2>
+      <p>// URL hiện tại: https://example.com/page#section2</p>
+      <p>console.log(window.location.hash); // 👉 "#section2"</p>
+    </section>
+
+    <section class="qa" id="innerhight" data-nav="innerHight">
+      <div class="q-tag"><span class="n">1</span> CSS</div>
+      <h2 class="q-title">innerHight</h2>
+      <p>Giả sử viewport là <b>900px</b>, thanh cuộn chiếm <b>16px</b></p>
+      <p>window.innerHeight: 900px;</p>
+      <p>document.documentElement.clientHeight: 884px;</p>
+    </section>
+
+    <section class="qa" id="scrollintoview" data-nav="ScrollIntoView">
+      <div class="q-tag"><span class="n">1</span> CSS</div>
+      <h2 class="q-title">ScrollIntoView</h2>
+      <p>Header có 1 list tabs , ở mode mobile thì list tabs thường hay có scroll ngang , khi ta click 1 tab để navigate sang 1 trang mới , thì header ở trang mới sẽ scroll tới chỗ tab được active, để scroll tới khoảng không gian để thấy tab active thì ta dùng tabActive.scrollIntoView</p>
+      <figure class="doc-figure"><img src="../assets/img/browser-web-api-scrollintoview-01.png" alt="Minh hoạ" loading="lazy"></figure>
+    </section>

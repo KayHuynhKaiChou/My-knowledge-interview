@@ -1,0 +1,6 @@
+# Tai lieu nguon (docx) chi dung luc build noi dung, khong day len git
+*.docx
+
+# Python cache cua cac script trong tools/
+__pycache__/
+*.py[cod]

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Sổ tay ôn phỏng vấn — Backend, Frontend, Hạ tầng, Nền tảng">
+<title>Interview Knowledge — Sổ tay ôn phỏng vấn — Backend, Frontend, Hạ tầng, Nền tảng</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body data-root="">
+
+<header class="topbar">
+  <a class="topbar-brand" href="index.html" aria-label="Interview Knowledge — trang chủ">
+    <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true">
+      <defs><linearGradient id="ikBadge" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#f0b355"/><stop offset="1" stop-color="#b9752a"/>
+      </linearGradient></defs>
+      <rect x="2" y="2" width="60" height="60" rx="15" fill="url(#ikBadge)"/>
+      <path d="M21 21 L33 32 L21 43" fill="none" stroke="#0b0e13" stroke-width="7"
+            stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M37 43 H46" stroke="#0b0e13" stroke-width="7" stroke-linecap="round"/>
+    </svg>
+    <span class="brand-text">Interview Knowledge</span>
+  </a>
+  <nav class="topbar-nav">
+    <details class="nav-group">
+      <summary>Backend</summary>
+      <div class="nav-dropdown">
+        <a href="advanced-backend/index.html">Advanced Backend</a>
+        <a href="backend-dotnet-nestjs/index.html">.NET &amp; NestJS</a>
+        <a href="database-sql/index.html">Database &amp; SQL</a>
+        <a href="backend-infrastructure/index.html">Hạ tầng</a>
+        <a href="realtime-socket/index.html">Realtime &amp; Socket</a>
+        <a href="case-studies/index.html">Case studies</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Frontend</summary>
+      <div class="nav-dropdown">
+        <a href="javascript-core/index.html">JavaScript &amp; TS</a>
+        <a href="react/index.html">React &amp; State</a>
+        <a href="nextjs/index.html">Next.js</a>
+        <a href="css-html/index.html">CSS &amp; HTML</a>
+        <a href="browser-web-api/index.html">Browser &amp; Web API</a>
+        <a href="react-native/index.html">React Native</a>
+        <a href="frontend-tooling/index.html">Frontend Tooling</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Quy trình &amp; Nền tảng</summary>
+      <div class="nav-dropdown">
+        <a href="git/index.html">Git</a>
+        <a href="testing-environments/index.html">Testing</a>
+        <a href="saas-platforms/index.html">SaaS &amp; Nền tảng</a>
+        <a href="auth-blockchain/index.html">Auth &amp; Blockchain</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Khác</summary>
+      <div class="nav-dropdown">
+        <a href="interview-intro/index.html">Giới thiệu &amp; English</a>
+        <a href="project-notes/index.html">Ghi chú dự án</a>
+      </div>
+    </details>
+  </nav>
+  <button class="search-trigger" id="searchTrigger" aria-label="Tìm kiếm nội dung">
+    <span class="search-icon" aria-hidden="true">⌕</span>
+    <span class="search-label">Tìm kiếm</span>
+    <kbd>/</kbd>
+  </button>
+</header>
+
+<div class="search-overlay" id="searchOverlay" hidden>
+  <div class="search-box" role="dialog" aria-label="Tìm kiếm nội dung">
+    <input type="search" id="searchInput" autocomplete="off" spellcheck="false"
+           placeholder="Tìm trong toàn bộ nội dung — closure, saga, index, rebase…">
+    <div class="search-results" id="searchResults"></div>
+    <div class="search-hint">Enter mở mục · ↑↓ chọn · Esc đóng</div>
+  </div>
+</div>
+
+<div class="shell no-sidebar">
+
+  <main>
+    <div class="hero">
+      <div class="hero-kicker">Interview prep · Fullstack</div>
+      <h1>Sổ tay ôn phỏng vấn</h1>
+      <p class="lede">Toàn bộ ghi chép kỹ thuật được sàng lọc và sắp theo chủ đề: câu hỏi backend chuyên sâu, khái niệm hạ tầng, phía client và công cụ, quy trình test &amp; môi trường, nền tảng SaaS, auth và Web3. Chọn một chủ đề ở menu trên hoặc trong danh sách bên dưới.</p>
+      <div class="hero-meta">
+        <span><b>19</b> chủ đề</span>
+        <span><b>229</b> mục nội dung</span>
+        <span><b>Định dạng:</b> câu hỏi → giải pháp → câu trả lời mẫu</span>
+      </div>
+    </div>
+
+    <p class="nav-label">Chủ đề</p>
+    <div class="topic-grid">
+      <a class="topic-card" href="advanced-backend/index.html">
+        <span class="card-num">CHỦ ĐỀ 01</span>
+        <h3>Advanced Backend</h3>
+        <p>12 câu hỏi chuyên sâu về concurrency, lock, idempotency, saga, queue, cache, index và API design — kèm code và câu trả lời mẫu.</p>
+        <span class="card-meta">12 mục</span>
+      </a>
+      <a class="topic-card" href="backend-dotnet-nestjs/index.html">
+        <span class="card-num">CHỦ ĐỀ 02</span>
+        <h3>Backend — .NET &amp; NestJS</h3>
+        <p>OOP, stack/heap, ADO.NET, EF Core, JWT, decorator, guard, module, API — REST — GraphQL.</p>
+        <span class="card-meta">15 mục</span>
+      </a>
+      <a class="topic-card" href="database-sql/index.html">
+        <span class="card-num">CHỦ ĐỀ 03</span>
+        <h3>Database &amp; SQL</h3>
+        <p>UNION, VIEW, CTE, procedure, transaction, trigger, index, ACID, Prisma và cursor pagination.</p>
+        <span class="card-meta">12 mục</span>
+      </a>
+      <a class="topic-card" href="backend-infrastructure/index.html">
+        <span class="card-num">CHỦ ĐỀ 04</span>
+        <h3>Backend &amp; Hạ tầng</h3>
+        <p>CDN, RedisBloom, upload file NestJS, HTTP caching, reverse proxy, Hyper-V, SSD vs HDD, GPU.</p>
+        <span class="card-meta">9 mục</span>
+      </a>
+      <a class="topic-card" href="realtime-socket/index.html">
+        <span class="card-num">CHỦ ĐỀ 05</span>
+        <h3>Realtime &amp; Socket</h3>
+        <p>Socket.IO, namespace, WebSocket, SSE, WebRTC, OCR và RxJS / reactive state.</p>
+        <span class="card-meta">11 mục</span>
+      </a>
+      <a class="topic-card" href="case-studies/index.html">
+        <span class="card-num">CHỦ ĐỀ 06</span>
+        <h3>Case studies thực chiến</h3>
+        <p>Flash sale, idempotency, import/export triệu dòng, chống spam OTP, caching bảng xếp hạng, thu hồi JWT.</p>
+        <span class="card-meta">6 mục</span>
+      </a>
+      <a class="topic-card" href="javascript-core/index.html">
+        <span class="card-num">CHỦ ĐỀ 07</span>
+        <h3>JavaScript &amp; TypeScript</h3>
+        <p>Closure, hoisting, this, event loop, promise, ES6, throttle/debounce, axios và TypeScript cơ bản.</p>
+        <span class="card-meta">38 mục</span>
+      </a>
+      <a class="topic-card" href="react/index.html">
+        <span class="card-num">CHỦ ĐỀ 08</span>
+        <h3>React &amp; State Management</h3>
+        <p>State, props, hooks, lifecycle, hydrate, virtual scroll, Redux/RTK, React Query, Sentry.</p>
+        <span class="card-meta">26 mục</span>
+      </a>
+      <a class="topic-card" href="nextjs/index.html">
+        <span class="card-num">CHỦ ĐỀ 09</span>
+        <h3>Next.js &amp; Rendering</h3>
+        <p>CSR/SSR/SSG, RSC payload, streaming, PPR, revalidation, prefetching, metadata, server-only.</p>
+        <span class="card-meta">17 mục</span>
+      </a>
+      <a class="topic-card" href="css-html/index.html">
+        <span class="card-num">CHỦ ĐỀ 10</span>
+        <h3>CSS &amp; HTML</h3>
+        <p>Render flow, position vs transform, margin collapse, sprite, preprocessor, Tailwind, semantic HTML.</p>
+        <span class="card-meta">14 mục</span>
+      </a>
+      <a class="topic-card" href="browser-web-api/index.html">
+        <span class="card-num">CHỦ ĐỀ 11</span>
+        <h3>Browser &amp; Web API</h3>
+        <p>DOM/VDOM, cookies vs storage, Blob, FormData, IndexedDB, Dexie, getBoundingClientRect, scroll API.</p>
+        <span class="card-meta">12 mục</span>
+      </a>
+      <a class="topic-card" href="react-native/index.html">
+        <span class="card-num">CHỦ ĐỀ 12</span>
+        <h3>React Native</h3>
+        <p>FlatList optimization, Touchable, Gesture Responder, ripple, SafeArea, native module.</p>
+        <span class="card-meta">7 mục</span>
+      </a>
+      <a class="topic-card" href="frontend-tooling/index.html">
+        <span class="card-num">CHỦ ĐỀ 13</span>
+        <h3>Frontend &amp; Tooling</h3>
+        <p>PWA, Hot Reloading, SDK, Nx monorepo, OpenIM, Refine.</p>
+        <span class="card-meta">6 mục</span>
+      </a>
+      <a class="topic-card" href="git/index.html">
+        <span class="card-num">CHỦ ĐỀ 14</span>
+        <h3>Git</h3>
+        <p>Three states, snapshot, add/commit/push, reset vs restore, amend, stash, merge vs rebase, SSH key.</p>
+        <span class="card-meta">17 mục</span>
+      </a>
+      <a class="topic-card" href="testing-environments/index.html">
+        <span class="card-num">CHỦ ĐỀ 15</span>
+        <h3>Testing &amp; Môi trường</h3>
+        <p>Alpha/staging, white-box, black-box, smoke, regression, e2e, POM, Playwright, Cucumber, Appium.</p>
+        <span class="card-meta">15 mục</span>
+      </a>
+      <a class="topic-card" href="saas-platforms/index.html">
+        <span class="card-num">CHỦ ĐỀ 16</span>
+        <h3>SaaS &amp; Nền tảng</h3>
+        <p>SaaS, điều kiện để là SaaS, Shopify theme vs headless, Haravan, CMS và CRM.</p>
+        <span class="card-meta">5 mục</span>
+      </a>
+      <a class="topic-card" href="auth-blockchain/index.html">
+        <span class="card-num">CHỦ ĐỀ 17</span>
+        <h3>Auth &amp; Blockchain</h3>
+        <p>OAuth2 (vai trò, token, scope), Solana, DApp và MetaMask.</p>
+        <span class="card-meta">4 mục</span>
+      </a>
+      <a class="topic-card" href="interview-intro/index.html">
+        <span class="card-num">CHỦ ĐỀ 18</span>
+        <h3>Giới thiệu &amp; English</h3>
+        <p>Kịch bản giới thiệu bản thân khi phỏng vấn và một bài đọc tiếng Anh kèm bản dịch.</p>
+        <span class="card-meta">2 mục</span>
+      </a>
+      <a class="topic-card" href="project-notes/index.html">
+        <span class="card-num">CHỦ ĐỀ 19</span>
+        <h3>Ghi chú dự án</h3>
+        <p>FilterTable: cách dùng, props, các state và hàm chính — tài liệu component dùng chung.</p>
+        <span class="card-meta">1 mục</span>
+      </a>
+    </div>
+  </main>
+</div>
+
+<footer>
+  Interview Knowledge — sổ tay ôn phỏng vấn tổng hợp từ ghi chép cá nhân.
+  Ưu tiên trả lời theo cấu trúc: vấn đề → giải pháp → vì sao chọn cách này thay vì cách khác.
+</footer>
+
+<script src="assets/search-index.js" defer></script>
+<script src="assets/js/main.js" defer></script>
+</body>
+</html>

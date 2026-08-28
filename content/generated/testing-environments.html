@@ -1,0 +1,189 @@
+    <section class="qa" id="appium" data-nav="Appium">
+      <div class="q-tag"><span class="n">1</span> React Native &amp; Libs</div>
+      <h2 class="q-title">Appium</h2>
+      <ul>
+        <li>is an open-source project and ecosystem of related software, designed to facilitate UI automation of many app platforms, including mobile (iOS, Android, Tizen), browser (Chrome, Firefox, Safari), desktop (macOS, Windows), TV (Roku, tvOS, Android TV, Samsung), and more!</li>
+        <li>Cho phép viết script tự động hóa bằng bất kỳ ngôn ngữ lập trình nào phổ biến (JS, Python, Java, Ruby, C#, v.v.) qua chuẩn giao tiếp WebDriver/W3C</li>
+        <li>Hoạt động theo mô hình Client–Server:</li>
+        <li>Appium hoạt động như một <b>máy chủ HTTP</b> (server), nhận các lệnh từ client bằng giao thức WebDriver (REST + JSON)</li>
+        <li><b>Appium client library</b> ở phía người dùng đóng vai trò gửi các lệnh đến server từ ngôn ngữ bạn chọn và xử lý phản hồi</li>
+        <li>Drivers trong appium là các thành phần chịu trách nhiệm thực thi lệnh kiểm thử trên từng nền tảng như iOS (dùng XCUITest driver), Android (UiAutomator2, Espresso), Windows (WinAppDriver)</li>
+        <li>WebdriverIO là Client gọi WebDriver API, giao tiếp với Appium server</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="automation-test" data-nav="Automation test">
+      <div class="q-tag"><span class="n">1</span> Automation test</div>
+      <h2 class="q-title">Automation test</h2>
+      <ul>
+        <li>Là <b>quy trình sử dụng các công cụ hoặc phần mềm để tự động thực hiện các bước kiểm thử phần mềm</b> thay vì kiểm thử thủ công (manual test) do con người thực hiện.</li>
+        <li>Thay vì manual test thì họ sẽ viết hoặc sử dụng sẵn script test case tự động.</li>
+        <li>Lợi ích :</li>
+        <li>Chạy test hàng trăm/lần chỉ mất vài phút thay vì nhiều giờ.</li>
+        <li>Dễ tích hợp CI/CD để auto run các script khi build code mới.</li>
+        <li>Dùng lại script cho các lần regression test.</li>
+        <li>Hạn chế :</li>
+        <li>Khi UI hoặc logic thay đổi, phải cập nhật test script.</li>
+        <li>Không phù hợp với test ngắn hạn , vì manual test sẽ nhanh hơn</li>
+        <li>Các tools: Selenium, Playwright, Cypress, …</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="white-box-testing" data-nav="White-box testing">
+      <div class="q-tag"><span class="n">1</span> Automation test</div>
+      <h2 class="q-title">White-box testing</h2>
+      <ul>
+        <li>là 1 phương pháp kiểm thử đòi hỏi tester <b>biết rõ cấu trúc bên trong, mã nguồn</b></li>
+        <li>Kiểm tra luồng logic, cấu trúc code, điều kiện rẽ nhánh, …</li>
+        <li>thực hiện unit test với các tools : JUnit , NUnit</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="black-box-testing" data-nav="Black-box testing">
+      <div class="q-tag"><span class="n">1</span> Automation test</div>
+      <h2 class="q-title">Black-box testing</h2>
+      <ul>
+        <li>là 1 phương pháp kiểm thử đòi hỏi tester chỉ tập trung vào <b>đầu vào và đầu ra</b> của hệ thống so với yêu cầu, ko cần quan tâm cấu trúc bên trong của phần mềm</li>
+        <li>tester cần hiểu yêu cầu, nghiệp vụ là đủ</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="smoke-test" data-nav="Smoke test">
+      <div class="q-tag"><span class="n">1</span> Automation test</div>
+      <h2 class="q-title">Smoke test</h2>
+      <p>là một loại kiểm thử phần mềm nhanh và cơ bản nhằm xác minh rằng các chức năng chính và quan trọng nhất của hệ thống hoặc bản build mới có hoạt động hay không trước khi thực hiện các kiểm thử chi tiết hơn.</p>
+    </section>
+
+    <section class="qa" id="regression-test" data-nav="Regression test">
+      <div class="q-tag"><span class="n">1</span> Automation test</div>
+      <h2 class="q-title">Regression test</h2>
+      <p>là quá trình kiểm thử phần mềm nhằm <b>đảm bảo rằng những tính năng vốn đang hoạt động trước đây vẫn hoạt động bình thường sau khi hệ thống được thay đổi</b> (ví dụ: fix bug, thêm tính năng mới, nâng cấp phiên bản).</p>
+    </section>
+
+    <section class="qa" id="environment-testing" data-nav="Environment testing">
+      <div class="q-tag"><span class="n">1</span> Automation test</div>
+      <h2 class="q-title">Environment testing</h2>
+      <ul>
+        <li>Quy trình các môi trường kiểm thử trong 1 dự án phần mềm:</li>
+        <li><b>Development</b>: Dành cho developer phát triển các tính năng và test nhanh</li>
+        <li><b>UAT</b>: Cho người dùng hoặc khách hàng kiểm tra và xác nhận tính năng, dữ liệu test mô phỏng thực tế</li>
+        <li><b>Staging (Pre-production)</b>: là bản sao gần như hoàn toàn giống môi trường production, dùng để test toàn hệ thống trước khi đưa vào live và có cấu hình, dữ liệu và server giống hệt production.</li>
+        <li>Production: Môi trường thật nơi end user sử dụng.</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="test-suite" data-nav="Test suite">
+      <div class="q-tag"><span class="n">1</span> Automation test</div>
+      <h2 class="q-title">Test suite</h2>
+      <p>là một <b>tập hợp các test case</b> được nhóm lại với nhau để kiểm thử một module, một tính năng, hoặc một mục tiêu kiểm thử cụ thể.</p>
+    </section>
+
+    <section class="qa" id="page-object-model" data-nav="Page object model">
+      <div class="q-tag"><span class="n">1</span> Automation test</div>
+      <h2 class="q-title">Page object model</h2>
+      <ul>
+        <li>là <b>một mẫu thiết kế (design pattern)</b> thường được dùng trong <b>automation testing</b></li>
+        <li>Mỗi trang (Page) hoặc thành phần lớn (Component) của ứng dụng sẽ được đại diện bởi một class trong code.- Class này chỉ chứa thông tin và thao tác liên quan đến trang đó, không chứa logic test.- Code test sẽ gọi các method từ những class này để thực hiện các hành động.</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="verification-and-validation-testing" data-nav="Verification and validation testing">
+      <div class="q-tag"><span class="n">1</span> Automation test</div>
+      <h2 class="q-title">Verification and validation testing</h2>
+      <p>1. verification: kiểm tra đúng theo yêu cầu thiết kế, cụ thể là + ví dụ:</p>
+      <ul>
+        <li>Kiểm tra tài liệu yêu cầu: Có đầy đủ chức năng “Tìm chuyến bay”, “Thanh toán”, “Gửi email xác nhận”.</li>
+        <li>Review thiết kế giao diện: Có đúng màu, đúng logo, đúng layout như bản vẽ không.- Review code: Các API gọi đúng tham số, trả đúng định dạng JSON như tài liệu.=&gt; Không cần chạy ứng dụng, chỉ cần xem tài liệu, thiết kế, code → nếu đúng, nghĩa là Verification pass.</li>
+      </ul>
+      <p>2. validation: kiểm tra đáp ứng nhu cầu người dùng, cụ thể là + ví dụ:</p>
+      <ul>
+        <li>Mở app, tìm vé Hà Nội → TP.HCM ngày mai, hệ thống hiển thị kết quả chính xác.- Thanh toán thành công và nhận được email xác nhận.</li>
+        <li>Người dùng thực sự sử dụng được app để đặt vé như mong muốn.=&gt; Cần chạy ứng dụng, nhập dữ liệu thật, thao tác như người dùng → nếu đúng, nghĩa là Validation pass.</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="playwright" data-nav="Playwright">
+      <div class="q-tag"><span class="n">1</span> Automation test</div>
+      <h2 class="q-title">Playwright</h2>
+      <ul>
+        <li>Là một thư viện kiểm thử tự động (automation testing) mã nguồn mở do Microsoft phát triển, dùng để test UI của web app theo hướng E2E</li>
+        <li>Kiểm tra xem web hoạt động đúng trên <b>nhiều trình duyệt</b>: Chromium (Chrome/Edge), Firefox, WebKit (Safari).</li>
+        <li>Các ưu điểm:</li>
+        <li>Đa trình duyệt</li>
+        <li>Đa nền tảng</li>
+        <li>Hỗ trợ nhiều ngôn ngữ lập trình</li>
+        <li>Hỗ trợ test song song để tiết kiệm time</li>
+        <li>Core Features &amp; Test Runner API:</li>
+      </ul>
+      <p>name</p>
+      <p>concept</p>
+      <p>Example</p>
+      <p>Locator</p>
+      <ul>
+        <li>tìm phần tử trên trang</li>
+        <li>gồm các basic actions: .fill() , .check(), .hover(), …</li>
+      </ul>
+      <pre><code>const usernameInput = page.locator('#username');
+const linkGetStarted = page.getByRole('link', { name: 'Get started' });
+Selector</code></pre>
+      <p><b>chuỗi định danh</b> để tìm phần tử</p>
+      <ul>
+        <li>CSS Selectorawait page.click('button#login');</li>
+        <li>Text Selector</li>
+      </ul>
+      <p>await page.click('text="Đăng nhập"');</p>
+      <p>XPath Selector</p>
+      <pre><code>await page.click('//button[@id="login"]');
+Assertions</code></pre>
+      <ul>
+        <li>Là cách để xác nhận kết quả test <b>đúng với mong đợi</b> thông qua expect()</li>
+        <li>Expect() gồm các matchers như: toBeVisible(), toHaveText(), …</li>
+      </ul>
+      <pre><code>await expect(page).toHaveURL(/.*dashboard/);
+await expect(page.locator('h1')).toHaveText('Welcome');
+Auto-wait</code></pre>
+      <p>Playwright <b>tự chờ</b> (up to timeout) khi:</p>
+      <ul>
+        <li>Element xuất hiện.</li>
+        <li>Element sẵn sàng để click/nhập liệu.</li>
+        <li>URL hoặc text thay đổi.</li>
+      </ul>
+      <pre><code>await page.click('button#submit');
+- Test hooks:
+Hook name
+Way run
+Purpose
+beforeAll</code></pre>
+      <p>Chạy <b>một lần</b> trước tất cả test scenario trong file</p>
+      <p>Chuẩn bị dữ liệu/môi trường chung cho toàn bộ file test</p>
+      <p>afterAll</p>
+      <p>Chạy <b>một lần</b> sau tất cả test scenario trong file</p>
+      <p>Dọn dẹp sau khi toàn bộ test chạy xong</p>
+      <p>beforeEach</p>
+      <p>Chạy <b>trước mỗi test case</b></p>
+      <p>Setup nhanh cho từng test, đảm bảo mỗi test có môi trường riêng</p>
+      <p>afterEach</p>
+      <p>Chạy <b>sau mỗi test case</b></p>
+      <p>Teardown (thu hồi dữ liệu tạm) sau mỗi test, xóa dữ liệu tạm, đóng kết nối, …</p>
+      <p>after</p>
+      <p>Chạy sau mỗi test scenario</p>
+      <p>Dọn dẹp sau khi mỗi test chạy xong</p>
+      <ul>
+        <li>generating testing:</li>
+        <li>đề cập đến việc <b>tự động ghi lại (record)</b> các thao tác của bạn trên trình duyệt rồi sinh ra <b>mã test</b> tương ứng, thay vì phải viết tay toàn bộ.</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="cucumber" data-nav="Cucumber">
+      <div class="q-tag"><span class="n">1</span> Automation test</div>
+      <h2 class="q-title">Cucumber</h2>
+      <ul>
+        <li>Là một công cụ kiểm thử tự động (automation testing tool)</li>
+        <li>Dùng để viết script test case bằng ngôn ngữ tự nhiên (Gherkin) , do đó hỗ trợ Behavior-Driven Development (BDD)</li>
+        <li>Giúp <b>mô tả kịch bản test</b> dễ đọc, dễ hiểu cho BA/QA/Dev</li>
+        <li>Dùng <b>Gherkin syntax</b> để viết kịch bản test:</li>
+        <li><b>Given</b>: trạng thái ban đầu (bối cảnh).</li>
+        <li><b>When</b>: hành động thực hiện.</li>
+        <li><b>Then</b>: kết quả mong đợi.</li>
+      </ul>
+    </section>

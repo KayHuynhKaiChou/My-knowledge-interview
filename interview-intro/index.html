@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Kịch bản giới thiệu bản thân khi phỏng vấn và một bài đọc tiếng Anh kèm bản dịch.">
+<title>Giới thiệu & English — Interview Knowledge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body data-root="../">
+
+<header class="topbar">
+  <a class="topbar-brand" href="../index.html" aria-label="Interview Knowledge — trang chủ">
+    <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true">
+      <defs><linearGradient id="ikBadge" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#f0b355"/><stop offset="1" stop-color="#b9752a"/>
+      </linearGradient></defs>
+      <rect x="2" y="2" width="60" height="60" rx="15" fill="url(#ikBadge)"/>
+      <path d="M21 21 L33 32 L21 43" fill="none" stroke="#0b0e13" stroke-width="7"
+            stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M37 43 H46" stroke="#0b0e13" stroke-width="7" stroke-linecap="round"/>
+    </svg>
+    <span class="brand-text">Interview Knowledge</span>
+  </a>
+  <nav class="topbar-nav">
+    <details class="nav-group">
+      <summary>Backend</summary>
+      <div class="nav-dropdown">
+        <a href="../advanced-backend/index.html">Advanced Backend</a>
+        <a href="../backend-dotnet-nestjs/index.html">.NET &amp; NestJS</a>
+        <a href="../database-sql/index.html">Database &amp; SQL</a>
+        <a href="../backend-infrastructure/index.html">Hạ tầng</a>
+        <a href="../realtime-socket/index.html">Realtime &amp; Socket</a>
+        <a href="../case-studies/index.html">Case studies</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Frontend</summary>
+      <div class="nav-dropdown">
+        <a href="../javascript-core/index.html">JavaScript &amp; TS</a>
+        <a href="../react/index.html">React &amp; State</a>
+        <a href="../nextjs/index.html">Next.js</a>
+        <a href="../css-html/index.html">CSS &amp; HTML</a>
+        <a href="../browser-web-api/index.html">Browser &amp; Web API</a>
+        <a href="../react-native/index.html">React Native</a>
+        <a href="../frontend-tooling/index.html">Frontend Tooling</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Quy trình &amp; Nền tảng</summary>
+      <div class="nav-dropdown">
+        <a href="../git/index.html">Git</a>
+        <a href="../testing-environments/index.html">Testing</a>
+        <a href="../saas-platforms/index.html">SaaS &amp; Nền tảng</a>
+        <a href="../auth-blockchain/index.html">Auth &amp; Blockchain</a>
+      </div>
+    </details>
+    <details class="nav-group has-active">
+      <summary>Khác</summary>
+      <div class="nav-dropdown">
+        <a href="../interview-intro/index.html" class="active">Giới thiệu &amp; English</a>
+        <a href="../project-notes/index.html">Ghi chú dự án</a>
+      </div>
+    </details>
+  </nav>
+  <button class="search-trigger" id="searchTrigger" aria-label="Tìm kiếm nội dung">
+    <span class="search-icon" aria-hidden="true">⌕</span>
+    <span class="search-label">Tìm kiếm</span>
+    <kbd>/</kbd>
+  </button>
+</header>
+
+<div class="search-overlay" id="searchOverlay" hidden>
+  <div class="search-box" role="dialog" aria-label="Tìm kiếm nội dung">
+    <input type="search" id="searchInput" autocomplete="off" spellcheck="false"
+           placeholder="Tìm trong toàn bộ nội dung — closure, saga, index, rebase…">
+    <div class="search-results" id="searchResults"></div>
+    <div class="search-hint">Enter mở mục · ↑↓ chọn · Esc đóng</div>
+  </div>
+</div>
+
+<div class="shell">
+  <button class="mobile-toggle" id="navToggle" aria-label="Mở mục lục">☰ Mục lục</button>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">Giới thiệu &amp; English</div>
+    <div class="brand-sub">2 mục &middot; sổ tay ôn phỏng vấn</div>
+
+    <div class="nav-block">
+      <p class="nav-label">Nội dung</p>
+      <ul class="nav-list">
+        <li><a href="#english-reading"><span class="nav-num">01</span><span class="nav-text">Bài đọc tiếng Anh</span></a></li>
+        <li><a href="#gioi-thieu-ban-than"><span class="nav-num">02</span><span class="nav-text">Giới thiệu bản thân</span></a></li>
+      </ul>
+    </div>
+  </aside>
+  <main>
+    <div class="hero">
+      <div class="hero-kicker">Interview prep · Soft skills</div>
+      <h1>Giới thiệu bản thân &amp; English</h1>
+      <p class="lede">Phần mở đầu buổi phỏng vấn: giới thiệu bản thân, quá trình học và làm việc; kèm một bài đọc tiếng Anh để luyện kể lại sự việc.</p>
+    </div>
+
+<section class="qa" id="english-reading" data-nav="Bài đọc tiếng Anh">
+      <div class="q-tag"><span class="n">1</span> English</div>
+      <h2 class="q-title">Bài đọc tiếng Anh — kể một sự việc đã xảy ra</h2>
+      <p>Last Saturday, I injured my ankle playing basketball. One of the players from the other team bumped into me and I fell down. When I fell, my ankle twisted. It was very painful immediately. When I woke up it was very swollen and a little red, so I went to the hospital. The doctor gave me some pain-relieving tablets and told me to take two tablets a day and wrap my ankle tightly with a bandage for one week. He said it was not a serious injury, and that I would be just fine. He told me not to do any exercise for three weeks. I have to rest my ankle so it can heal more quickly. I’m really looking forward to getting back to the basketball court.</p>
+      <p>Thứ Bảy tuần trước, tôi bị thương ở mắt cá chân khi chơi bóng rổ. Một trong những cầu thủ của đội đối phương va vào tôi và tôi bị ngã. Khi ngã, mắt cá chân tôi bị xoắn. Ngay lập tức tôi cảm thấy rất đau. Khi tôi thức dậy vào sáng hôm sau, mắt cá bị sưng to và hơi đỏ, nên tôi đã đến bệnh viện.</p>
+      <p>Bác sĩ cho tôi một số viên thuốc giảm đau và dặn tôi uống hai viên mỗi ngày, đồng thời quấn chặt mắt cá bằng băng trong một tuần. Bác sĩ nói chấn thương không nghiêm trọng và tôi sẽ ổn thôi. Ông ấy dặn tôi không được tập luyện hay vận động gì trong vòng ba tuần. Tôi phải nghỉ ngơi để mắt cá hồi phục nhanh hơn.</p>
+      <p>Tôi thật sự mong chờ được quay lại sân bóng rổ.</p>
+    </section>
+
+    <section class="qa" id="gioi-thieu-ban-than" data-nav="Giới thiệu bản thân">
+      <div class="q-tag"><span class="n">2</span> Phỏng vấn</div>
+      <h2 class="q-title">Giới thiệu bản thân khi phỏng vấn</h2>
+      <p>Đầu tiên em xin gửi lời chào đến anh/chị. Em tên là HUỳnh Gia Khôi, em sinh ra và lớn lên ở Gia Lai. Em là sinh viên của trường Đại học FPT. Chuyên ngành chính của em là kĩ thuật phần mềm. Và hiện tại em đã hoàn thành xong đồ án và tốt nghiệp đại học FPT</p>
+      <p>Trong quá trình học đại học , em đã được trường trang bị các kiến thức nền tảng về ngành nghề này . Về ngôn ngữ lập trình thì ban đầu em học C, sau đó đến Java rồi đến Javascript, html,css. Sau đó em chọn chuyên ngành hẹp là Frontend JS , em học được ReactJS và NodeJS</p>
+      <p>Về quá trình thực tập, làm việc của em ở các doanh nghiệp trước đây. Đầu tiên, FPT Software , dự án đầu tiên em tham gia là làm về mảng data , dự án quản lý data của các doanh nghiệp , công ty, tập đoàn bên Nhật Bản, gồm 1 modal với bên trái là các button setting , chọn công ty , chọn quý, tháng … và bên phải là chart hoặc table để thống kê data. Dự án dùng VueJS và RubyOnRail , và em được các anh cho học cả 2. Dự án thứ 2 em tham gia là về quản lý tour du lịch, dự án dùng ReactJS và DotNet. Đây là 1 dự án xử lý form rất phức tạp , 1 form bự gồm các form nhỏ bên trong và qua đó em mới biết đến 1 thư viện quản lý form là React Hook Form. Bên cạnh đó , qua đó em biết thêm các cách tránh re-render comp như dùng memo, useCallback, tránh truyền prop ở nhiều cấp component, … Hơn nữa là custom hook , thay vì viết các code về logic như các func xử lý data , các hook useState, … thì chúng đc move sang customHook và import hook vào component và dùng destructuring để lấy biến, hàm mà dùng . EM làm đc 8 tháng …</p>
+    </section>
+  </main>
+</div>
+
+<footer>
+  Interview Knowledge — sổ tay ôn phỏng vấn tổng hợp từ ghi chép cá nhân.
+  Ưu tiên trả lời theo cấu trúc: vấn đề → giải pháp → vì sao chọn cách này thay vì cách khác.
+</footer>
+
+<script src="../assets/search-index.js" defer></script>
+<script src="../assets/js/main.js" defer></script>
+</body>
+</html>

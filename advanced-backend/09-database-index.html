@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Index tăng tốc query bằng cách nào, và cái giá phải trả là gì?">
+<title>09. Index — cơ chế & đánh đổi — Advanced Backend</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body data-root="../">
+
+<header class="topbar">
+  <a class="topbar-brand" href="../index.html" aria-label="Interview Knowledge — trang chủ">
+    <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true">
+      <defs><linearGradient id="ikBadge" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#f0b355"/><stop offset="1" stop-color="#b9752a"/>
+      </linearGradient></defs>
+      <rect x="2" y="2" width="60" height="60" rx="15" fill="url(#ikBadge)"/>
+      <path d="M21 21 L33 32 L21 43" fill="none" stroke="#0b0e13" stroke-width="7"
+            stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M37 43 H46" stroke="#0b0e13" stroke-width="7" stroke-linecap="round"/>
+    </svg>
+    <span class="brand-text">Interview Knowledge</span>
+  </a>
+  <nav class="topbar-nav">
+    <details class="nav-group has-active">
+      <summary>Backend</summary>
+      <div class="nav-dropdown">
+        <a href="../advanced-backend/index.html" class="active">Advanced Backend</a>
+        <a href="../backend-dotnet-nestjs/index.html">.NET &amp; NestJS</a>
+        <a href="../database-sql/index.html">Database &amp; SQL</a>
+        <a href="../backend-infrastructure/index.html">Hạ tầng</a>
+        <a href="../realtime-socket/index.html">Realtime &amp; Socket</a>
+        <a href="../case-studies/index.html">Case studies</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Frontend</summary>
+      <div class="nav-dropdown">
+        <a href="../javascript-core/index.html">JavaScript &amp; TS</a>
+        <a href="../react/index.html">React &amp; State</a>
+        <a href="../nextjs/index.html">Next.js</a>
+        <a href="../css-html/index.html">CSS &amp; HTML</a>
+        <a href="../browser-web-api/index.html">Browser &amp; Web API</a>
+        <a href="../react-native/index.html">React Native</a>
+        <a href="../frontend-tooling/index.html">Frontend Tooling</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Quy trình &amp; Nền tảng</summary>
+      <div class="nav-dropdown">
+        <a href="../git/index.html">Git</a>
+        <a href="../testing-environments/index.html">Testing</a>
+        <a href="../saas-platforms/index.html">SaaS &amp; Nền tảng</a>
+        <a href="../auth-blockchain/index.html">Auth &amp; Blockchain</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Khác</summary>
+      <div class="nav-dropdown">
+        <a href="../interview-intro/index.html">Giới thiệu &amp; English</a>
+        <a href="../project-notes/index.html">Ghi chú dự án</a>
+      </div>
+    </details>
+  </nav>
+  <button class="search-trigger" id="searchTrigger" aria-label="Tìm kiếm nội dung">
+    <span class="search-icon" aria-hidden="true">⌕</span>
+    <span class="search-label">Tìm kiếm</span>
+    <kbd>/</kbd>
+  </button>
+</header>
+
+<div class="search-overlay" id="searchOverlay" hidden>
+  <div class="search-box" role="dialog" aria-label="Tìm kiếm nội dung">
+    <input type="search" id="searchInput" autocomplete="off" spellcheck="false"
+           placeholder="Tìm trong toàn bộ nội dung — closure, saga, index, rebase…">
+    <div class="search-results" id="searchResults"></div>
+    <div class="search-hint">Enter mở mục · ↑↓ chọn · Esc đóng</div>
+  </div>
+</div>
+
+<div class="shell">
+  <button class="mobile-toggle" id="navToggle" aria-label="Mở mục lục">☰ Mục lục</button>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">Advanced Backend</div>
+    <div class="brand-sub">12 mục &middot; sổ tay ôn phỏng vấn</div>
+
+    <div class="nav-block">
+      <p class="nav-label">Nội dung</p>
+      <ul class="nav-list">
+        <li><a href="01-race-condition-lock-deadlock.html"><span class="nav-num">01</span><span class="nav-text">Race Condition, Lock &amp; Deadlock</span></a></li>
+        <li><a href="02-idempotency.html"><span class="nav-num">02</span><span class="nav-text">Idempotency</span></a></li>
+        <li><a href="03-distributed-transaction-saga.html"><span class="nav-num">03</span><span class="nav-text">Transaction xuyên service</span></a></li>
+        <li><a href="04-queue-async-processing.html"><span class="nav-num">04</span><span class="nav-text">Queue &amp; Async Processing</span></a></li>
+        <li><a href="05-rate-limiting.html"><span class="nav-num">05</span><span class="nav-text">Rate Limiting</span></a></li>
+        <li><a href="06-database-query-optimization.html"><span class="nav-num">06</span><span class="nav-text">Tối ưu Database &amp; Query</span></a></li>
+        <li><a href="07-redis-caching.html"><span class="nav-num">07</span><span class="nav-text">Redis &mdash; khái niệm &amp; case study</span></a></li>
+        <li><a href="08-scalability-pagination.html"><span class="nav-num">08</span><span class="nav-text">Scalability &amp; Pagination</span></a></li>
+        <li><a href="09-database-index.html" class="active"><span class="nav-num">09</span><span class="nav-text">Index &mdash; cơ chế &amp; đánh đổi</span></a></li>
+        <li><a href="10-background-job.html"><span class="nav-num">10</span><span class="nav-text">Background Job</span></a></li>
+        <li><a href="11-multi-tenant.html"><span class="nav-num">11</span><span class="nav-text">Multi-tenant</span></a></li>
+        <li><a href="12-api-design.html"><span class="nav-num">12</span><span class="nav-text">API Design</span></a></li>
+      </ul>
+    </div>
+
+    <div class="nav-block">
+      <p class="nav-label">Trong trang này</p>
+      <div id="pageToc"></div>
+    </div>
+  </aside>
+  <main>
+    <div class="crumb">
+      <a href="index.html">Advanced Backend</a>
+      <span class="sep">/</span>
+      <span>Câu 09</span>
+    </div>
+
+    <section class="qa" id="q9">
+      <div class="q-tag"><span class="n">9</span> Câu hỏi ứng dụng thường gặp</div>
+      <h2 class="q-title">"Index tăng tốc query bằng cách nào, và cái giá phải trả là gì?"</h2>
+      <p class="lede">Index là chủ đề nền tảng nằm phía sau mọi câu hỏi tối ưu ở Câu 6 — nhưng bản thân nó cũng là 1 câu hỏi phỏng vấn riêng: hiểu index tăng tốc <i>đúng những thao tác nào</i>, và quan trọng không kém là hiểu <i>index không miễn phí</i>.</p>
+
+      <h3 class="sub">9.1 — Index là gì (nhắc lại nhanh)</h3>
+      <p>Index giống hệt mục lục ở cuối 1 cuốn sách dày — thay vì phải lật từng trang để tìm 1 từ khoá (full table scan), bạn tra mục lục rồi nhảy thẳng tới đúng trang. Về bản chất, DB duy trì 1 cấu trúc dữ liệu riêng (thường là B-Tree) lưu sẵn giá trị của (các) cột được đánh index kèm theo con trỏ trỏ tới vị trí thật của row trong bảng — giúp tra cứu nhanh hơn quét tuần tự rất nhiều lần khi bảng lớn.</p>
+
+      <h3 class="sub">9.2 — Composite Index: gộp nhiều cột vào 1 index</h3>
+      <p>Composite index (compound index) là gộp <b>2 hoặc nhiều cột</b> vào chung 1 index thay vì tạo riêng từng index cho từng cột.</p>
+      <pre><code>CREATE INDEX idx_account_created ON transactions (account_id, created_at);</code></pre>
+      <p><b>Thứ tự cột quyết định index có dùng được hay không.</b> Index này giúp nhanh khi lọc theo <code>account_id</code> đứng trước, hoặc cả 2 cột theo đúng thứ tự — nhưng vô dụng nếu query chỉ lọc theo <code>created_at</code> mà bỏ qua <code>account_id</code>, vì index được sắp xếp theo cột đầu trước (xem lại ví dụ đầy đủ ở mục 6.1). Nguyên tắc: giống mục lục sách theo "Chương → Trang" — biết chương thì tra trang nhanh, chỉ có số trang mà không biết chương thì mục lục này không giúp được gì.</p>
+
+      <h3 class="sub">9.3 — Index tăng tốc chủ yếu 3 nhóm thao tác</h3>
+      <div class="grid-2">
+        <div class="case-card">
+          <h5>1. WHERE</h5>
+          <ul>
+            <li>Tìm nhanh row thoả điều kiện thay vì quét toàn bảng (full table scan)</li>
+            <li>Càng nhiều row, chênh lệch tốc độ càng lớn</li>
+          </ul>
+        </div>
+        <div class="case-card">
+          <h5>2. ORDER BY</h5>
+          <ul>
+            <li>Nếu cột sort trùng cột trong index (đúng thứ tự), dữ liệu đã nằm sẵn theo thứ tự trong index</li>
+            <li>Khỏi phải load hết rồi sort lại — tốn CPU/memory</li>
+          </ul>
+        </div>
+        <div class="case-card">
+          <h5>3. JOIN</h5>
+          <ul>
+            <li>Index trên cột khoá ngoại (foreign key) giúp tra cứu nhanh</li>
+            <li>DB cần biết ngay "row nào ở bảng B khớp với row này ở bảng A"</li>
+          </ul>
+        </div>
+        <div class="case-card">
+          <h5>Bonus: GROUP BY & UNIQUE check</h5>
+          <ul>
+            <li>GROUP BY theo đúng cột index → gom nhóm nhanh vì dữ liệu đã ở gần nhau</li>
+            <li>Unique constraint (email không trùng) cần tra nhanh giá trị đã tồn tại chưa mỗi lần INSERT</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3 class="sub">9.4 — Nhược điểm của Index: không hề miễn phí</h3>
+      <div class="callout">
+        <span class="callout-label">Đúng — index chiếm thêm dung lượng lưu trữ</span>
+        <p>Index là 1 cấu trúc dữ liệu <b>riêng</b>, tách biệt khỏi bảng gốc, nên nó chiếm thêm dung lượng ổ đĩa — với bảng hàng chục triệu row, 1 index có thể chiếm tới vài chục % dung lượng so với chính bảng dữ liệu đó, và bảng có càng nhiều index thì dung lượng DB càng phình to. Đây là lý do không nên "cứ thêm cột là đánh index" — mỗi index thêm vào là thêm chi phí lưu trữ thật.</p>
+      </div>
+      <ul>
+        <li><b>Ghi chậm hơn (INSERT / UPDATE / DELETE):</b> mỗi lần dữ liệu thay đổi, DB không chỉ ghi vào bảng mà còn phải cập nhật lại <b>tất cả</b> các index liên quan tới cột vừa đổi. Bảng càng nhiều index, thao tác ghi càng chậm — đây là đánh đổi kinh điển giữa tốc độ đọc và tốc độ ghi.</li>
+        <li><b>Tốn dung lượng lưu trữ:</b> như đã nói ở trên, mỗi index là 1 bản sao có cấu trúc riêng của (các) cột được đánh index, không phải miễn phí.</li>
+        <li><b>Tốn thêm bộ nhớ (RAM):</b> DB thường cố gắng giữ index "hot" trong RAM (buffer pool) để tra cứu nhanh — càng nhiều index, buffer pool càng phải chia sẻ cho nhiều thứ, có thể đẩy dữ liệu thật ra khỏi cache sớm hơn.</li>
+        <li><b>Không phải cứ có index là được dùng:</b> composite index sai thứ tự cột (mục 9.2), hoặc query dùng hàm bọc quanh cột (<code>WHERE YEAR(created_at) = 2026</code>) sẽ khiến DB <b>không tận dụng được index</b> dù đã tạo, vẫn full table scan như thường.</li>
+      </ul>
+
+      <div class="interview-line">
+        <span class="callout-label">Trả lời mẫu khi phỏng vấn</span>
+        <p>"Index tăng tốc chủ yếu 3 nhóm thao tác: WHERE (tìm nhanh thay vì full table scan), ORDER BY (dữ liệu đã sắp sẵn theo index, khỏi sort lại), và JOIN (tra cứu nhanh khoá ngoại). Nhưng index không miễn phí — nó là 1 cấu trúc riêng nên chiếm thêm dung lượng ổ đĩa và RAM, và mỗi lần INSERT/UPDATE/DELETE, DB phải cập nhật lại toàn bộ index liên quan nên ghi sẽ chậm hơn. Vì vậy em chỉ đánh index vào những cột thực sự dùng nhiều trong WHERE/ORDER BY/JOIN, chứ không đánh tràn lan cho mọi cột."</p>
+      </div>
+    </section>
+
+    <nav class="pager">
+      <a class="prev" href="08-scalability-pagination.html"><span class="pager-dir">← Câu trước</span><span class="pager-title">08. Scalability &amp; Pagination</span></a>
+      <a class="next" href="10-background-job.html"><span class="pager-dir">Câu tiếp theo →</span><span class="pager-title">10. Background Job</span></a>
+    </nav>
+  </main>
+</div>
+
+<footer>
+  Interview Knowledge — sổ tay ôn phỏng vấn tổng hợp từ ghi chép cá nhân.
+  Ưu tiên trả lời theo cấu trúc: vấn đề → giải pháp → vì sao chọn cách này thay vì cách khác.
+</footer>
+
+<script src="../assets/search-index.js" defer></script>
+<script src="../assets/js/main.js" defer></script>
+</body>
+</html>

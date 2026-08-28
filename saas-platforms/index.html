@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="SaaS, điều kiện để là SaaS, Shopify theme vs headless, Haravan, CMS và CRM.">
+<title>SaaS & Nền tảng — Interview Knowledge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body data-root="../">
+
+<header class="topbar">
+  <a class="topbar-brand" href="../index.html" aria-label="Interview Knowledge — trang chủ">
+    <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true">
+      <defs><linearGradient id="ikBadge" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#f0b355"/><stop offset="1" stop-color="#b9752a"/>
+      </linearGradient></defs>
+      <rect x="2" y="2" width="60" height="60" rx="15" fill="url(#ikBadge)"/>
+      <path d="M21 21 L33 32 L21 43" fill="none" stroke="#0b0e13" stroke-width="7"
+            stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M37 43 H46" stroke="#0b0e13" stroke-width="7" stroke-linecap="round"/>
+    </svg>
+    <span class="brand-text">Interview Knowledge</span>
+  </a>
+  <nav class="topbar-nav">
+    <details class="nav-group">
+      <summary>Backend</summary>
+      <div class="nav-dropdown">
+        <a href="../advanced-backend/index.html">Advanced Backend</a>
+        <a href="../backend-dotnet-nestjs/index.html">.NET &amp; NestJS</a>
+        <a href="../database-sql/index.html">Database &amp; SQL</a>
+        <a href="../backend-infrastructure/index.html">Hạ tầng</a>
+        <a href="../realtime-socket/index.html">Realtime &amp; Socket</a>
+        <a href="../case-studies/index.html">Case studies</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Frontend</summary>
+      <div class="nav-dropdown">
+        <a href="../javascript-core/index.html">JavaScript &amp; TS</a>
+        <a href="../react/index.html">React &amp; State</a>
+        <a href="../nextjs/index.html">Next.js</a>
+        <a href="../css-html/index.html">CSS &amp; HTML</a>
+        <a href="../browser-web-api/index.html">Browser &amp; Web API</a>
+        <a href="../react-native/index.html">React Native</a>
+        <a href="../frontend-tooling/index.html">Frontend Tooling</a>
+      </div>
+    </details>
+    <details class="nav-group has-active">
+      <summary>Quy trình &amp; Nền tảng</summary>
+      <div class="nav-dropdown">
+        <a href="../git/index.html">Git</a>
+        <a href="../testing-environments/index.html">Testing</a>
+        <a href="../saas-platforms/index.html" class="active">SaaS &amp; Nền tảng</a>
+        <a href="../auth-blockchain/index.html">Auth &amp; Blockchain</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Khác</summary>
+      <div class="nav-dropdown">
+        <a href="../interview-intro/index.html">Giới thiệu &amp; English</a>
+        <a href="../project-notes/index.html">Ghi chú dự án</a>
+      </div>
+    </details>
+  </nav>
+  <button class="search-trigger" id="searchTrigger" aria-label="Tìm kiếm nội dung">
+    <span class="search-icon" aria-hidden="true">⌕</span>
+    <span class="search-label">Tìm kiếm</span>
+    <kbd>/</kbd>
+  </button>
+</header>
+
+<div class="search-overlay" id="searchOverlay" hidden>
+  <div class="search-box" role="dialog" aria-label="Tìm kiếm nội dung">
+    <input type="search" id="searchInput" autocomplete="off" spellcheck="false"
+           placeholder="Tìm trong toàn bộ nội dung — closure, saga, index, rebase…">
+    <div class="search-results" id="searchResults"></div>
+    <div class="search-hint">Enter mở mục · ↑↓ chọn · Esc đóng</div>
+  </div>
+</div>
+
+<div class="shell">
+  <button class="mobile-toggle" id="navToggle" aria-label="Mở mục lục">☰ Mục lục</button>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">SaaS &amp; Nền tảng</div>
+    <div class="brand-sub">5 mục &middot; sổ tay ôn phỏng vấn</div>
+
+    <div class="nav-block">
+      <p class="nav-label">Nội dung</p>
+      <ul class="nav-list">
+        <li><a href="#saas"><span class="nav-num">01</span><span class="nav-text">SaaS</span></a></li>
+        <li><a href="#shopify"><span class="nav-num">02</span><span class="nav-text">Shopify: theme vs headless</span></a></li>
+        <li><a href="#haravan"><span class="nav-num">03</span><span class="nav-text">Haravan</span></a></li>
+        <li><a href="#cms"><span class="nav-num">04</span><span class="nav-text">CMS</span></a></li>
+        <li><a href="#crm"><span class="nav-num">05</span><span class="nav-text">CRM</span></a></li>
+      </ul>
+    </div>
+  </aside>
+  <main>
+    <div class="hero">
+      <div class="hero-kicker">Interview prep · Product / E-commerce platform</div>
+      <h1>SaaS &amp; Nền tảng thương mại điện tử</h1>
+      <p class="lede">Thế nào là một SaaS, hai cách làm store trên Shopify, và phân biệt CMS với CRM — nhóm câu hỏi về mô hình sản phẩm.</p>
+    </div>
+
+<!-- ============ SaaS ============ -->
+    <section class="qa" id="saas" data-nav="SaaS">
+      <div class="q-tag"><span class="n">1</span> Mô hình sản phẩm</div>
+      <h2 class="q-title">SaaS là gì, thế nào thì được coi là một SaaS?</h2>
+      <div class="callout answer">
+        <span class="callout-label">Đáp án</span>
+        <p>SaaS viết tắt của <b>Software as a Service</b> — phần mềm dưới dạng dịch vụ. Thay vì phải mua phần mềm, tự cài đặt, tự bảo trì, tự nâng cấp, lo server và bảo mật, người dùng chỉ cần đăng ký tài khoản, trả phí hàng tháng/năm và dùng trực tiếp trên trình duyệt.</p>
+      </div>
+
+      <h3 class="sub">Ví dụ quen thuộc</h3>
+      <ul>
+        <li><b>Shopify</b> — tạo website bán hàng.</li>
+        <li><b>Google Docs</b> — soạn thảo văn bản online.</li>
+      </ul>
+
+      <h3 class="sub">Điều kiện để một phần mềm là SaaS</h3>
+      <table>
+        <thead><tr><th>Điều kiện</th><th>Cụ thể</th></tr></thead>
+        <tbody>
+          <tr><td>Tự code phần mềm (web app)</td><td>VD: quản lý bán hàng, khách hàng, đơn hàng…</td></tr>
+          <tr><td>Deploy lên server / public cloud</td><td>Vercel, Render, VPS hoặc máy chủ riêng</td></tr>
+          <tr><td>Người dùng truy cập qua trình duyệt</td><td>Không cần cài đặt app, chỉ cần URL</td></tr>
+          <tr><td>Có tài khoản đăng nhập riêng từng người dùng</td><td>Họ dùng phần mềm như một dịch vụ</td></tr>
+          <tr><td>Thu phí theo tháng/năm (hoặc free)</td><td>Subscription là đặc điểm chính của SaaS</td></tr>
+        </tbody>
+      </table>
+
+      <div class="callout">
+        <span class="callout-label">Ghi chú</span>
+        <p>Bình thường tự code một project rồi deploy cho mọi người dùng qua URL public thì đã được coi là một SaaS. Câu hỏi này hay đi kèm với <b>multi-tenant</b> — cách tách dữ liệu giữa các khách hàng dùng chung một hệ thống.</p>
+      </div>
+    </section>
+
+    <!-- ============ Shopify ============ -->
+    <section class="qa" id="shopify" data-nav="Shopify: theme vs headless">
+      <div class="q-tag"><span class="n">2</span> Nền tảng TMĐT</div>
+      <h2 class="q-title">Làm store trên Shopify: dùng theme hay headless?</h2>
+      <p class="lede">Shopify là nền tảng SaaS thương mại điện tử. Có hai cách triển khai giao diện, khác nhau ở chỗ ai chịu trách nhiệm phần front-end.</p>
+      <p><a href="https://fptshop.com.vn/tin-tuc/danh-gia/shopify-la-gi-167662" target="_blank" rel="noopener">Bài giới thiệu tổng quan về Shopify ↗</a></p>
+
+      <h3 class="sub">1 — Shopify Theme (monolithic, giao diện truyền thống)</h3>
+      <ul>
+        <li>Không cần code front-end hay back-end.</li>
+        <li>Giao diện (UI) có sẵn, chỉnh sửa bằng <b>Theme Editor</b>: <code>shopify.com → Online Store → Customize</code>.</li>
+        <li>Toàn bộ logic hiển thị dùng <b>Liquid</b> — ngôn ngữ template của Shopify.</li>
+        <li>Trang sản phẩm, trang danh mục, giỏ hàng, thanh toán → đều đã có sẵn.</li>
+        <li>Shopify tự tích hợp API nội bộ, không phải gọi API thủ công.</li>
+      </ul>
+      <div class="callout">
+        <span class="callout-label">Khi nào chọn</span>
+        <p>Đây là cách nhanh nhất để tạo một trang bán hàng mà không cần viết nhiều code.</p>
+      </div>
+
+      <h3 class="sub">2 — Headless front-end (React/Vue + Shopify API)</h3>
+      <ul>
+        <li>Tự build giao diện bằng framework như React, Vue, Next.js.</li>
+        <li>Không dùng theme của Shopify.</li>
+        <li>Gọi <b>Shopify Storefront API</b> (GraphQL/REST) để lấy danh sách sản phẩm, xử lý giỏ hàng, checkout, đăng ký / đăng nhập.</li>
+      </ul>
+
+      <table>
+        <thead><tr><th>Thành phần</th><th>Bạn lo</th><th>Shopify lo</th></tr></thead>
+        <tbody>
+          <tr><td>Giao diện</td><td>Bạn code (React/Vue)</td><td>Không dùng theme</td></tr>
+          <tr><td>Back-end logic, dữ liệu</td><td>Không cần làm</td><td>Shopify lo (qua API)</td></tr>
+          <tr><td>Hosting front-end</td><td>Tự deploy (Vercel, Netlify, GCP…)</td><td>—</td></tr>
+          <tr><td>Checkout, thanh toán, đơn hàng</td><td>Không cần làm</td><td>Shopify xử lý</td></tr>
+        </tbody>
+      </table>
+
+      <div class="interview-line">
+        <span class="callout-label">Trả lời mẫu khi phỏng vấn</span>
+        <p>"Nếu yêu cầu chỉ là dựng store bán hàng nhanh thì em dùng theme của Shopify, sửa bằng Theme Editor và Liquid, gần như không phải code. Còn khi cần UI tuỳ biến cao, SEO tốt hoặc phải tích hợp với hệ thống ngoài như CMS hay hệ thống quản lý kho, em làm headless: tự build front-end bằng Next.js và gọi Storefront API, còn phần checkout và đơn hàng vẫn để Shopify lo để không phải tự chịu trách nhiệm về thanh toán."</p>
+      </div>
+    </section>
+
+    <!-- ============ Haravan ============ -->
+    <section class="qa" id="haravan" data-nav="Haravan">
+      <div class="q-tag"><span class="n">3</span> Nền tảng TMĐT</div>
+      <h2 class="q-title">Haravan là gì?</h2>
+      <p>Haravan là nền tảng thương mại điện tử (E-commerce Platform) của Việt Nam, mô hình tương tự Shopify: cung cấp sẵn store, quản lý sản phẩm — đơn hàng — thanh toán, và mở API để tích hợp. Điểm khác biệt chính so với Shopify là hệ sinh thái nội địa: đối tác vận chuyển, cổng thanh toán và kênh bán hàng phù hợp thị trường Việt Nam.</p>
+    </section>
+
+<section class="qa" id="cms" data-nav="CMS">
+      <div class="q-tag"><span class="n">4</span> React Native &amp; Libs</div>
+      <h2 class="q-title">CMS</h2>
+      <figure class="doc-figure"><img src="../assets/img/saas-platforms-cms-01.png" alt="Minh hoạ" loading="lazy"></figure>
+    </section>
+
+    <section class="qa" id="crm" data-nav="CRM">
+      <div class="q-tag"><span class="n">5</span> React Native &amp; Libs</div>
+      <h2 class="q-title">CRM</h2>
+      <figure class="doc-figure"><img src="../assets/img/saas-platforms-crm-01.png" alt="Minh hoạ" loading="lazy"></figure>
+    </section>
+  </main>
+</div>
+
+<footer>
+  Interview Knowledge — sổ tay ôn phỏng vấn tổng hợp từ ghi chép cá nhân.
+  Ưu tiên trả lời theo cấu trúc: vấn đề → giải pháp → vì sao chọn cách này thay vì cách khác.
+</footer>
+
+<script src="../assets/search-index.js" defer></script>
+<script src="../assets/js/main.js" defer></script>
+</body>
+</html>

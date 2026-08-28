@@ -1,0 +1,175 @@
+    <section class="qa" id="union-union-all" data-nav="UNION (UNION ALL)">
+      <div class="q-tag"><span class="n">1</span> SQL</div>
+      <h2 class="q-title">UNION (UNION ALL)</h2>
+      <ul>
+        <li>Dùng để kết hợp kết quả của nhiều truy vấn SELECT.</li>
+        <li>Các bảng không cần có quan hệ với nhau.</li>
+        <li>Chỉ lấy các dòng duy nhất (giống DISTINCT). Nếu muốn giữ trùng lặp, dùng UNION ALL.</li>
+        <li>Yêu cầu số cột và kiểu dữ liệu trong các SELECT phải giống nhau.</li>
+        <li>Ex:</li>
+      </ul>
+      <pre><code>SELECT name, email FROM customers
+UNION
+SELECT name, email FROM employees;</code></pre>
+    </section>
+
+    <section class="qa" id="select-into" data-nav="SELECT INTO">
+      <div class="q-tag"><span class="n">1</span> SQL</div>
+      <h2 class="q-title">SELECT INTO</h2>
+      <ul>
+        <li>Dùng để tạo 1 bảng mới và sao chép dữ liệu từ 1 bảng hiện có vào bảng mới này</li>
+        <li>Cấu trúc bảng mới sẽ giống bảng gốc, nhưng không có ràng buộc (<code>PRIMARY KEY</code>, <code>FOREIGN KEY</code>, <code>INDEX</code>...).</li>
+        <li>Ex:</li>
+      </ul>
+      <pre><code>SELECT * INTO CloneProduct
+FROM Product
+WHERE 1=1</code></pre>
+    </section>
+
+    <section class="qa" id="view" data-nav="VIEW">
+      <div class="q-tag"><span class="n">1</span> SQL</div>
+      <h2 class="q-title">VIEW</h2>
+      <p>Là một bảng ảo hiển thị dữ liệu động từ truy vấn.</p>
+      <figure class="doc-figure"><img src="../assets/img/database-sql-view-01.png" alt="Minh hoạ" loading="lazy"></figure>
+    </section>
+
+    <section class="qa" id="common-table-expression" data-nav="Common table expression">
+      <div class="q-tag"><span class="n">1</span> SQL</div>
+      <h2 class="q-title">Common table expression</h2>
+      <ul>
+        <li>CTE là một truy vấn tạm thời được định nghĩa bằng WITH, giúp câu SQL dễ đọc hơn và có thể tái sử dụng trong cùng một truy vấn.</li>
+        <li>Ex:</li>
+      </ul>
+      <pre><code>WITH HighRevenueOrders AS (
+    SELECT order_id, customer_id, total_amount
+    FROM orders
+    WHERE total_amount &gt; 1000
+)
+SELECT c.name, hro.total_amount
+FROM customers as c
+JOIN HighRevenueOrders as hro ON c.customer_id = hro.customer_id;</code></pre>
+    </section>
+
+    <section class="qa" id="store-procedure-function" data-nav="STORE PROCEDURE, FUNCTION">
+      <div class="q-tag"><span class="n">1</span> SQL</div>
+      <h2 class="q-title">STORE PROCEDURE, FUNCTION</h2>
+      <p>Là tập hợp 1 hay nhiều câu lệnh T-SQL thành 1 nhóm để hoàn thành 1 tác vụ</p>
+      <p><b>Feature</b></p>
+      <p><b>Store procedure</b></p>
+      <p><b>Function</b></p>
+      <p>Trả về giá trị</p>
+      <p>Không hoặc có (thông qua OUTPUT nếu có)</p>
+      <p>Luôn phải trả về 1 giá trị</p>
+      <p>Có thể dùng trong SELECT / WHERE / HAVING</p>
+      <p>không</p>
+      <p>có</p>
+      <p>Thực hiện INSERT, UPDATE, DELETE?</p>
+      <p>Có</p>
+      <p>không</p>
+      <pre><code>Có thể bắt đầu TRANSACTION?</code></pre>
+      <p>Có</p>
+      <p>không</p>
+      <p>Có thể dùng try-catch</p>
+      <p>Có</p>
+      <p>không</p>
+      <ul>
+        <li>Ex :</li>
+        <li>Store procedure</li>
+      </ul>
+      <figure class="doc-figure"><img src="../assets/img/database-sql-store-procedure-function-01.png" alt="Minh hoạ" loading="lazy"></figure>
+      <figure class="doc-figure"><img src="../assets/img/database-sql-store-procedure-function-02.png" alt="Minh hoạ" loading="lazy"></figure>
+      <p>function</p>
+      <figure class="doc-figure"><img src="../assets/img/database-sql-store-procedure-function-03.png" alt="Minh hoạ" loading="lazy"></figure>
+      <figure class="doc-figure"><img src="../assets/img/database-sql-store-procedure-function-04.png" alt="Minh hoạ" loading="lazy"></figure>
+    </section>
+
+    <section class="qa" id="transaction-trong-sql" data-nav="Transaction trong SQL">
+      <div class="q-tag"><span class="n">1</span> SQL</div>
+      <h2 class="q-title">Transaction trong SQL</h2>
+      <ul>
+        <li>là tiến trình thực hiện một nhóm các câu lệnh SQL. Các câu lệnh này được thực thi một cách tuần tự và độc lập.</li>
+        <li>được áp dụng cho các lệnh thao tác dữ liệu : INSERT, UPDATE, DELETE</li>
+        <li>Gồm 2 trạng thái chính là : COMMIT và ROLLBACK (chỉ 1 fail thì all back về ban đầu như chưa có gì happen)</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="trigger" data-nav="Trigger">
+      <div class="q-tag"><span class="n">1</span> SQL</div>
+      <h2 class="q-title">Trigger</h2>
+      <ul>
+        <li>Là 1 đoạn thủ tục SQL đc thực thi tự động khi 1 sự kiện xảy ra trên 1 table hoặc view</li>
+        <li>Sự kiện ở đây là DDL , DML (SELECT , INSERT , …)</li>
+        <li>Các loại Trigger phổ biến:</li>
+        <li>Trigger trước khi (BEFORE): Thực hiện trước khi sự kiện xảy ra.</li>
+        <li>Trigger sau khi (AFTER): Thực hiện sau khi sự kiện xảy ra.</li>
+        <li>Trigger thay vì (INSTEAD OF): Thay thế cho một câu lệnh SQL cụ thể (thường dùng với view).</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="index" data-nav="Index">
+      <div class="q-tag"><span class="n">1</span> SQL</div>
+      <h2 class="q-title">Index</h2>
+      <ul>
+        <li>là một cấu trúc dữ liệu được tạo trên một hoặc nhiều cột của bảng để tăng tốc độ truy vấn dữ liệu</li>
+        <li>giống như mục lục trong một cuốn sách giúp bạn tìm kiếm thông tin nhanh chóng hơn và ko cần quét toàn bộ sách</li>
+        <li>cải thiện tốc độ các câu query có điều kiện(where, join, group by, order by) nhưng có thể làm chậm quá trình INSERT và UPDATE</li>
+        <li>Tại sao không đặt index cho tất cả cột:</li>
+      </ul>
+      <figure class="doc-figure"><img src="../assets/img/database-sql-index-01.png" alt="Minh hoạ" loading="lazy"></figure>
+      <p><b>NestJS</b></p>
+    </section>
+
+    <section class="qa" id="some-va-every-trong-quan-he-1-n-o-where-prisma" data-nav="some và every trong quan hệ 1-n ở where prisma">
+      <div class="q-tag"><span class="n">1</span> SQL</div>
+      <h2 class="q-title">some và every trong quan hệ 1-n ở where prisma</h2>
+      <figure class="doc-figure"><img src="../assets/img/database-sql-some-va-every-trong-quan-he-1-n-o-where-prisma-01.png" alt="Minh hoạ" loading="lazy"></figure>
+      <p>Nếu dùng every thì :</p>
+      <figure class="doc-figure"><img src="../assets/img/database-sql-some-va-every-trong-quan-he-1-n-o-where-prisma-02.png" alt="Minh hoạ" loading="lazy"></figure>
+      <p>Dịch sang truy vấn thuần:</p>
+      <p>some:</p>
+      <figure class="doc-figure"><img src="../assets/img/database-sql-some-va-every-trong-quan-he-1-n-o-where-prisma-03.png" alt="Minh hoạ" loading="lazy"></figure>
+      <p>every:</p>
+      <p>NOT EXISTS (</p>
+      <pre><code>    SELECT 1
+    FROM account_project ap
+    WHERE ap.project_id = p.id
+      AND (ap.account_id != 12 OR ap.status != 'ACTIVE')
+  )</code></pre>
+      <p>Tóm lại:EXISTS (subquery)</p>
+      <ul>
+        <li>Trả về FALSE nếu subquery không có bản ghi nào.</li>
+        <li>Trả về TRUE nếu subquery có ít nhất 1 bản ghi.</li>
+      </ul>
+      <pre><code>NOT EXISTS (subquery)</code></pre>
+      <ul>
+        <li>Trả về TRUE nếu subquery không có bản ghi nào.</li>
+        <li>Trả về FALSE nếu subquery có ít nhất 1 bản ghi.</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="schema-prisma-file" data-nav="schema.prisma file">
+      <div class="q-tag"><span class="n">1</span> SQL</div>
+      <h2 class="q-title">schema.prisma file</h2>
+      <figure class="doc-figure"><img src="../assets/img/database-sql-schema-prisma-file-01.png" alt="Minh hoạ" loading="lazy"></figure>
+      <figure class="doc-figure"><img src="../assets/img/database-sql-schema-prisma-file-02.png" alt="Minh hoạ" loading="lazy"></figure>
+    </section>
+
+    <section class="qa" id="acid" data-nav="ACID">
+      <div class="q-tag"><span class="n">1</span> SQL</div>
+      <h2 class="q-title">ACID</h2>
+      <p>là bộ 4 tiêu chuẩn vàng (Atomicity, Consistency, Isolation, Durability) đảm bảo mọi giao dịch (transaction) được xử lý an toàn và chính xác. Nếu một phần giao dịch thất bại, toàn bộ hệ thống sẽ tự động khôi phục lại trạng thái ban đầu.</p>
+      <p>4 thuộc tính cốt lõi bao gồm:</p>
+      <ul>
+        <li><b>Atomicity (Tính nguyên tử):</b> Hoạt động theo quy tắc "Tất cả hoặc không". Nếu một bước trong giao dịch bị lỗi, toàn bộ giao dịch sẽ bị hủy bỏ và phục hồi (rollback), không có thay đổi nào được lưu lại.</li>
+        <li><b>Consistency (Tính nhất quán):</b> Đảm bảo dữ liệu luôn tuân thủ các quy tắc, ràng buộc và cấu trúc của hệ thống trước và sau khi giao dịch hoàn tất (commit).</li>
+        <li><b>Isolation (Tính cô lập):</b> Các giao dịch thực hiện cùng lúc không được làm ảnh hưởng đến nhau. Mọi thay đổi từ một giao dịch đang chạy sẽ bị ẩn đối với các giao dịch khác cho đến khi hoàn tất.</li>
+        <li><b>Durability (Tính bền vững):</b> Khi một giao dịch được xác nhận (commit) thành công, dữ liệu sẽ được lưu vĩnh viễn trên ổ cứng và không bị mất ngay cả khi hệ thống sập hoặc mất điện.</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="giua-cursor-va-pagination-tai-sao-lai-uu-tien-dung-cursor-ho" data-nav="giữa cursor và pagination , tại sao lại ưu t…">
+      <div class="q-tag"><span class="n">1</span> SQL</div>
+      <h2 class="q-title">giữa cursor và pagination , tại sao lại ưu tiên dùng cursor hơn</h2>
+      <figure class="doc-figure"><img src="../assets/img/database-sql-giua-cursor-va-pagination-tai-sao-lai-uu-tien-dung-cursor-ho-01.png" alt="Minh hoạ" loading="lazy"></figure>
+      <figure class="doc-figure"><img src="../assets/img/database-sql-giua-cursor-va-pagination-tai-sao-lai-uu-tien-dung-cursor-ho-02.png" alt="Minh hoạ" loading="lazy"></figure>
+    </section>

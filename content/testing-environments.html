@@ -1,0 +1,58 @@
+    <!-- ============ Alpha ============ -->
+    <section class="qa" id="alpha-testing" data-nav="Alpha testing">
+      <div class="q-tag"><span class="n">1</span> Quy trình phát hành</div>
+      <h2 class="q-title">Alpha testing là gì?</h2>
+      <p class="lede">Alpha thường là <b>môi trường nội bộ</b>, dùng để chạy alpha testing — giai đoạn kiểm thử đầu tiên sau khi tích hợp, dành cho đội phát triển và QA nội bộ.</p>
+      <ul>
+        <li>Người test: developer và QA trong công ty, chưa mở cho người dùng thật.</li>
+        <li>Dữ liệu: dùng dữ liệu giả lập hoặc “dummy” để test ban đầu, không phải dữ liệu thật.</li>
+        <li>Mục tiêu: bắt lỗi tích hợp giữa các module ngay sau khi ghép, trước khi tốn công dựng môi trường giống production.</li>
+      </ul>
+    </section>
+
+    <!-- ============ Staging ============ -->
+    <section class="qa" id="staging" data-nav="Staging">
+      <div class="q-tag"><span class="n">2</span> Quy trình phát hành</div>
+      <h2 class="q-title">Staging khác production ở đâu?</h2>
+      <div class="callout answer">
+        <span class="callout-label">Đáp án</span>
+        <p>Staging là bản sao gần như hoàn toàn giống môi trường production, dùng để test toàn hệ thống trước khi đưa lên live. Cấu hình, môi trường, dữ liệu… giống production nhất có thể; dữ liệu có thể là dữ liệu sản xuất đã được làm ẩn danh.</p>
+      </div>
+      <p>Staging là “bước cuối cùng” trước production, dùng để đảm bảo mọi thứ vận hành đúng như mong muốn trong môi trường như thật — khác với alpha là môi trường nội bộ với dữ liệu giả lập.</p>
+
+      <table>
+        <thead><tr><th>Tiêu chí</th><th>Alpha</th><th>Staging</th></tr></thead>
+        <tbody>
+          <tr><td>Đối tượng test</td><td>Dev &amp; QA nội bộ</td><td>Toàn hệ thống, thường có cả nghiệp vụ / khách hàng nội bộ</td></tr>
+          <tr><td>Dữ liệu</td><td>Dummy, giả lập</td><td>Giống production, có thể là dữ liệu thật đã ẩn danh</td></tr>
+          <tr><td>Cấu hình</td><td>Đơn giản hơn production</td><td>Sát production nhất có thể</td></tr>
+          <tr><td>Vị trí trong quy trình</td><td>Ngay sau khi tích hợp</td><td>Bước cuối trước khi go-live</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ============ E2E ============ -->
+    <section class="qa" id="e2e-testing" data-nav="End-to-End (e2e)">
+      <div class="q-tag"><span class="n">3</span> Kiểm thử</div>
+      <h2 class="q-title">End-to-End (e2e) test kiểm tra cái gì?</h2>
+      <p class="lede">E2E là phương pháp kiểm thử luồng hoạt động của ứng dụng <b>từ đầu đến cuối</b>, mô phỏng kịch bản của người dùng thực để xác nhận hệ thống và các thành phần của nó tích hợp đúng và dữ liệu toàn vẹn.</p>
+
+      <ul>
+        <li>Giúp xác định sự phụ thuộc lẫn nhau giữa các thành phần của ứng dụng.</li>
+        <li>Đảm bảo thông tin được truyền giữa các thành phần hệ thống khác nhau là chính xác.</li>
+      </ul>
+
+      <div class="flow">
+        <div class="flow-step"><div class="flow-time">1</div><div class="flow-text">Người dùng mở web</div></div>
+        <div class="flow-step"><div class="flow-time">2</div><div class="flow-text">Đăng nhập</div></div>
+        <div class="flow-step"><div class="flow-time">3</div><div class="flow-text">Tìm sản phẩm</div></div>
+        <div class="flow-step"><div class="flow-time">4</div><div class="flow-text">Thêm vào giỏ</div></div>
+        <div class="flow-step"><div class="flow-time">5</div><div class="flow-text">Thanh toán</div></div>
+        <div class="flow-step"><div class="flow-time">6</div><div class="flow-text ok">Nhận email xác nhận</div></div>
+      </div>
+
+      <div class="interview-line">
+        <span class="callout-label">Trả lời mẫu khi phỏng vấn</span>
+        <p>"Unit test chỉ đảm bảo từng hàm chạy đúng khi tách riêng, còn e2e chạy đúng kịch bản người dùng thật xuyên qua tất cả các tầng — FE, API, DB, cả email/thông báo — nên nó bắt được loại lỗi mà unit test không thấy: sai hợp đồng dữ liệu giữa hai service, thiếu bước trong luồng nghiệp vụ. Đổi lại e2e chạy chậm và dễ flaky nên em chỉ viết e2e cho các luồng quan trọng như đăng nhập và thanh toán, phần còn lại để unit và integration test lo."</p>
+      </div>
+    </section>

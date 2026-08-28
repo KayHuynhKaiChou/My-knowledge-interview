@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Nhiều service (order, payment, inventory) — đảm bảo consistency sao khi không dùng distributed transaction?">
+<title>03. Transaction xuyên service — Advanced Backend</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body data-root="../">
+
+<header class="topbar">
+  <a class="topbar-brand" href="../index.html" aria-label="Interview Knowledge — trang chủ">
+    <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true">
+      <defs><linearGradient id="ikBadge" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#f0b355"/><stop offset="1" stop-color="#b9752a"/>
+      </linearGradient></defs>
+      <rect x="2" y="2" width="60" height="60" rx="15" fill="url(#ikBadge)"/>
+      <path d="M21 21 L33 32 L21 43" fill="none" stroke="#0b0e13" stroke-width="7"
+            stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M37 43 H46" stroke="#0b0e13" stroke-width="7" stroke-linecap="round"/>
+    </svg>
+    <span class="brand-text">Interview Knowledge</span>
+  </a>
+  <nav class="topbar-nav">
+    <details class="nav-group has-active">
+      <summary>Backend</summary>
+      <div class="nav-dropdown">
+        <a href="../advanced-backend/index.html" class="active">Advanced Backend</a>
+        <a href="../backend-dotnet-nestjs/index.html">.NET &amp; NestJS</a>
+        <a href="../database-sql/index.html">Database &amp; SQL</a>
+        <a href="../backend-infrastructure/index.html">Hạ tầng</a>
+        <a href="../realtime-socket/index.html">Realtime &amp; Socket</a>
+        <a href="../case-studies/index.html">Case studies</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Frontend</summary>
+      <div class="nav-dropdown">
+        <a href="../javascript-core/index.html">JavaScript &amp; TS</a>
+        <a href="../react/index.html">React &amp; State</a>
+        <a href="../nextjs/index.html">Next.js</a>
+        <a href="../css-html/index.html">CSS &amp; HTML</a>
+        <a href="../browser-web-api/index.html">Browser &amp; Web API</a>
+        <a href="../react-native/index.html">React Native</a>
+        <a href="../frontend-tooling/index.html">Frontend Tooling</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Quy trình &amp; Nền tảng</summary>
+      <div class="nav-dropdown">
+        <a href="../git/index.html">Git</a>
+        <a href="../testing-environments/index.html">Testing</a>
+        <a href="../saas-platforms/index.html">SaaS &amp; Nền tảng</a>
+        <a href="../auth-blockchain/index.html">Auth &amp; Blockchain</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Khác</summary>
+      <div class="nav-dropdown">
+        <a href="../interview-intro/index.html">Giới thiệu &amp; English</a>
+        <a href="../project-notes/index.html">Ghi chú dự án</a>
+      </div>
+    </details>
+  </nav>
+  <button class="search-trigger" id="searchTrigger" aria-label="Tìm kiếm nội dung">
+    <span class="search-icon" aria-hidden="true">⌕</span>
+    <span class="search-label">Tìm kiếm</span>
+    <kbd>/</kbd>
+  </button>
+</header>
+
+<div class="search-overlay" id="searchOverlay" hidden>
+  <div class="search-box" role="dialog" aria-label="Tìm kiếm nội dung">
+    <input type="search" id="searchInput" autocomplete="off" spellcheck="false"
+           placeholder="Tìm trong toàn bộ nội dung — closure, saga, index, rebase…">
+    <div class="search-results" id="searchResults"></div>
+    <div class="search-hint">Enter mở mục · ↑↓ chọn · Esc đóng</div>
+  </div>
+</div>
+
+<div class="shell">
+  <button class="mobile-toggle" id="navToggle" aria-label="Mở mục lục">☰ Mục lục</button>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">Advanced Backend</div>
+    <div class="brand-sub">12 mục &middot; sổ tay ôn phỏng vấn</div>
+
+    <div class="nav-block">
+      <p class="nav-label">Nội dung</p>
+      <ul class="nav-list">
+        <li><a href="01-race-condition-lock-deadlock.html"><span class="nav-num">01</span><span class="nav-text">Race Condition, Lock &amp; Deadlock</span></a></li>
+        <li><a href="02-idempotency.html"><span class="nav-num">02</span><span class="nav-text">Idempotency</span></a></li>
+        <li><a href="03-distributed-transaction-saga.html" class="active"><span class="nav-num">03</span><span class="nav-text">Transaction xuyên service</span></a></li>
+        <li><a href="04-queue-async-processing.html"><span class="nav-num">04</span><span class="nav-text">Queue &amp; Async Processing</span></a></li>
+        <li><a href="05-rate-limiting.html"><span class="nav-num">05</span><span class="nav-text">Rate Limiting</span></a></li>
+        <li><a href="06-database-query-optimization.html"><span class="nav-num">06</span><span class="nav-text">Tối ưu Database &amp; Query</span></a></li>
+        <li><a href="07-redis-caching.html"><span class="nav-num">07</span><span class="nav-text">Redis &mdash; khái niệm &amp; case study</span></a></li>
+        <li><a href="08-scalability-pagination.html"><span class="nav-num">08</span><span class="nav-text">Scalability &amp; Pagination</span></a></li>
+        <li><a href="09-database-index.html"><span class="nav-num">09</span><span class="nav-text">Index &mdash; cơ chế &amp; đánh đổi</span></a></li>
+        <li><a href="10-background-job.html"><span class="nav-num">10</span><span class="nav-text">Background Job</span></a></li>
+        <li><a href="11-multi-tenant.html"><span class="nav-num">11</span><span class="nav-text">Multi-tenant</span></a></li>
+        <li><a href="12-api-design.html"><span class="nav-num">12</span><span class="nav-text">API Design</span></a></li>
+      </ul>
+    </div>
+
+    <div class="nav-block">
+      <p class="nav-label">Trong trang này</p>
+      <div id="pageToc"></div>
+    </div>
+  </aside>
+  <main>
+    <div class="crumb">
+      <a href="index.html">Advanced Backend</a>
+      <span class="sep">/</span>
+      <span>Câu 03</span>
+    </div>
+
+    <section class="qa" id="q3">
+      <div class="q-tag"><span class="n">3</span> Câu hỏi ứng dụng thường gặp</div>
+      <h2 class="q-title">"Nhiều service (order, payment, inventory) — đảm bảo consistency sao khi không dùng distributed transaction?"</h2>
+
+      <h3 class="sub">3.1 — Distributed transaction là gì, vì sao câu hỏi này tồn tại</h3>
+      <p>Trong 1 hệ thống <b>monolith</b> (1 ứng dụng, 1 database duy nhất), khi cần nhiều thao tác cùng thành công hoặc cùng thất bại, chỉ cần dùng transaction bình thường:</p>
+      <pre><code>BEGIN;
+UPDATE orders SET status = 'confirmed' WHERE id = 1;
+UPDATE inventory SET stock = stock - 1 WHERE product_id = 5;
+UPDATE payments SET status = 'paid' WHERE order_id = 1;
+COMMIT;  -- cả 3 dòng cùng thành công, hoặc ROLLBACK cả 3 nếu có lỗi</code></pre>
+      <p>Dễ dàng vì cả 3 bảng nằm trong <b>1 database duy nhất</b> — DB tự đảm bảo tính toàn vẹn (ACID). Nhưng khi hệ thống tách thành <b>microservices</b>, mỗi service thường có DB riêng:</p>
+      <pre><code>Order Service      → có DB riêng (orders_db)
+Inventory Service  → có DB riêng (inventory_db)
+Payment Service    → có DB riêng (payment_db)</code></pre>
+      <p>Lúc này, tạo order + trừ kho + trừ tiền nằm ở <b>3 database khác nhau, thuộc 3 service khác nhau</b> — không thể viết 1 câu <code>BEGIN...COMMIT</code> xuyên qua 3 DB như trên nữa, vì transaction SQL thường chỉ hoạt động trong phạm vi 1 connection tới 1 DB. <b>Distributed transaction</b> chính là tên gọi cho bài toán: đảm bảo "tất cả cùng thành công hoặc tất cả cùng thất bại" khi các thao tác đó nằm rải rác ở nhiều database/service độc lập.</p>
+
+      <h4 class="subsub">Cách giải kinh điển: Two-Phase Commit (2PC) — và vì sao ít dùng trong thực tế</h4>
+      <pre><code>Giai đoạn 1 (Prepare):
+  Coordinator hỏi cả 3 service: "Sẵn sàng commit chưa?"
+  Order Service     → chuẩn bị xong, trả lời "Sẵn sàng" (CHƯA commit thật, đang khoá dữ liệu chờ)
+  Inventory Service → chuẩn bị xong, trả lời "Sẵn sàng" (cũng đang khoá, chờ)
+  Payment Service   → chuẩn bị xong, trả lời "Sẵn sàng" (cũng đang khoá, chờ)
+
+Giai đoạn 2 (Commit):
+  Nếu CẢ 3 đều "Sẵn sàng" → Coordinator ra lệnh commit thật cho cả 3
+  Nếu có 1 cái "Không sẵn sàng" → Coordinator ra lệnh rollback cho cả 3</code></pre>
+      <p>Nhược điểm khiến 2PC ít được dùng trong microservices thực tế:</p>
+      <ul>
+        <li>Cả 3 service phải <b>giữ khoá dữ liệu</b> suốt từ giai đoạn 1 tới giai đoạn 2 — nếu Coordinator crash giữa chừng, cả 3 service kẹt khoá vô thời hạn, không biết commit hay rollback.</li>
+        <li><b>Chậm</b> vì phải chờ round-trip qua lại nhiều lần giữa nhiều service.</li>
+        <li><b>Chịu lỗi kém</b> — chỉ cần 1 service trong chuỗi down tạm thời là cả giao dịch bị treo.</li>
+        <li>Không scale tốt khi số lượng service tăng lên.</li>
+      </ul>
+      <p>Vì vậy, câu hỏi phỏng vấn thường đi tiếp: <i>"Vậy không dùng 2PC thì đảm bảo consistency sao?"</i> — câu trả lời là <b>Saga pattern</b>, chấp nhận đánh đổi sang <b>eventual consistency</b> (dữ liệu sẽ nhất quán sau một khoảng thời gian ngắn, không phải ngay lập tức) để đổi lấy tốc độ và khả năng chịu lỗi tốt hơn.</p>
+
+      <h3 class="sub">3.2 — Đáp án: Saga Pattern</h3>
+      <div class="callout answer">
+        <span class="callout-label">Đáp án</span>
+        <p>Không dùng 2PC vì chậm và không scale tốt. Dùng <b>Saga pattern</b>: chia giao dịch lớn thành các bước nhỏ, mỗi bước là 1 transaction cục bộ; nếu bước nào fail, chạy <b>compensating transaction</b> để hoàn tác các bước trước.</p>
+      </div>
+
+      <p>Saga chọn hướng tiếp cận hoàn toàn ngược với 2PC: <b>không khoá gì cả, không chờ ai cả</b> — mỗi service cứ làm phần việc của mình và <b>commit ngay lập tức</b>, không giữ transaction mở chờ lệnh xác nhận từ ai (khác hẳn 2PC ở mục 3.1, nơi mọi service phải giữ lock chờ tới khi tất cả cùng "sẵn sàng"). Nếu có bước nào ở giữa thất bại, thay vì rollback bằng cách "chưa commit thì huỷ" như 2PC, Saga xử lý bằng cách <b>chạy thêm 1 giao dịch bù trừ (compensating transaction)</b> để đảo ngược tác dụng của các bước đã lỡ commit trước đó.</p>
+
+      <h4 class="subsub">So sánh trực quan với 2PC (dùng lại ví dụ Order / Inventory / Payment)</h4>
+      <div class="code-label bad">2PC — giữ lock, chờ xác nhận từ tất cả trước khi ai cũng commit</div>
+      <pre class="bad"><code>Order Service: BEGIN → INSERT (LOCK, CHỜ) ──┐
+Inventory:     BEGIN → UPDATE (LOCK, CHỜ) ──┼── tất cả commit CÙNG LÚC
+Payment:       BEGIN → UPDATE (LOCK, CHỜ) ──┘   (hoặc rollback cùng lúc)</code></pre>
+      <div class="code-label good">Saga — mỗi bước tự commit ngay, không chờ ai, không khoá</div>
+      <pre class="good"><code>Order Service:     INSERT order (status=pending) → COMMIT NGAY → publish "OrderCreated"
+                                                                          ↓
+Inventory Service:                        nhận event → UPDATE stock -1 → COMMIT NGAY → publish "StockReserved"
+                                                                                                ↓
+Payment Service:                                                  nhận event → UPDATE balance -100k → COMMIT NGAY</code></pre>
+      <p>Mỗi <code>COMMIT NGAY</code> nghĩa là row đó được <b>giải phóng lock ngay lập tức</b>, không ai phải đợi ai — đây là lý do Saga nhanh và không bị kẹt lock vô thời hạn như 2PC khi Coordinator crash.</p>
+
+      <h4 class="subsub">Compensating transaction — khi bước Payment thất bại</h4>
+      <p>Đây là lúc compensating transaction vào việc — thay vì "rollback" (huỷ trước khi commit, như 2PC), Saga phải <b>chủ động chạy một hành động ngược lại</b> vì dữ liệu đã commit thật rồi:</p>
+      <pre class="bad"><code>Order Service:     INSERT order (pending) → COMMIT → publish "OrderCreated"
+Inventory Service: UPDATE stock -1 → COMMIT → publish "StockReserved"
+Payment Service:   UPDATE balance -100k → THẤT BẠI (không đủ tiền)
+                   → publish "PaymentFailed"
+
+-- Hệ thống phải "dọn dẹp" ngược lại 2 bước đã lỡ commit trước đó:
+Inventory Service: nhận "PaymentFailed" → chạy compensating transaction:
+                   UPDATE stock +1   (hoàn lại kho đã trừ)
+Order Service:     nhận "PaymentFailed" → chạy compensating transaction:
+                   UPDATE orders SET status = 'cancelled'   (huỷ đơn, KHÔNG xoá row)</code></pre>
+      <div class="callout">
+        <span class="callout-label">Vì sao không xoá row mà lại UPDATE status = 'cancelled'?</span>
+        <p>Dữ liệu đã commit thật và có thể đã bị hệ thống khác đọc thấy rồi, nên compensating transaction luôn là "làm 1 hành động mới để bù lại", không phải "quay ngược thời gian xoá sạch dấu vết" như rollback thật của 2PC.</p>
+      </div>
+
+      <h4 class="subsub">Vì sao gọi là "eventual consistency" (nhất quán cuối cùng)</h4>
+      <p>Trong khoảng thời gian giữa lúc Order Service commit <code>status=pending</code> và lúc toàn bộ chuỗi compensating chạy xong để đổi thành <code>cancelled</code>, hệ thống ở trạng thái <b>tạm thời không nhất quán</b> — ai đó query đúng lúc đó sẽ thấy đơn hàng "pending" dù thực chất giao dịch sẽ fail. Đây là cái giá phải trả để đổi lấy tốc độ: dữ liệu <b>sẽ</b> nhất quán, chỉ là không phải ngay lập tức như 2PC.</p>
+
+      <h4 class="subsub">Choreography vs Orchestration — 2 cách tổ chức Saga</h4>
+      <div class="grid-2">
+        <div class="case-card">
+          <h5>Choreography</h5>
+          <ul>
+            <li>Các service tự lắng nghe event của nhau, không ai "chỉ huy"</li>
+            <li>Đơn giản khi ít bước</li>
+            <li>Khó trace khi flow dài</li>
+          </ul>
+        </div>
+        <div class="case-card">
+          <h5>Orchestration</h5>
+          <ul>
+            <li>Có 1 Saga Orchestrator trung tâm gọi tuần tự từng service</li>
+            <li>Biết chính xác cần compensate bước nào khi fail</li>
+            <li>Dễ debug, phù hợp flow phức tạp</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="interview-line">
+        <span class="callout-label">Trả lời mẫu khi phỏng vấn</span>
+        <p>"Saga không tránh được việc dữ liệu tạm thời sai lệch — nó chỉ đảm bảo dữ liệu sẽ đúng lại sau một khoảng thời gian ngắn thông qua compensating transaction, đổi lại được tốc độ cao và không bị kẹt lock như 2PC. Với flow ngắn em sẽ chọn choreography cho đơn giản, còn flow nhiều bước và cần dễ debug thì em chọn orchestration để có 1 nơi duy nhất biết toàn cảnh và biết chính xác cần compensate theo thứ tự nào."</p>
+      </div>
+
+      <h3 class="sub">3.3 — Outbox Pattern — tránh lệch dữ liệu khi vừa ghi DB vừa publish message</h3>
+      <p>Vấn đề: nếu DB commit thành công nhưng publish message lên Kafka lại fail (hoặc ngược lại) → dữ liệu và message lệch nhau (dual-write problem).</p>
+      <pre><code>BEGIN;
+UPDATE account SET balance = balance - 6000000 WHERE id = 1;
+INSERT INTO outbox (event_type, payload, status) VALUES ('MoneyDebited', '{...}', 'pending');
+COMMIT;
+-- 1 process riêng (Debezium CDC hoặc polling job) đọc bảng outbox rồi publish lên Kafka
+-- → 2 thay đổi luôn nằm trong cùng 1 transaction atomic, không thể lệch nhau</code></pre>
+    </section>
+
+    <nav class="pager">
+      <a class="prev" href="02-idempotency.html"><span class="pager-dir">← Câu trước</span><span class="pager-title">02. Idempotency</span></a>
+      <a class="next" href="04-queue-async-processing.html"><span class="pager-dir">Câu tiếp theo →</span><span class="pager-title">04. Queue &amp; Async Processing</span></a>
+    </nav>
+  </main>
+</div>
+
+<footer>
+  Interview Knowledge — sổ tay ôn phỏng vấn tổng hợp từ ghi chép cá nhân.
+  Ưu tiên trả lời theo cấu trúc: vấn đề → giải pháp → vì sao chọn cách này thay vì cách khác.
+</footer>
+
+<script src="../assets/search-index.js" defer></script>
+<script src="../assets/js/main.js" defer></script>
+</body>
+</html>

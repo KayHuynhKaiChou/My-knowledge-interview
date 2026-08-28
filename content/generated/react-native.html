@@ -1,0 +1,65 @@
+    <section class="qa" id="native-module" data-nav="Native module">
+      <div class="q-tag"><span class="n">1</span> Kiến thức nền</div>
+      <h2 class="q-title">Native module</h2>
+      <ul>
+        <li>là cầu nối giữa mã JavaScript của React Native và mã native (Android - Java/Kotlin, iOS - Swift/Objective-C).</li>
+        <li>các thư viện dùng trong react native đều được viết bằng Native Module, rồi đóng gói lại thành package npm</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="optimizing-flatlist-configuration" data-nav="Optimizing Flatlist Configuration">
+      <div class="q-tag"><span class="n">1</span> React Native &amp; Libs</div>
+      <h2 class="q-title">Optimizing Flatlist Configuration</h2>
+      <p>https://reactnative.dev/docs/optimizing-flatlist-configuration</p>
+      <p>1. windowSize</p>
+      <p>2. initialNumToRender</p>
+      <p>3. maxToRenderPerBatch:</p>
+      <p>Khi FlatList render một danh sách, nó không render toàn bộ item một lúc – mà chia thành từng đợt nhỏ và mỗi đợt chứa cùng 1 số lượng item, gọi là batch.</p>
+      <p>4. updateCellsBatchingPeriod</p>
+      <p>5. removeClippedSubviews</p>
+      <pre><code>6. getItemLayout: return {height, offset, index}</code></pre>
+    </section>
+
+    <section class="qa" id="component-touchable" data-nav="Component Touchable">
+      <div class="q-tag"><span class="n">1</span> React Native &amp; Libs</div>
+      <h2 class="q-title">Component Touchable</h2>
+      <figure class="doc-figure"><img src="../assets/img/react-native-component-touchable-01.png" alt="Minh hoạ" loading="lazy"></figure>
+    </section>
+
+    <section class="qa" id="gesture-responder-system" data-nav="Gesture Responder System">
+      <div class="q-tag"><span class="n">1</span> React Native &amp; Libs</div>
+      <h2 class="q-title">Gesture Responder System</h2>
+      <p>Đây là hệ thống giúp React Native <b>nhận biết và xử lý các cử chỉ của người dùng</b>, ví dụ như:</p>
+      <ul>
+        <li><b>Tap</b> (chạm)</li>
+        <li><b>Swipe</b> (vuốt)</li>
+        <li><b>Drag</b> (kéo)</li>
+        <li><b>Pinch</b> (chụm/mở hai ngón tay)</li>
+      </ul>
+      <p>Công cụ dùng: react-native-gesture-handler , hay các hàm có sẵn ở View như &lt;View</p>
+      <pre><code>  onStartShouldSetResponder={() =&gt; true}</code></pre>
+      <p>onResponderGrant={() =&gt; console.log('Bắt đầu chạm')}</p>
+      <p>onResponderMove={() =&gt; console.log('Đang kéo')}</p>
+      <p>onResponderRelease={() =&gt; console.log('Thả ra')}</p>
+      <p>&gt;</p>
+    </section>
+
+    <section class="qa" id="ripple-effect" data-nav="Ripple effect">
+      <div class="q-tag"><span class="n">1</span> React Native &amp; Libs</div>
+      <h2 class="q-title">Ripple effect</h2>
+      <p>là hiệu ứng gợn sóng, xuất hiện ở TouchableNativeFeedback</p>
+      <figure class="doc-figure"><img src="../assets/img/react-native-ripple-effect-01.png" alt="Minh hoạ" loading="lazy"></figure>
+    </section>
+
+    <section class="qa" id="safeareaprovider" data-nav="SafeAreaProvider">
+      <div class="q-tag"><span class="n">1</span> React Native &amp; Libs</div>
+      <h2 class="q-title">SafeAreaProvider</h2>
+      <p>Đảm bảo vùng hiển thị an toàn trên các thiết bị có "notch" (tai thỏ), camera trước, status bar,....</p>
+    </section>
+
+    <section class="qa" id="safeareaview" data-nav="SafeAreaView">
+      <div class="q-tag"><span class="n">1</span> React Native &amp; Libs</div>
+      <h2 class="q-title">SafeAreaView</h2>
+      <p>Là một View đặc biệt đảm bảo nội dung không bị đè lên các khu vực không an toàn như status bar, notch, home indicator.</p>
+      <p>—------------------------------------------------------------------------------------------------------------------------</p>
+    </section>

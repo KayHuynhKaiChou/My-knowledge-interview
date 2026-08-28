@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Three states, snapshot, add/commit/push, reset vs restore, amend, stash, merge vs rebase, SSH key.">
+<title>Git — Interview Knowledge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body data-root="../">
+
+<header class="topbar">
+  <a class="topbar-brand" href="../index.html" aria-label="Interview Knowledge — trang chủ">
+    <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true">
+      <defs><linearGradient id="ikBadge" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#f0b355"/><stop offset="1" stop-color="#b9752a"/>
+      </linearGradient></defs>
+      <rect x="2" y="2" width="60" height="60" rx="15" fill="url(#ikBadge)"/>
+      <path d="M21 21 L33 32 L21 43" fill="none" stroke="#0b0e13" stroke-width="7"
+            stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M37 43 H46" stroke="#0b0e13" stroke-width="7" stroke-linecap="round"/>
+    </svg>
+    <span class="brand-text">Interview Knowledge</span>
+  </a>
+  <nav class="topbar-nav">
+    <details class="nav-group">
+      <summary>Backend</summary>
+      <div class="nav-dropdown">
+        <a href="../advanced-backend/index.html">Advanced Backend</a>
+        <a href="../backend-dotnet-nestjs/index.html">.NET &amp; NestJS</a>
+        <a href="../database-sql/index.html">Database &amp; SQL</a>
+        <a href="../backend-infrastructure/index.html">Hạ tầng</a>
+        <a href="../realtime-socket/index.html">Realtime &amp; Socket</a>
+        <a href="../case-studies/index.html">Case studies</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Frontend</summary>
+      <div class="nav-dropdown">
+        <a href="../javascript-core/index.html">JavaScript &amp; TS</a>
+        <a href="../react/index.html">React &amp; State</a>
+        <a href="../nextjs/index.html">Next.js</a>
+        <a href="../css-html/index.html">CSS &amp; HTML</a>
+        <a href="../browser-web-api/index.html">Browser &amp; Web API</a>
+        <a href="../react-native/index.html">React Native</a>
+        <a href="../frontend-tooling/index.html">Frontend Tooling</a>
+      </div>
+    </details>
+    <details class="nav-group has-active">
+      <summary>Quy trình &amp; Nền tảng</summary>
+      <div class="nav-dropdown">
+        <a href="../git/index.html" class="active">Git</a>
+        <a href="../testing-environments/index.html">Testing</a>
+        <a href="../saas-platforms/index.html">SaaS &amp; Nền tảng</a>
+        <a href="../auth-blockchain/index.html">Auth &amp; Blockchain</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Khác</summary>
+      <div class="nav-dropdown">
+        <a href="../interview-intro/index.html">Giới thiệu &amp; English</a>
+        <a href="../project-notes/index.html">Ghi chú dự án</a>
+      </div>
+    </details>
+  </nav>
+  <button class="search-trigger" id="searchTrigger" aria-label="Tìm kiếm nội dung">
+    <span class="search-icon" aria-hidden="true">⌕</span>
+    <span class="search-label">Tìm kiếm</span>
+    <kbd>/</kbd>
+  </button>
+</header>
+
+<div class="search-overlay" id="searchOverlay" hidden>
+  <div class="search-box" role="dialog" aria-label="Tìm kiếm nội dung">
+    <input type="search" id="searchInput" autocomplete="off" spellcheck="false"
+           placeholder="Tìm trong toàn bộ nội dung — closure, saga, index, rebase…">
+    <div class="search-results" id="searchResults"></div>
+    <div class="search-hint">Enter mở mục · ↑↓ chọn · Esc đóng</div>
+  </div>
+</div>
+
+<div class="shell">
+  <button class="mobile-toggle" id="navToggle" aria-label="Mở mục lục">☰ Mục lục</button>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">Git</div>
+    <div class="brand-sub">17 mục &middot; sổ tay ôn phỏng vấn</div>
+
+    <div class="nav-block">
+      <p class="nav-label">Nội dung</p>
+      <ul class="nav-list">
+        <li><a href="#ssh-key"><span class="nav-num">01</span><span class="nav-text">SSH key</span></a></li>
+        <li><a href="#git-va-github"><span class="nav-num">02</span><span class="nav-text">GIT và GITHUB</span></a></li>
+        <li><a href="#git"><span class="nav-num">03</span><span class="nav-text">GIT</span></a></li>
+        <li><a href="#snapshot"><span class="nav-num">04</span><span class="nav-text">Snapshot</span></a></li>
+        <li><a href="#the-three-states"><span class="nav-num">05</span><span class="nav-text">The three states</span></a></li>
+        <li><a href="#git-status"><span class="nav-num">06</span><span class="nav-text">Git status</span></a></li>
+        <li><a href="#git-add"><span class="nav-num">07</span><span class="nav-text">Git add</span></a></li>
+        <li><a href="#git-commit"><span class="nav-num">08</span><span class="nav-text">Git commit</span></a></li>
+        <li><a href="#git-commit-amend"><span class="nav-num">09</span><span class="nav-text">Git commit --amend</span></a></li>
+        <li><a href="#git-push"><span class="nav-num">10</span><span class="nav-text">Git push</span></a></li>
+        <li><a href="#git-restore"><span class="nav-num">11</span><span class="nav-text">Git restore</span></a></li>
+        <li><a href="#git-reset"><span class="nav-num">12</span><span class="nav-text">Git reset</span></a></li>
+        <li><a href="#git-push-force"><span class="nav-num">13</span><span class="nav-text">Git push --force</span></a></li>
+        <li><a href="#gitignore"><span class="nav-num">14</span><span class="nav-text">.gitignore</span></a></li>
+        <li><a href="#git-stash"><span class="nav-num">15</span><span class="nav-text">git stash</span></a></li>
+        <li><a href="#git-merge-va-git-rebase"><span class="nav-num">16</span><span class="nav-text">git merge và git rebase</span></a></li>
+        <li><a href="#git-protocols"><span class="nav-num">17</span><span class="nav-text">git protocols</span></a></li>
+      </ul>
+    </div>
+  </aside>
+  <main>
+    <div class="hero">
+      <div class="hero-kicker">Interview prep · Version control</div>
+      <h1>Git</h1>
+      <p class="lede">Ba trạng thái của file, snapshot, các lệnh hay bị hỏi (reset, restore, amend, stash, force push) và khác biệt giữa merge với rebase.</p>
+    </div>
+
+<section class="qa" id="ssh-key" data-nav="SSH key">
+      <div class="q-tag"><span class="n">1</span> Kiến thức nền</div>
+      <h2 class="q-title">SSH key</h2>
+      <p>SSH key (Secure Shell key) là một cặp mã hóa bao gồm một khóa riêng tư (private key) và một khóa công khai (public key) được sử dụng trong giao thức SSH để xác thực và bảo mật quá trình truyền tải dữ liệu và đăng nhập từ xa vào các máy chủ. SSH key thường được sử dụng để thay thế việc nhập mật khẩu khi kết nối đến một máy chủ từ xa.</p>
+    </section>
+
+    <section class="qa" id="git-va-github" data-nav="GIT và GITHUB">
+      <div class="q-tag"><span class="n">2</span> Kiến thức nền</div>
+      <h2 class="q-title">GIT và GITHUB</h2>
+      <p>Git là một hệ thống kiểm soát phiên bản (Version Control System - VCS) mã nguồn phân tán, giúp theo dõi các thay đổi của mã theo thời gian.</p>
+      <p>GitHub là một dịch vụ lưu trữ kho mã nguồn (repository) sử dụng Git. Nói cách khác, GitHub là nơi bạn có thể lưu trữ và quản lý các dự án Git của mình.</p>
+      <p>https://blog.thanhnamnguyen.dev/tim-hieu-ve-git-va-github</p>
+      <figure class="doc-figure"><img src="../assets/img/git-git-va-github-01.png" alt="Minh hoạ" loading="lazy"></figure>
+    </section>
+
+    <section class="qa" id="git" data-nav="GIT">
+      <div class="q-tag"><span class="n">3</span> JS · React · Git</div>
+      <h2 class="q-title">GIT</h2>
+      <ul>
+        <li>is an open source distributed version control system</li>
+        <li>theo dõi sự thay đổi của mã nguồn</li>
+        <li>gồm có 2 loại repositories:</li>
+        <li>remote repository: repo đc lưu trên server git</li>
+        <li>local repository: repo đc lưu tại máy tính cá nhân của developer</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="snapshot" data-nav="Snapshot">
+      <div class="q-tag"><span class="n">4</span> JS · React · Git</div>
+      <h2 class="q-title">Snapshot</h2>
+      <ul>
+        <li>là quá trình “chụp ảnh” project hay tạo 1 project mới với những file thay đổi</li>
+        <li>xảy ra lúc git commit</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="the-three-states" data-nav="The three states">
+      <div class="q-tag"><span class="n">5</span> JS · React · Git</div>
+      <h2 class="q-title">The three states</h2>
+      <ul>
+        <li>Khi làm việc với git, các files gồm có 3 trạng thái chính: modified, staged, commited</li>
+        <li>Modified: bạn thay đổi file ở working directory nhưng chưa add vào staged</li>
+        <li>Staged: Là trạng thái khi bạn đã dùng git add để đánh dấu những thay đổi sẽ được bao gồm trong lần commit sắp tới. Các file sau khi được thêm (add) sẽ được đưa vào staging area.</li>
+        <li>Committed: File đã được lưu vào repository với git commit</li>
+        <li>Bên cạnh đó gồm 3 khu vực:</li>
+        <li>Working Directory: một phiên bản của project. Những file này đc pulled out từ Git directory và place on disk để chúng ta có thể thay đổi.</li>
+        <li>Staging Area: là 1 file được lưu trong git directory, lưu trữ thông tin cho lần commit sắp tới. (file này có tên là index trong .git folder)</li>
+        <li>Git directory (repository): nơi git lưu trữ metadata và object database của project.</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="git-status" data-nav="Git status">
+      <div class="q-tag"><span class="n">6</span> JS · React · Git</div>
+      <h2 class="q-title">Git status</h2>
+      <p>Cho biết:</p>
+      <p>Các file đã thay đổi nhưng chưa được add</p>
+      <p>Các file đã được add nhưng chưa commit</p>
+      <p>Các file chưa được theo dõi</p>
+    </section>
+
+    <section class="qa" id="git-add" data-nav="Git add">
+      <div class="q-tag"><span class="n">7</span> JS · React · Git</div>
+      <h2 class="q-title">Git add</h2>
+      <ul>
+        <li>dùng để đánh dấu và đưa các file thay đổi từ working directory vào staging area (file index trong .git folder)</li>
+        <li>vd: git add <a href="http://accountservice.ts" target="_blank" rel="noopener">accountService.ts</a>, areaService.ts</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="git-commit" data-nav="Git commit">
+      <div class="q-tag"><span class="n">8</span> JS · React · Git</div>
+      <h2 class="q-title">Git commit</h2>
+      <ul>
+        <li>dùng để lưu (snapshot) các thay đổi đã được đưa vào staging area vào trong Git repository</li>
+        <li>vd: git commit -m “[CM_0001] handle happy case”</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="git-commit-amend" data-nav="Git commit --amend">
+      <div class="q-tag"><span class="n">9</span> JS · React · Git</div>
+      <h2 class="q-title">Git commit --amend</h2>
+      <ul>
+        <li>dùng để chỉnh sửa commit gần nhất, cụ thể là sửa message của commit gần nhất, thêm bớt file vào commit đó nếu quên git add file đó</li>
+        <li>không tạo commit mới mà thay thế commit cũ thành commit mới =&gt; git push -f</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="git-push" data-nav="Git push">
+      <div class="q-tag"><span class="n">10</span> JS · React · Git</div>
+      <h2 class="q-title">Git push</h2>
+      <ul>
+        <li>dùng để đẩy các commit (đã lưu cục bộ) từ repository local lên repository remote</li>
+        <li>dùng git push nếu đã thiết lập upstream giữa local và remote branch , ngược lại , dùng git push origin &lt;name_branch&gt;</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="git-restore" data-nav="Git restore">
+      <div class="q-tag"><span class="n">11</span> JS · React · Git</div>
+      <h2 class="q-title">Git restore</h2>
+      <ul>
+        <li>git restore --staged &lt;file&gt;:</li>
+        <li>dùng để loại bỏ file ra khỏi staging area nhưng ko làm mất nội dung đã chỉnh sửa</li>
+        <li>chỉ được dùng khi file change chưa đc git commit , tức là chỉ git add</li>
+        <li>git restore &lt;file&gt;: Khôi phục file về nội dung commit gần nhất</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="git-reset" data-nav="Git reset">
+      <div class="q-tag"><span class="n">12</span> JS · React · Git</div>
+      <h2 class="q-title">Git reset</h2>
+      <ul>
+        <li>Gồm có 3 loại: &lt;commit&gt; là mã hash commit</li>
+        <li>git reset --soft &lt;commit&gt;: gỡ commit nhưng vẫn giữ file change ở staging area</li>
+        <li>git reset --mixed &lt;commit&gt;: gỡ commit , đưa file về trạng thái modified (back về work directory)</li>
+        <li>git reset –hard &lt;commit&gt;: gỡ commit và xóa luôn thay đổi trong file</li>
+      </ul>
+      <p>còn  - - keep và - - merge</p>
+    </section>
+
+    <section class="qa" id="git-push-force" data-nav="Git push --force">
+      <div class="q-tag"><span class="n">13</span> JS · React · Git</div>
+      <h2 class="q-title">Git push --force</h2>
+      <p>dùng để ép đẩy commit mới lên , ghi đè lịch sử commit</p>
+    </section>
+
+    <section class="qa" id="gitignore" data-nav=".gitignore">
+      <div class="q-tag"><span class="n">14</span> JS · React · Git</div>
+      <h2 class="q-title">.gitignore</h2>
+      <p>là tệp cấu hình đặc biệt trong Git, dùng để bỏ qua (không theo dõi) các file hoặc thư mục mà bạn không muốn Git đưa vào hệ thống kiểm soát phiên bản.</p>
+    </section>
+
+    <section class="qa" id="git-stash" data-nav="git stash">
+      <div class="q-tag"><span class="n">15</span> JS · React · Git</div>
+      <h2 class="q-title">git stash</h2>
+      <ul>
+        <li>dùng để lưu tạm thời các thay đổi trong working directory và staging area, giúp bạn có thể chuyển sang một nhánh khác hoặc làm việc khác mà không mất công việc đang dở.</li>
+        <li>gồm các syntax sau:</li>
+        <li>git stash: lưu thay đổi (file sửa + staged) vào stash stack</li>
+        <li>git stash push -m “ghi chú”: lưu stash kèm mô tả “ghi chú”</li>
+        <li>git stash list: liệt kê các stash đang lưu</li>
+        <li>git stash pop: áp dụng stash (các thay đổi) vào code và xóa stash đó khỏi stack</li>
+        <li>git stash apply: khôi phục lại các thay đổi đã được lưu trong stash mà không xóa stash đó khỏi danh sách.</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="git-merge-va-git-rebase" data-nav="git merge và git rebase">
+      <div class="q-tag"><span class="n">16</span> JS · React · Git</div>
+      <h2 class="q-title">git merge và git rebase</h2>
+      <ul>
+        <li>Giả sử có 1 nhánh main và feature</li>
+        <li>Điểm giống: đều gộp commit của feature vào main</li>
+        <li>Điểum khác:</li>
+        <li>git merge sẽ giữ lịch sử commit và tạo ra 1 commit mới nhất. Nhược điểm: lịch sử commit lộn xộn (do nó có hình như đồ thị, rẽ nhánh nhiều), khó quản lý</li>
+        <li>git rebase sẽ làm mới lịch sử commit, vd feature có các commit mới là D và E mà nhánh main ko có, khi rebase vào main thì các commit D,E ở feature sẽ tạo 1 bản copy là D’ và E’ , nội dung giống nhau nhưng chỉ khác commit ID . D’ và E’ sẽ là commit mới nhất của main. Nhược điểm: dễ gây conflict nếu nhánh main là nhánh chung , có nhiều ng cùng làm</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="git-protocols" data-nav="git protocols">
+      <div class="q-tag"><span class="n">17</span> JS · React · Git</div>
+      <h2 class="q-title">git protocols</h2>
+      <ul>
+        <li>Https: một trong hai giao thức chính để kết nối đến các kho lưu trữ từ xa (remote repository), đặc biệt là trên các nền tảng như GitHub, GitLab, …</li>
+        <li>SSH: một trong hai giao thức phổ biến nhất (cùng với HTTPS) để kết nối với remote repository như GitHub, GitLab, Bitbucket,... với độ bảo mật cao và không cần nhập mật khẩu mỗi lần thao tác.</li>
+        <li>Bên cạnh đó việc git clone , git push , git pull để giao tiếp với remote repository phải thông qua git protocols</li>
+      </ul>
+    </section>
+  </main>
+</div>
+
+<footer>
+  Interview Knowledge — sổ tay ôn phỏng vấn tổng hợp từ ghi chép cá nhân.
+  Ưu tiên trả lời theo cấu trúc: vấn đề → giải pháp → vì sao chọn cách này thay vì cách khác.
+</footer>
+
+<script src="../assets/search-index.js" defer></script>
+<script src="../assets/js/main.js" defer></script>
+</body>
+</html>

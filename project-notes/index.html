@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="FilterTable: cách dùng, props, các state và hàm chính — tài liệu component dùng chung.">
+<title>Ghi chú dự án — Interview Knowledge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body data-root="../">
+
+<header class="topbar">
+  <a class="topbar-brand" href="../index.html" aria-label="Interview Knowledge — trang chủ">
+    <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true">
+      <defs><linearGradient id="ikBadge" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#f0b355"/><stop offset="1" stop-color="#b9752a"/>
+      </linearGradient></defs>
+      <rect x="2" y="2" width="60" height="60" rx="15" fill="url(#ikBadge)"/>
+      <path d="M21 21 L33 32 L21 43" fill="none" stroke="#0b0e13" stroke-width="7"
+            stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M37 43 H46" stroke="#0b0e13" stroke-width="7" stroke-linecap="round"/>
+    </svg>
+    <span class="brand-text">Interview Knowledge</span>
+  </a>
+  <nav class="topbar-nav">
+    <details class="nav-group">
+      <summary>Backend</summary>
+      <div class="nav-dropdown">
+        <a href="../advanced-backend/index.html">Advanced Backend</a>
+        <a href="../backend-dotnet-nestjs/index.html">.NET &amp; NestJS</a>
+        <a href="../database-sql/index.html">Database &amp; SQL</a>
+        <a href="../backend-infrastructure/index.html">Hạ tầng</a>
+        <a href="../realtime-socket/index.html">Realtime &amp; Socket</a>
+        <a href="../case-studies/index.html">Case studies</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Frontend</summary>
+      <div class="nav-dropdown">
+        <a href="../javascript-core/index.html">JavaScript &amp; TS</a>
+        <a href="../react/index.html">React &amp; State</a>
+        <a href="../nextjs/index.html">Next.js</a>
+        <a href="../css-html/index.html">CSS &amp; HTML</a>
+        <a href="../browser-web-api/index.html">Browser &amp; Web API</a>
+        <a href="../react-native/index.html">React Native</a>
+        <a href="../frontend-tooling/index.html">Frontend Tooling</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Quy trình &amp; Nền tảng</summary>
+      <div class="nav-dropdown">
+        <a href="../git/index.html">Git</a>
+        <a href="../testing-environments/index.html">Testing</a>
+        <a href="../saas-platforms/index.html">SaaS &amp; Nền tảng</a>
+        <a href="../auth-blockchain/index.html">Auth &amp; Blockchain</a>
+      </div>
+    </details>
+    <details class="nav-group has-active">
+      <summary>Khác</summary>
+      <div class="nav-dropdown">
+        <a href="../interview-intro/index.html">Giới thiệu &amp; English</a>
+        <a href="../project-notes/index.html" class="active">Ghi chú dự án</a>
+      </div>
+    </details>
+  </nav>
+  <button class="search-trigger" id="searchTrigger" aria-label="Tìm kiếm nội dung">
+    <span class="search-icon" aria-hidden="true">⌕</span>
+    <span class="search-label">Tìm kiếm</span>
+    <kbd>/</kbd>
+  </button>
+</header>
+
+<div class="search-overlay" id="searchOverlay" hidden>
+  <div class="search-box" role="dialog" aria-label="Tìm kiếm nội dung">
+    <input type="search" id="searchInput" autocomplete="off" spellcheck="false"
+           placeholder="Tìm trong toàn bộ nội dung — closure, saga, index, rebase…">
+    <div class="search-results" id="searchResults"></div>
+    <div class="search-hint">Enter mở mục · ↑↓ chọn · Esc đóng</div>
+  </div>
+</div>
+
+<div class="shell">
+  <button class="mobile-toggle" id="navToggle" aria-label="Mở mục lục">☰ Mục lục</button>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">Ghi chú dự án</div>
+    <div class="brand-sub">1 mục &middot; sổ tay ôn phỏng vấn</div>
+
+    <div class="nav-block">
+      <p class="nav-label">Nội dung</p>
+      <ul class="nav-list">
+        <li><a href="#filtertable-common"><span class="nav-num">01</span><span class="nav-text">FilterTable Common</span></a></li>
+      </ul>
+    </div>
+  </aside>
+  <main>
+    <div class="hero">
+      <div class="hero-kicker">Interview prep · Kinh nghiệm dự án</div>
+      <h1>Ghi chú dự án</h1>
+      <p class="lede">Ghi chép về component dùng chung FilterTable trong dự án Hitek — dùng khi phỏng vấn hỏi sâu về thứ bạn đã tự xây dựng.</p>
+    </div>
+
+<section class="qa" id="filtertable-common" data-nav="FilterTable Common">
+      <div class="q-tag"><span class="n">1</span> Ghi chú dự án</div>
+      <h2 class="q-title">FilterTable — component dùng chung (dự án Hitek)</h2>
+      <p><b>FilterTable Common</b></p>
+      <p><b>1. FilterTable có 2 cách dùng (hiển thị) chính:</b></p>
+      <p>Cách dùng đặt biệt: Header + SegmentTabs + Table + Modal =&gt; gồm 1 thanh tabs và nhiều table vì mỗi table là 1 tab</p>
+      <figure class="doc-figure"><img src="../assets/img/project-notes-filtertable-common-01.png" alt="Minh hoạ" loading="lazy"></figure>
+      <p>Cách dùng thông thường:Header + Table + Modal =&gt; chỉ có 1 table</p>
+      <figure class="doc-figure"><img src="../assets/img/project-notes-filtertable-common-02.png" alt="Minh hoạ" loading="lazy"></figure>
+      <p><b>2. CUD row trong FilterTable:</b></p>
+      <ul>
+        <li>gồm 2 type là Modal và Link (navigate sang page khác)</li>
+        <li>Mỗi type gồm 3 actions: Detail, Create, Update</li>
+        <li>riêng Delete thì FilterTable dùng Modal.confirm({...})</li>
+      </ul>
+      <p><b>3. Chi tiết các props của FilterTable</b></p>
+      <pre><code>const {
+    title,
+    subTitle,
+    columns,
+    useQueryHook, // query get data để lấy rows cho table
+    paramVariables, // query params initial của phục vụ cho filter by criteria , pagination … rows của table
+    actions = {
+      isDetail: true,
+      isEdit: true,
+      isDelete: true,
+      customAction: () =&gt; null,
+    }, // use khi muốn có cột action ở cuối gồm 3 button chính: view detail, edit và delete 1 row , bên cạnh đó có thể truyền 1 func hoặc 1 array gồm các func , mỗi func đại diện button custom (dùng customAction), tuy nhiên các button custom này ko connect tới Modal trong FilterTable mà phải dùng Modal riêng bên ngoài
+    createInfo, // cho phép pass form create + mutation call API create + custom modal create (title, width …)
+    updateInfo, // cho phép pass form update + mutation call API update + query call API get detail + custom modal update (title, width …)
+    detailInfo, // cho phép pass query get detail (nếu dùng modal) , dùng link để chuyển sang trang detail hoặc dùng modal để show detail
+    exportInfo, // cho phép pass text button export + mutation call API export
+    deleteInfo, // cho phép pass mutation call API delete + custom modal delete (title, width …)
+    filterRender,// pass ui filter riêng vì ko dùng đến filter có sẵn trong table antd, đơn giản vì filter , pagination … là handle ở BE mà
+    segmentRender, // pass 1 array các SegmentConfig (interface này extends FilterTableProps + thêm key và label của Tab), chỉ dùng khi muốn có tabs segment + table, đã dùng prop này thì các props liên quan đến CRUD có chữ ‘Info’ ở cuối như createInfo, … ko cần truyền vì FilterTable ưu tiên segmentRender
+    formatInitialValues, // được dùng để format data detail của 1 row
+    formatFormValues, // đc dùng để format form values của các form create update trong 1 modal trước khi submit để call API
+    formatFilterFormValues, // đc dùng để format các query params dùng trong query api get list rows, ví dụ như format lại date , …
+    forceRerenderParentComponent, // khi detail data của 1 row thay đổi (select row khác) thì sẽ gọi hàm này
+  } = props;</code></pre>
+      <p><b>4. Các biến, hàm cần lưu ý trong FilterTable:</b></p>
+      <ul>
+        <li><b>renderHeader</b>: là 1 thẻ Flex theo row gồm title, subTitle bên trái và bên phải có thể gồm 2 nút create or export hoặc ko có nút nào</li>
+        <li><b>renderTable</b>: là 1 thẻ Form chứa Flex theo column gồm 1 filterRender được pass vào và Table custom</li>
+        <li><b>renderModal</b>: là 1 thẻ Modal chứa thẻ Form , sẽ chứa UI 1 Form (được pass từ bên ngoài) về Create, Update, View detail của 1 entity</li>
+        <li><b>segmentConfig</b>: đại diện cho table của tab được active thông qua activeSegment state, bên cạnh đó nó cũng đc xem là 1 FilterTable (có thêm key + label)</li>
+        <li><b>currentUseQueryHook</b>: query call API get list rows</li>
+        <li><b>currentDetailHook</b>: query call API get detail 1 row được selected, phục vụ cho view detail và thực hiện update info row. Priority order: segment.detailInfo -&gt; segment.updateInfo.detailFunc -&gt; detailInfo -&gt; updateInfo.detailFunc</li>
+        <li><b>currentConfig</b>: là 1 obj gồm các fields và value của field sẽ ưu tiên segmentConfig rồi mới đến props của FilterTable</li>
+        <li><b>internalParams</b>: là 1 state quản lý query params ở api get list , phục vụ cho pagination + filter table</li>
+        <li><b>openModal</b>: là 1 state quản lý việc đóng mở 1 Modal , nó gom 4 fields là type, open, id, index. Ví dụ , muốn mở modal Form Create thì set type : ‘create’ , open: true và id: ‘’ , chỉ set id khi mở Modal update hoặc view detail vì 2 loại Modal đó cần call API get detail by id</li>
+        <li><b>getRecordId</b> : lấy id từ record (row) ở table, nhằm phục vụ cho API detail , update dựa vào id</li>
+        <li><b>shouldFetchDetail</b>: dựa vào <b>openModal</b> state nó sẽ là true khi mở modal detail hoặc modal update form. Bên cạnh đó nó đại diện cho enable field của useQuery , nói nôn na là chỉ call API detail khi mở modal. Như bạn biết , enable của useQuery default là true , tức là luôn gọi queryFn khi component chứa useQuery này mounted, do đó cần kiểm soát enable thông qua <b>shouldFetchDetail</b></li>
+        <li><b>handleChangeFilterForm</b>: được gọi để thay đổi state internalParams , thay đổi các fields mang ý nghĩa về filter by criteria</li>
+        <li><b>handleChangeTable</b>: được gọi để thay đổi state internalParams , thay đổi các fields mang ý nghĩa về pagination (như page, limit)</li>
+      </ul>
+    </section>
+  </main>
+</div>
+
+<footer>
+  Interview Knowledge — sổ tay ôn phỏng vấn tổng hợp từ ghi chép cá nhân.
+  Ưu tiên trả lời theo cấu trúc: vấn đề → giải pháp → vì sao chọn cách này thay vì cách khác.
+</footer>
+
+<script src="../assets/search-index.js" defer></script>
+<script src="../assets/js/main.js" defer></script>
+</body>
+</html>

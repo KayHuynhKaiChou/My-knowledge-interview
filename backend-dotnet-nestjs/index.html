@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="OOP, stack/heap, ADO.NET, EF Core, JWT, decorator, guard, module, API — REST — GraphQL.">
+<title>Backend — .NET & NestJS — Interview Knowledge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body data-root="../">
+
+<header class="topbar">
+  <a class="topbar-brand" href="../index.html" aria-label="Interview Knowledge — trang chủ">
+    <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true">
+      <defs><linearGradient id="ikBadge" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#f0b355"/><stop offset="1" stop-color="#b9752a"/>
+      </linearGradient></defs>
+      <rect x="2" y="2" width="60" height="60" rx="15" fill="url(#ikBadge)"/>
+      <path d="M21 21 L33 32 L21 43" fill="none" stroke="#0b0e13" stroke-width="7"
+            stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M37 43 H46" stroke="#0b0e13" stroke-width="7" stroke-linecap="round"/>
+    </svg>
+    <span class="brand-text">Interview Knowledge</span>
+  </a>
+  <nav class="topbar-nav">
+    <details class="nav-group has-active">
+      <summary>Backend</summary>
+      <div class="nav-dropdown">
+        <a href="../advanced-backend/index.html">Advanced Backend</a>
+        <a href="../backend-dotnet-nestjs/index.html" class="active">.NET &amp; NestJS</a>
+        <a href="../database-sql/index.html">Database &amp; SQL</a>
+        <a href="../backend-infrastructure/index.html">Hạ tầng</a>
+        <a href="../realtime-socket/index.html">Realtime &amp; Socket</a>
+        <a href="../case-studies/index.html">Case studies</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Frontend</summary>
+      <div class="nav-dropdown">
+        <a href="../javascript-core/index.html">JavaScript &amp; TS</a>
+        <a href="../react/index.html">React &amp; State</a>
+        <a href="../nextjs/index.html">Next.js</a>
+        <a href="../css-html/index.html">CSS &amp; HTML</a>
+        <a href="../browser-web-api/index.html">Browser &amp; Web API</a>
+        <a href="../react-native/index.html">React Native</a>
+        <a href="../frontend-tooling/index.html">Frontend Tooling</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Quy trình &amp; Nền tảng</summary>
+      <div class="nav-dropdown">
+        <a href="../git/index.html">Git</a>
+        <a href="../testing-environments/index.html">Testing</a>
+        <a href="../saas-platforms/index.html">SaaS &amp; Nền tảng</a>
+        <a href="../auth-blockchain/index.html">Auth &amp; Blockchain</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Khác</summary>
+      <div class="nav-dropdown">
+        <a href="../interview-intro/index.html">Giới thiệu &amp; English</a>
+        <a href="../project-notes/index.html">Ghi chú dự án</a>
+      </div>
+    </details>
+  </nav>
+  <button class="search-trigger" id="searchTrigger" aria-label="Tìm kiếm nội dung">
+    <span class="search-icon" aria-hidden="true">⌕</span>
+    <span class="search-label">Tìm kiếm</span>
+    <kbd>/</kbd>
+  </button>
+</header>
+
+<div class="search-overlay" id="searchOverlay" hidden>
+  <div class="search-box" role="dialog" aria-label="Tìm kiếm nội dung">
+    <input type="search" id="searchInput" autocomplete="off" spellcheck="false"
+           placeholder="Tìm trong toàn bộ nội dung — closure, saga, index, rebase…">
+    <div class="search-results" id="searchResults"></div>
+    <div class="search-hint">Enter mở mục · ↑↓ chọn · Esc đóng</div>
+  </div>
+</div>
+
+<div class="shell">
+  <button class="mobile-toggle" id="navToggle" aria-label="Mở mục lục">☰ Mục lục</button>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">Backend — .NET &amp; NestJS</div>
+    <div class="brand-sub">15 mục &middot; sổ tay ôn phỏng vấn</div>
+
+    <div class="nav-block">
+      <p class="nav-label">Nội dung</p>
+      <ul class="nav-list">
+        <li><a href="#4-tinh-chat-oop"><span class="nav-num">01</span><span class="nav-text">4 tính chất OOP</span></a></li>
+        <li><a href="#stack-voi-heap"><span class="nav-num">02</span><span class="nav-text">Stack với Heap</span></a></li>
+        <li><a href="#ado-net"><span class="nav-num">03</span><span class="nav-text">ADO.NET</span></a></li>
+        <li><a href="#chuc-nang-cua-addcontrollers"><span class="nav-num">04</span><span class="nav-text">Chức năng của AddControllers</span></a></li>
+        <li><a href="#adddbcontext"><span class="nav-num">05</span><span class="nav-text">AddDbContext</span></a></li>
+        <li><a href="#lazy-loading-va-eager-loading"><span class="nav-num">06</span><span class="nav-text">Lazy Loading và Eager Loading</span></a></li>
+        <li><a href="#dac-diem-chinh-cua-record"><span class="nav-num">07</span><span class="nav-text">Đặc điểm chính của record</span></a></li>
+        <li><a href="#jwt"><span class="nav-num">08</span><span class="nav-text">JWT</span></a></li>
+        <li><a href="#express-multer-file"><span class="nav-num">09</span><span class="nav-text">Express.Multer.File</span></a></li>
+        <li><a href="#decorator"><span class="nav-num">10</span><span class="nav-text">Decorator</span></a></li>
+        <li><a href="#guard"><span class="nav-num">11</span><span class="nav-text">Guard</span></a></li>
+        <li><a href="#api"><span class="nav-num">12</span><span class="nav-text">API</span></a></li>
+        <li><a href="#restful-api"><span class="nav-num">13</span><span class="nav-text">Restful API</span></a></li>
+        <li><a href="#graphql"><span class="nav-num">14</span><span class="nav-text">GraphQL</span></a></li>
+        <li><a href="#module"><span class="nav-num">15</span><span class="nav-text">Module</span></a></li>
+      </ul>
+    </div>
+  </aside>
+  <main>
+    <div class="hero">
+      <div class="hero-kicker">Interview prep · Backend / OOP / API</div>
+      <h1>Backend — .NET &amp; NestJS</h1>
+      <p class="lede">Nền tảng OOP, stack vs heap, ADO.NET và Entity Framework phía .NET; decorator, guard, module, upload file phía NestJS; cùng nhóm câu hỏi về API, REST và GraphQL.</p>
+    </div>
+
+<section class="qa" id="4-tinh-chat-oop" data-nav="4 tính chất OOP">
+      <div class="q-tag"><span class="n">1</span> Kiến thức nền</div>
+      <h2 class="q-title">4 tính chất OOP</h2>
+      <p><b>Tính đóng gói (Encapsulation)</b>: dùng để bảo vệ các thành phần bên trong của Object (thường gọi là private). Các thành phần bên ngoài sẽ không được can thiệp và sử dụng các thành phần này trực tiếp mà phải thông qua các phương thức công khai (public get set).</p>
+      <figure class="doc-figure"><img src="../assets/img/backend-dotnet-nestjs-4-tinh-chat-oop-01.png" alt="Minh hoạ" loading="lazy"></figure>
+      <ul>
+        <li><b>Tính kế thừa (Inheritance)</b>: một cơ chế xây dựng class mới dựa trên các class đã có. Các class kế thừa sẽ bao gồm toàn bộ các attributes và methods từ base class (lớp cơ sở) hay parent class (lớp cha).</li>
+        <li><b>Tính đa hình (Polymorphism)</b>: các đối tượng khác nhau thực thi chức năng giống nhau theo những cách khác nhau.</li>
+      </ul>
+      <p>Polymorphism trong OOP được chia làm 2 loại: Static Polymorphism (đa hình tĩnh - Overloading) và Dynamic Polymorphism (đa hình động - Overriding)</p>
+      <figure class="doc-figure"><img src="../assets/img/backend-dotnet-nestjs-4-tinh-chat-oop-02.png" alt="Minh hoạ" loading="lazy"></figure>
+      <p><b>Bắt buộc ghi đè (overriding):</b></p>
+      <p>Nếu <code>Drive</code> thuộc một <b>giao diện</b> hoặc là một phương thức <b>trừu tượng</b> trong lớp trừu tượng.</p>
+      <pre><code>interface IVehicle { void Drive(); }
+abstract class Vehicle { public abstract void Drive(); }</code></pre>
+      <p><b>Không bắt buộc ghi đè:</b></p>
+      <p>Nếu <code>Drive</code> là một phương thức <b>không trừu tượng</b> (cụ thể) trong lớp cha.</p>
+      <pre><code>class Vehicle { public virtual void Drive() { Console.WriteLine("Vehicle is driving."); } }</code></pre>
+      <p><b>Tính trừu tượng (Abstraction): </b>quá trình bỏ qua những property, method ko cần thiết và chỉ use những property, method cần thiết của đối tượng</p>
+      <pre><code>====================================================================</code></pre>
+    </section>
+
+    <section class="qa" id="stack-voi-heap" data-nav="Stack với Heap">
+      <div class="q-tag"><span class="n">2</span> Kiến thức nền</div>
+      <h2 class="q-title">Stack với Heap</h2>
+      <p><a href="https://viblo.asia/p/non-alloc-c-1-struct-voi-class-khac-nhau-the-nao-optimize-code-voi-value-type-va-span-trong-c-obA46yBwVKv" target="_blank" rel="noopener">https://viblo.asia/p/non-alloc-c-1-struct-voi-class-khac-nhau-the-nao-optimize-code-voi-value-type-va-span-trong-c-obA46yBwVKv</a></p>
+      <p>Các chương trình khi hoạt động cần sử dụng bộ nhớ trên RAM. Trước tiên ta hãy nhớ về khái niệm cấp phát (allocate) và thu hồi (deallocate) vùng nhớ</p>
+      <ul>
+        <li>Chương trình không thể tự tiện truy xuất vùng nhớ mà phải "xin phép" hệ điều hành, khi đó chương trình "sở hữu" vùng nhớ này và hệ điều hành đảm bảo sẽ không có 1 chương trình nào khác can thiệp vào, quá trình này gọi là cấp phát vùng nhớ <code>(memory allocation)</code></li>
+        <li>Sau khi sử dụng xong vùng nhớ đã cấp phát, chương trình cần "trả" nó lại cho hệ điều hành (để chương trình khác có thể sử dụng), quá trình này gọi là thu hồi vùng nhớ <code>(memory deallocation)</code></li>
+      </ul>
+      <p>Stack memory: Quá trình cấp phát và thu hồi trong <code>Stack</code> sẽ hoạt động theo kiểu <a href="https://en.wikipedia.org/wiki/Stack_(abstract_data_type)" target="_blank" rel="noopener">LIFO</a>, nghĩa là dữ liệu nào được cấp phát trước sẽ bị thu hồi sau</p>
+      <p>Heap memory: Dữ liệu được cấp phát sẽ không có thứ tự xác định, để truy cập dữ liệu trong <code>Heap</code> cần phải thông qua địa chỉ (khi cấp phát xong thì hệ điều hành sẽ trả về địa chỉ này)</p>
+      <pre><code>====================================================================</code></pre>
+    </section>
+
+    <section class="qa" id="ado-net" data-nav="ADO.NET">
+      <div class="q-tag"><span class="n">3</span> Kiến thức nền</div>
+      <h2 class="q-title">ADO.NET</h2>
+      <p>là tập hợp các thư viện lớp qua đó cho phép ứng dụng tương tác (get, create,update, delete) với các nguồn dữ liệu (Như SQLServer, XML, MySQL, Oracle Database ...).</p>
+      <p><a href="https://bb.ccc.dddd.maya.vn/ado-net-gioi-thieu-ado-net-va-ket-noi-sql-server-voi-sqlconnection.html" target="_blank" rel="noopener">https://bb.ccc.dddd.maya.vn/ado-net-gioi-thieu-ado-net-va-ket-noi-sql-server-voi-sqlconnection.html</a></p>
+      <p>https://viblo.asia/p/phan-1-tong-quan-ve-entity-framework-core-4dbZNQNaKYM</p>
+      <pre><code>====================================================================
+ORM vs ODM</code></pre>
+      <p>An ORM maps between an Object Model and a Relational Database. An ODM maps between an Object Model and a Document Database.</p>
+      <pre><code>====================================================================
+Navigation property:</code></pre>
+      <p>Trong Entity Framework (EF), <b>thuộc tính điều hướng</b> (navigation property) là thuộc tính được sử dụng để mô tả mối quan hệ giữa các thực thể (entities). Nó không ánh xạ trực tiếp thành cột trong cơ sở dữ liệu mà được EF dùng để tạo liên kết logic giữa các bảng.</p>
+      <p>vd:</p>
+      <figure class="doc-figure"><img src="../assets/img/backend-dotnet-nestjs-ado-net-01.png" alt="Minh hoạ" loading="lazy"></figure>
+      <pre><code>====================================================================</code></pre>
+    </section>
+
+    <section class="qa" id="chuc-nang-cua-addcontrollers" data-nav="Chức năng của AddControllers">
+      <div class="q-tag"><span class="n">4</span> Kiến thức nền</div>
+      <h2 class="q-title">Chức năng của AddControllers</h2>
+      <ul>
+        <li>Đăng ký Controller: Phương thức này thêm tất cả các controller của ứng dụng vào DI container. Controller có thể là:</li>
+        <li>Controller của Web API (thường kế thừa từ ControllerBase).</li>
+        <li>Không bao gồm các tính năng liên quan đến Razor Pages hoặc Views (dùng trong MVC).</li>
+        <li>Cấu hình JSON Serializer: Mặc định, nó sử dụng System.Text.Json làm trình xử lý JSON. Bạn có thể thay đổi hoặc cấu hình chi tiết hơn nếu cần.</li>
+        <li>Kích hoạt các tính năng cần thiết cho Web API: Cụ thể, các middleware và dịch vụ được thêm vào bao gồm:</li>
+        <li>Routing</li>
+        <li>Model Binding</li>
+        <li>Validation</li>
+        <li>Formatters (JSON, XML, etc.)</li>
+        <li>Action Filters</li>
+      </ul>
+      <p><b>Phương thức</b></p>
+      <p><b>Mô tả</b></p>
+      <pre><code>AddControllers()</code></pre>
+      <p>Chỉ đăng ký controller cho Web API, không bao gồm Views hoặc Razor Pages.</p>
+      <pre><code>AddControllersWithViews()</code></pre>
+      <p>Đăng ký controller cho cả Web API và MVC, hỗ trợ Razor Views nhưng không hỗ trợ Razor Pages.</p>
+      <pre><code>AddMvc()</code></pre>
+      <p>Đăng ký đầy đủ MVC, bao gồm cả Razor Pages, Views và Controllers cho Web API.</p>
+      <pre><code>====================================================================</code></pre>
+    </section>
+
+    <section class="qa" id="adddbcontext" data-nav="AddDbContext">
+      <div class="q-tag"><span class="n">5</span> Kiến thức nền</div>
+      <h2 class="q-title">AddDbContext</h2>
+      <p>code:</p>
+      <pre><code>services.AddDbContext&lt;DatabaseContext&gt;(option =&gt;
+            {
+                option.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
+            });
+services.AddDbContext&lt;DatabaseContext&gt;(...): Đăng ký DatabaseContext vào DI container. DatabaseContext là lớp kế thừa từ DbContext, đại diện cho cơ sở dữ liệu trong ứng dụng.</code></pre>
+      <p><code>options.UseSqlServer(...)</code>: Cấu hình sử dụng SQL Server là nhà cung cấp cơ sở dữ liệu. Bạn có thể thay đổi thành các nhà cung cấp khác như PostgreSQL, SQLite, v.v. tuỳ thuộc vào cơ sở dữ liệu mà bạn sử dụng.</p>
+      <pre><code>Configuration.GetConnectionString("DefaultConnection"): Lấy chuỗi kết nối đến cơ sở dữ liệu từ file cấu hình ứng dụng (thường là appsettings.json hoặc appsettings.Development.json). DefaultConnection là tên chuỗi kết nối được cấu hình trong phần này.</code></pre>
+    </section>
+
+    <section class="qa" id="lazy-loading-va-eager-loading" data-nav="Lazy Loading và Eager Loading">
+      <div class="q-tag"><span class="n">6</span> Kiến thức nền</div>
+      <h2 class="q-title">Lazy Loading và Eager Loading</h2>
+      <figure class="doc-figure"><img src="../assets/img/backend-dotnet-nestjs-lazy-loading-va-eager-loading-01.png" alt="Minh hoạ" loading="lazy"></figure>
+      <pre><code>===========================================================</code></pre>
+      <figure class="doc-figure"><img src="../assets/img/backend-dotnet-nestjs-lazy-loading-va-eager-loading-02.png" alt="Minh hoạ" loading="lazy"></figure>
+      <pre><code>===========================================================
+Record</code></pre>
+      <figure class="doc-figure"><img src="../assets/img/backend-dotnet-nestjs-lazy-loading-va-eager-loading-03.png" alt="Minh hoạ" loading="lazy"></figure>
+    </section>
+
+    <section class="qa" id="dac-diem-chinh-cua-record" data-nav="Đặc điểm chính của record">
+      <div class="q-tag"><span class="n">7</span> Kiến thức nền</div>
+      <h2 class="q-title">Đặc điểm chính của record</h2>
+      <ul>
+        <li>Tính bất biến (Immutable):</li>
+        <li>Các thuộc tính của <code>record</code> mặc định chỉ có <code>get</code>, nghĩa là không thể thay đổi sau khi khởi tạo (nếu không dùng <code>init</code> hoặc <code>set</code> rõ ràng).</li>
+        <li>So sánh giá trị (Value-based Equality):</li>
+        <li>Hai đối tượng <code>record</code> được coi là bằng nhau nếu tất cả các giá trị thuộc tính của chúng bằng nhau, không phụ thuộc vào tham chiếu trong bộ nhớ.</li>
+        <li>Tự động sinh constructor:</li>
+        <li><code>record</code> tự động sinh ra constructor với các tham số tương ứng với các thuộc tính.</li>
+        <li>Dành cho mô hình dữ liệu (Data Models):</li>
+        <li>Thường được dùng cho các đối tượng dữ liệu, DTOs (Data Transfer Objects), kết quả API, v.v.</li>
+      </ul>
+      <figure class="doc-figure"><img src="../assets/img/backend-dotnet-nestjs-dac-diem-chinh-cua-record-01.png" alt="Minh hoạ" loading="lazy"></figure>
+    </section>
+
+    <section class="qa" id="jwt" data-nav="JWT">
+      <div class="q-tag"><span class="n">8</span> Kiến thức nền</div>
+      <h2 class="q-title">JWT</h2>
+      <p>https://200lab.io/blog/jwt-la-gi?srsltid=AfmBOop5EboB46epFVuXgqSDilr9PZnvtQdd0li_N5fRO_lD1o_UcZ2Y</p>
+      <p><b>``````````````````````````````````````````` ………………``````````````````````````````````````````</b></p>
+      <p><b>// FE</b></p>
+    </section>
+
+    <section class="qa" id="express-multer-file" data-nav="Express.Multer.File">
+      <div class="q-tag"><span class="n">9</span> Kiến thức nền</div>
+      <h2 class="q-title">Express.Multer.File</h2>
+      <p>là kiểu dữ liệu (interface) mà NestJS dùng để mô tả một file đã được upload thông qua middleware Multer (mặc định của NestJS để xử lý multipart/form-data).</p>
+      <figure class="doc-figure"><img src="../assets/img/backend-dotnet-nestjs-express-multer-file-01.png" alt="Minh hoạ" loading="lazy"></figure>
+    </section>
+
+    <section class="qa" id="decorator" data-nav="Decorator">
+      <div class="q-tag"><span class="n">10</span> Kiến thức nền</div>
+      <h2 class="q-title">Decorator</h2>
+      <ul>
+        <li>là một hàm đặc biệt được dùng để thêm hành vi (metadata hoặc logic) vào<b> class, property, method, accessor</b> hoặc<b> parameter</b>, mà không thay đổi mã gốc của đối tượng đó. Decorator thường dùng trong các framework như Angular, NestJS, hoặc để xây dựng hệ thống DI (Dependency Injection).</li>
+        <li>decorator đc call trong quá trình biên dịch file lần đầu , chứ ko phải trong quá trình 1 class đc khởi tạo hay 1 property đc truy cập …</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="guard" data-nav="Guard">
+      <div class="q-tag"><span class="n">11</span> Kiến thức nền</div>
+      <h2 class="q-title">Guard</h2>
+      <ul>
+        <li>là một thành phần dùng để <b>kiểm soát quyền truy cập</b> đến các route (API endpoint). Nó được sử dụng để xác định xem <b>một request có được phép thực hiện hay không</b> – thường dùng cho xác thực (authentication) và phân quyền (authorization).</li>
+        <li>là class implement CanActivate interface.Chạy trước khi route handler được thực thi. Nếu trả về true → request được tiếp tục. Nếu trả về false → bị chặn, trả về 403 hoặc lỗi tùy bạn xử lý.</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="api" data-nav="API">
+      <div class="q-tag"><span class="n">12</span> Kiến thức nền</div>
+      <h2 class="q-title">API</h2>
+      <p>một "cầu nối" cho phép các ứng dụng phần mềm khác nhau giao tiếp và trao đổi dữ liệu với nhau một cách có quy tắc.</p>
+    </section>
+
+    <section class="qa" id="restful-api" data-nav="Restful API">
+      <div class="q-tag"><span class="n">13</span> Kiến thức nền</div>
+      <h2 class="q-title">Restful API</h2>
+      <ul>
+        <li>là một tiêu chuẩn dùng trong việc thiết kế các API cho các ứng dụng web để quản lý các resource.</li>
+        <li>REST hoạt động chủ yếu dựa vào giao thức HTTP =&gt; tuân theo mô hình Client-Server</li>
+        <li>Nó sử dụng các phương thức HTTP như GET, POST, PUT, DELETE để thực hiện các thao tác (CRUD - Tạo, Đọc, Cập nhật, Xóa) trên các tài nguyên</li>
+        <li>Format dữ liệu trả về là JSON or XML</li>
+        <li>Gồm nhiều endpoint , mỗi endpoint tương ứng vs mỗi resource</li>
+        <li>Có hỗ trợ API version (v1,v2…)</li>
+        <li>Có caching sẵn do dùng HTTP</li>
+        <li>Ngoài Restful còn có các chuẩn API khác như SOAP, GraphQL, rGPC, …</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="graphql" data-nav="GraphQL">
+      <div class="q-tag"><span class="n">14</span> Kiến thức nền</div>
+      <h2 class="q-title">GraphQL</h2>
+      <ul>
+        <li>là một ngôn ngữ truy vấn API cho phép client truy vấn chính xác những dữ liệu mà client cần</li>
+        <li>chỉ có duy nhất 1 endpoint vì tổ chức theo types và fields</li>
+        <li>Format dữ liệu trả về là JSON</li>
+        <li>Gồm các thành phần: Schema, Query, Mutation</li>
+        <li>Ko hỗ trợ API version</li>
+        <li>Ko có caching sẵn , phải tự tích hợp bên ngoài</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="module" data-nav="Module">
+      <div class="q-tag"><span class="n">15</span> SQL</div>
+      <h2 class="q-title">Module</h2>
+      <p>Trong NestJS, <b>Module</b> là một class được đánh dấu bằng decorator @Module().</p>
+      <p>Mỗi ứng dụng NestJS đều có ít nhất một module gọi là <b>Root Module</b> (thường là AppModule). Root module này là điểm bắt đầu để NestJS xây dựng biểu đồ ứng dụng (application graph)</p>
+      <p>Decorator @Module bao gồm:</p>
+      <figure class="doc-figure"><img src="../assets/img/backend-dotnet-nestjs-module-01.png" alt="Minh hoạ" loading="lazy"></figure>
+      <figure class="doc-figure"><img src="../assets/img/backend-dotnet-nestjs-module-02.png" alt="Minh hoạ" loading="lazy"></figure>
+      <ul>
+        <li>providers có service A và B , thì controller có thể inject service A,B để sài và A cx có thể inject B để sài B trong A đc luôn nhé</li>
+        <li><b>Controller có thể gọi cả A và B:</b> Bất kỳ controller nào trong module đó đều có thể inject A và B thông qua <code>constructor</code>.</li>
+        <li><b>Provider có thể gọi lẫn nhau:</b> Service A hoàn toàn có thể inject Service B (hoặc ngược lại) để sử dụng các hàm của B bên trong A.</li>
+      </ul>
+      <p><b>Global Module</b> (Module Toàn cầu)</p>
+      <ul>
+        <li>là một module đặc biệt trong NestJS được đánh dấu bằng decorator <code>@Global()</code>.</li>
+        <li>Hiểu đơn giản: Ở điều kiện bình thường, nếu <code>UsersModule</code> muốn dùng <code>DatabaseService</code> từ <code>DatabaseModule</code>, bạn phải đưa <code>DatabaseModule</code> vào mảng <code>imports</code> của <code>UsersModule</code>. Nhưng nếu <code>DatabaseModule</code> là một <b>Global Module</b>, bạn không cần phải <code>import</code> nó ở bất cứ đâu nữa – mọi module khác trong ứng dụng đều có thể tự do dùng các service mà nó xuất ra.</li>
+      </ul>
+    </section>
+  </main>
+</div>
+
+<footer>
+  Interview Knowledge — sổ tay ôn phỏng vấn tổng hợp từ ghi chép cá nhân.
+  Ưu tiên trả lời theo cấu trúc: vấn đề → giải pháp → vì sao chọn cách này thay vì cách khác.
+</footer>
+
+<script src="../assets/search-index.js" defer></script>
+<script src="../assets/js/main.js" defer></script>
+</body>
+</html>

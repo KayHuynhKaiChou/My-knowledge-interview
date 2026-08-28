@@ -1,0 +1,82 @@
+    <!-- ============ SaaS ============ -->
+    <section class="qa" id="saas" data-nav="SaaS">
+      <div class="q-tag"><span class="n">1</span> Mô hình sản phẩm</div>
+      <h2 class="q-title">SaaS là gì, thế nào thì được coi là một SaaS?</h2>
+      <div class="callout answer">
+        <span class="callout-label">Đáp án</span>
+        <p>SaaS viết tắt của <b>Software as a Service</b> — phần mềm dưới dạng dịch vụ. Thay vì phải mua phần mềm, tự cài đặt, tự bảo trì, tự nâng cấp, lo server và bảo mật, người dùng chỉ cần đăng ký tài khoản, trả phí hàng tháng/năm và dùng trực tiếp trên trình duyệt.</p>
+      </div>
+
+      <h3 class="sub">Ví dụ quen thuộc</h3>
+      <ul>
+        <li><b>Shopify</b> — tạo website bán hàng.</li>
+        <li><b>Google Docs</b> — soạn thảo văn bản online.</li>
+      </ul>
+
+      <h3 class="sub">Điều kiện để một phần mềm là SaaS</h3>
+      <table>
+        <thead><tr><th>Điều kiện</th><th>Cụ thể</th></tr></thead>
+        <tbody>
+          <tr><td>Tự code phần mềm (web app)</td><td>VD: quản lý bán hàng, khách hàng, đơn hàng…</td></tr>
+          <tr><td>Deploy lên server / public cloud</td><td>Vercel, Render, VPS hoặc máy chủ riêng</td></tr>
+          <tr><td>Người dùng truy cập qua trình duyệt</td><td>Không cần cài đặt app, chỉ cần URL</td></tr>
+          <tr><td>Có tài khoản đăng nhập riêng từng người dùng</td><td>Họ dùng phần mềm như một dịch vụ</td></tr>
+          <tr><td>Thu phí theo tháng/năm (hoặc free)</td><td>Subscription là đặc điểm chính của SaaS</td></tr>
+        </tbody>
+      </table>
+
+      <div class="callout">
+        <span class="callout-label">Ghi chú</span>
+        <p>Bình thường tự code một project rồi deploy cho mọi người dùng qua URL public thì đã được coi là một SaaS. Câu hỏi này hay đi kèm với <b>multi-tenant</b> — cách tách dữ liệu giữa các khách hàng dùng chung một hệ thống.</p>
+      </div>
+    </section>
+
+    <!-- ============ Shopify ============ -->
+    <section class="qa" id="shopify" data-nav="Shopify: theme vs headless">
+      <div class="q-tag"><span class="n">2</span> Nền tảng TMĐT</div>
+      <h2 class="q-title">Làm store trên Shopify: dùng theme hay headless?</h2>
+      <p class="lede">Shopify là nền tảng SaaS thương mại điện tử. Có hai cách triển khai giao diện, khác nhau ở chỗ ai chịu trách nhiệm phần front-end.</p>
+      <p><a href="https://fptshop.com.vn/tin-tuc/danh-gia/shopify-la-gi-167662" target="_blank" rel="noopener">Bài giới thiệu tổng quan về Shopify ↗</a></p>
+
+      <h3 class="sub">1 — Shopify Theme (monolithic, giao diện truyền thống)</h3>
+      <ul>
+        <li>Không cần code front-end hay back-end.</li>
+        <li>Giao diện (UI) có sẵn, chỉnh sửa bằng <b>Theme Editor</b>: <code>shopify.com → Online Store → Customize</code>.</li>
+        <li>Toàn bộ logic hiển thị dùng <b>Liquid</b> — ngôn ngữ template của Shopify.</li>
+        <li>Trang sản phẩm, trang danh mục, giỏ hàng, thanh toán → đều đã có sẵn.</li>
+        <li>Shopify tự tích hợp API nội bộ, không phải gọi API thủ công.</li>
+      </ul>
+      <div class="callout">
+        <span class="callout-label">Khi nào chọn</span>
+        <p>Đây là cách nhanh nhất để tạo một trang bán hàng mà không cần viết nhiều code.</p>
+      </div>
+
+      <h3 class="sub">2 — Headless front-end (React/Vue + Shopify API)</h3>
+      <ul>
+        <li>Tự build giao diện bằng framework như React, Vue, Next.js.</li>
+        <li>Không dùng theme của Shopify.</li>
+        <li>Gọi <b>Shopify Storefront API</b> (GraphQL/REST) để lấy danh sách sản phẩm, xử lý giỏ hàng, checkout, đăng ký / đăng nhập.</li>
+      </ul>
+
+      <table>
+        <thead><tr><th>Thành phần</th><th>Bạn lo</th><th>Shopify lo</th></tr></thead>
+        <tbody>
+          <tr><td>Giao diện</td><td>Bạn code (React/Vue)</td><td>Không dùng theme</td></tr>
+          <tr><td>Back-end logic, dữ liệu</td><td>Không cần làm</td><td>Shopify lo (qua API)</td></tr>
+          <tr><td>Hosting front-end</td><td>Tự deploy (Vercel, Netlify, GCP…)</td><td>—</td></tr>
+          <tr><td>Checkout, thanh toán, đơn hàng</td><td>Không cần làm</td><td>Shopify xử lý</td></tr>
+        </tbody>
+      </table>
+
+      <div class="interview-line">
+        <span class="callout-label">Trả lời mẫu khi phỏng vấn</span>
+        <p>"Nếu yêu cầu chỉ là dựng store bán hàng nhanh thì em dùng theme của Shopify, sửa bằng Theme Editor và Liquid, gần như không phải code. Còn khi cần UI tuỳ biến cao, SEO tốt hoặc phải tích hợp với hệ thống ngoài như CMS hay hệ thống quản lý kho, em làm headless: tự build front-end bằng Next.js và gọi Storefront API, còn phần checkout và đơn hàng vẫn để Shopify lo để không phải tự chịu trách nhiệm về thanh toán."</p>
+      </div>
+    </section>
+
+    <!-- ============ Haravan ============ -->
+    <section class="qa" id="haravan" data-nav="Haravan">
+      <div class="q-tag"><span class="n">3</span> Nền tảng TMĐT</div>
+      <h2 class="q-title">Haravan là gì?</h2>
+      <p>Haravan là nền tảng thương mại điện tử (E-commerce Platform) của Việt Nam, mô hình tương tự Shopify: cung cấp sẵn store, quản lý sản phẩm — đơn hàng — thanh toán, và mở API để tích hợp. Điểm khác biệt chính so với Shopify là hệ sinh thái nội địa: đối tác vận chuyển, cổng thanh toán và kênh bán hàng phù hợp thị trường Việt Nam.</p>
+    </section>

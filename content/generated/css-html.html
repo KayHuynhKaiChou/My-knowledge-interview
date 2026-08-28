@@ -1,0 +1,129 @@
+    <section class="qa" id="flow-render-ui-css" data-nav="Flow render UI CSS">
+      <div class="q-tag"><span class="n">1</span> CSS</div>
+      <h2 class="q-title">Flow render UI CSS</h2>
+      <p>Reflow - paint - composite</p>
+      <figure class="doc-figure"><img src="../assets/img/css-html-flow-render-ui-css-01.png" alt="Minh hoạ" loading="lazy"></figure>
+    </section>
+
+    <section class="qa" id="position-vs-transform" data-nav="Position vs transform">
+      <div class="q-tag"><span class="n">1</span> CSS</div>
+      <h2 class="q-title">Position vs transform</h2>
+      <ul>
+        <li>position: sẽ lấy ele cha nào có set position: làm gốc và vị trí bị thay đổi trong layout</li>
+        <li>transform: ele A dùng transform thì lấy vị trí ele A đó làm góc tọa độ và vị trí ko bị thay đổi trong layout</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="margin-collapse" data-nav="margin collapse">
+      <div class="q-tag"><span class="n">1</span> CSS</div>
+      <h2 class="q-title">margin collapse</h2>
+      <p><a href="https://www.youtube.com/watch?v=g9chYWsfEK8" target="_blank" rel="noopener">https://www.youtube.com/watch?v=g9chYWsfEK8</a></p>
+    </section>
+
+    <section class="qa" id="cau-hoi-phong-van-css-amp-html" data-nav="Câu hỏi phỏng vấn CSS &amp; HTML">
+      <div class="q-tag"><span class="n">1</span> CSS</div>
+      <h2 class="q-title">Câu hỏi phỏng vấn CSS &amp; HTML</h2>
+      <p><a href="https://dev.to/frontendengineer/css-and-html-interview-questions-and-answers-270l" target="_blank" rel="noopener">Bài tham khảo ↗</a></p>
+    </section>
+
+    <section class="qa" id="css-sprite" data-nav="CSS sprite">
+      <div class="q-tag"><span class="n">1</span> CSS</div>
+      <h2 class="q-title">CSS sprite</h2>
+      <p>CSS sprites combine multiple images into one single larger image. This would only require one server request resulting in a faster loading time. Without CSS sprites, each image will send out individual server requests.</p>
+      <p>https://viblo.asia/p/front-end-quan-ly-va-toi-uu-webpage-bang-css-sprites-naQZRYA0Kvx</p>
+      <figure class="doc-figure"><img src="../assets/img/css-html-css-sprite-01.png" alt="Minh hoạ" loading="lazy"></figure>
+    </section>
+
+    <section class="qa" id="css-preprocessor" data-nav="CSS preprocessor">
+      <div class="q-tag"><span class="n">1</span> CSS</div>
+      <h2 class="q-title">CSS preprocessor</h2>
+      <p>là một ngôn ngữ kịch bản mở rộng của CSS và được biên dịch thành cú pháp CSS giúp bạn viết CSS nhanh hơn bằng cách cung cấp các tính năng mà CSS gốc không hỗ trợ như nesting selector, inheritance selector, mixin, hàm, và các phép tính</p>
+      <p>Vd: scss , less , …</p>
+    </section>
+
+    <section class="qa" id="important" data-nav="!important">
+      <div class="q-tag"><span class="n">1</span> CSS</div>
+      <h2 class="q-title">!important</h2>
+      <p>là 1 từ khóa trong css được sử dụng để thay đổi thứ tự ưu tiên của 1 property css bằng cách override value mới nhất</p>
+    </section>
+
+    <section class="qa" id="css-multi-columns" data-nav="CSS multi columns">
+      <div class="q-tag"><span class="n">1</span> CSS</div>
+      <h2 class="q-title">CSS multi columns</h2>
+      <p>columns: 4 // tự chia container thành 4 cột và width mỗi cột là auto columns: 4 // = column-count: 4 column-width: autocolumns: 4 200px // mỗi cột có min-width : 200px; và số 4 ở đây là tối đa 4 cột , ví dụ nếu chia 4 , mỗi cột 200px mà ko đủ thì nó sẽ chia 3break-inside: avoid; tức là ko cho 1 ele trong container đang dùng multi columns bị cắt ngang qua cột kế tiếpcolumn-rule: 1px solid #ccc; // đường kẻ giữa các cộtcolumn-fill: balance; /* mặc định */ chia đều chiều cao nội dung giữa các cột</p>
+    </section>
+
+    <section class="qa" id="scale-y-0" data-nav="Scale-y-0">
+      <div class="q-tag"><span class="n">1</span> CSS</div>
+      <h2 class="q-title">Scale-y-0</h2>
+      <p>giả sử có 1 div.container chứa 1 div.child , ban đầu height div.container = div.child = 100px , sau khi div.child đc set scale-y-0 thì div.child có height = 0px (theo kiểu visibility) , tuy nhiên thg div.container height vẫn = 100px; =&gt; scale-y-0 khác height:0px</p>
+    </section>
+
+    <section class="qa" id="align-content" data-nav="align-content">
+      <div class="q-tag"><span class="n">1</span> CSS</div>
+      <h2 class="q-title">align-content</h2>
+      <ul>
+        <li>căn chỉnh <b>nguyên cả nhóm hàng (</b>căn chỉnh tất cả item trong container<b>)</b> so với container, nó sẽ đc thể hiện rõ nhất khi dùng flex-wrap: wrap;</li>
+        <li>align-items: chỉ căn chỉnh các item trong 1 hàng</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="white-space-break-spaces" data-nav="white-space: 'break-spaces'">
+      <div class="q-tag"><span class="n">1</span> CSS</div>
+      <h2 class="q-title">white-space: 'break-spaces'</h2>
+      <p>Đây là giá trị của <code>white-space</code> trong CSS, hoạt động gần giống <code>pre-wrap</code> nhưng có thêm:</p>
+      <ul>
+        <li><b>Giữ nguyên khoảng trắng liên tiếp</b> (nhiều dấu cách không bị gộp lại).</li>
+        <li><b>Tự động xuống dòng khi cần</b>, giống <code>pre-wrap</code>.</li>
+        <li><b>Dòng dài vẫn được bẻ xuống</b>, không tràn.</li>
+        <li><b>Tóm lại:</b> → Giữ đúng khoảng trắng người dùng nhập, tab, enter... mà vẫn không làm vỡ layout.</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="inline-block" data-nav="inline-block">
+      <div class="q-tag"><span class="n">1</span> CSS</div>
+      <h2 class="q-title">inline-block</h2>
+      <p>cx giống với inline là các ele nằm trên 1 hàng và các ele này sẽ có thể set width, height , mr, padding , … như block</p>
+    </section>
+
+    <section class="qa" id="tailwind" data-nav="tailwind">
+      <div class="q-tag"><span class="n">1</span> CSS</div>
+      <h2 class="q-title">tailwind</h2>
+      <p>có 3 layers chính là base, component và utility</p>
+      <p>độ ưu tiên: base &lt; component &lt; utility =&gt; utility là có độ ưu tiên cao nhất</p>
+      <p><b>Tên Layer</b></p>
+      <p><b>Độ ưu tiên</b></p>
+      <p><b>Mục đích</b></p>
+      <p><b>Ví dụ</b></p>
+      <p><b>base</b></p>
+      <p>Thấp nhất</p>
+      <p>Dùng cho các thẻ HTML cơ bản (reset CSS), các style mặc định toàn trang.</p>
+      <p>h1, p, body, a...</p>
+      <p><b>components</b></p>
+      <p>Trung bình</p>
+      <p>Dùng cho các class phức tạp, tái sử dụng (UI components).</p>
+      <p>.btn, .card, .input-field...</p>
+      <p><b>utilities</b></p>
+      <p>Cao nhất</p>
+      <p>Dùng cho các class đơn lẻ, tiện ích. Luôn ghi đè được component và base.</p>
+      <p>.p-4, .text-center, .bg-red-500...</p>
+      <p>Phân biệt tailwind 4 và &lt;=3</p>
+      <p>4</p>
+      <pre><code>&lt;=3
+taiwind.config.ts</code></pre>
+      <p>ko có file này , dồn hết vào 1 file css như global css dùng</p>
+      <p>có file này</p>
+      <p>định nghĩa các theme (color, spacing, …)</p>
+      <p>trong file global css</p>
+      <p>trong tailwind.config</p>
+      <p>các import</p>
+      <pre><code>@import "tailwindcss"</code></pre>
+      <p>3 cái @tailwind base comp utility</p>
+    </section>
+
+    <section class="qa" id="semantic-element" data-nav="Semantic element">
+      <div class="q-tag"><span class="n">1</span> Next.js</div>
+      <h2 class="q-title">Semantic element</h2>
+      <p>là những <b>thẻ HTML</b> có ý nghĩa rõ ràng về nội dung mà nó bao bọc, giúp <b>trình duyệt và người đọc</b> (bao gồm cả máy đọc màn hình, công cụ tìm kiếm) hiểu được <b>mục đích</b> của phần nội dung đó.</p>
+      <figure class="doc-figure"><img src="../assets/img/css-html-semantic-element-01.png" alt="Minh hoạ" loading="lazy"></figure>
+    </section>

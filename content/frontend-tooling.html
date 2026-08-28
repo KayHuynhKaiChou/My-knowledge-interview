@@ -1,0 +1,83 @@
+    <!-- ============ PWA ============ -->
+    <section class="qa" id="pwa" data-nav="Progressive Web App (PWA)">
+      <div class="q-tag"><span class="n">1</span> Phía client</div>
+      <h2 class="q-title">PWA là gì, khác web thường ở chỗ nào?</h2>
+      <div class="callout answer">
+        <span class="callout-label">Đáp án</span>
+        <p>PWA (Progressive Web App) là ứng dụng web hiện đại được thiết kế để mang lại trải nghiệm gần giống ứng dụng gốc (native app), nhưng vẫn chạy trên trình duyệt — kết hợp tính linh hoạt của web với hiệu suất và khả năng hoạt động offline của app di động.</p>
+      </div>
+
+      <h3 class="sub">Những điểm tạo nên một PWA</h3>
+      <ul>
+        <li><b>Service Worker</b> — nhờ nó PWA có thể chạy kể cả khi không có internet.</li>
+        <li><b>Lưu trữ phía client</b> — vì hoạt động offline nên dữ liệu được lưu và query ở IndexedDB / LocalStorage / Cache API.</li>
+        <li><b>Manifest.json</b> — bản chất vẫn là code web (React, Angular, Vue), nhưng nhờ file manifest mà cài và chạy được trên mobile, desktop như một app.</li>
+        <li><b>Responsive</b> — khi chạy trên mobile, UI phải responsive để tương thích với màn hình nhỏ.</li>
+      </ul>
+
+      <div class="interview-line">
+        <span class="callout-label">Trả lời mẫu khi phỏng vấn</span>
+        <p>"PWA vẫn là web app viết bằng React/Vue bình thường, nhưng bổ sung service worker để cache tài nguyên và dữ liệu nên chạy được offline, cộng thêm manifest.json để người dùng cài lên màn hình chính như app native. Dữ liệu offline em lưu ở IndexedDB hoặc Cache API tuỳ loại. Ưu điểm là không phải build hai app riêng cho iOS/Android, nhược điểm là bị giới hạn quyền truy cập phần cứng so với native."</p>
+      </div>
+    </section>
+
+    <!-- ============ Hot Reloading ============ -->
+    <section class="qa" id="hot-reloading" data-nav="Hot Reloading">
+      <div class="q-tag"><span class="n">2</span> Công cụ phát triển</div>
+      <h2 class="q-title">Hot reloading là gì?</h2>
+      <p class="lede">Chỉnh sửa code xong, trình duyệt tự cập nhật ngay — <b>giữ nguyên state, không reload cả trang</b>. Đây là điểm khác biệt so với live reload (tải lại toàn trang, mất hết state đang có).</p>
+
+      <table>
+        <thead><tr><th>Công cụ</th><th>Tên gọi cơ chế</th></tr></thead>
+        <tbody>
+          <tr><td>Next.js</td><td>Fast Refresh</td></tr>
+          <tr><td>Vite</td><td>HMR — Hot Module Replacement</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ============ SDK ============ -->
+    <section class="qa" id="sdk" data-nav="SDK">
+      <div class="q-tag"><span class="n">3</span> Khái niệm chung</div>
+      <h2 class="q-title">SDK là gì?</h2>
+      <p>SDK — <b>Software Development Kit</b> (bộ công cụ phát triển phần mềm) — là một gói công cụ / thư viện giúp lập trình viên tạo ra ứng dụng nhanh hơn cho một nền tảng, hệ thống hoặc dịch vụ cụ thể (Android, Solana, Firebase…).</p>
+
+      <h3 class="sub">Một SDK thường gồm</h3>
+      <ul>
+        <li>Thư viện — các file <code>.dll</code>, <code>.jar</code>, <code>.js</code>…</li>
+        <li>Tài liệu (docs) hướng dẫn tích hợp</li>
+        <li>Công cụ hỗ trợ (tools): CLI, emulator, debugger…</li>
+      </ul>
+
+      <div class="callout">
+        <span class="callout-label">Phân biệt nhanh với API</span>
+        <p>API là <b>giao diện</b> để gọi tới một dịch vụ; SDK là <b>bộ đồ nghề</b> đóng gói sẵn (thường bao gồm cả client gọi API đó) để bạn tích hợp nhanh mà không phải tự viết lại tầng giao tiếp.</p>
+      </div>
+    </section>
+
+    <!-- ============ Nx monorepo ============ -->
+    <section class="qa" id="nx-monorepo" data-nav="Nx &amp; Monorepo">
+      <div class="q-tag"><span class="n">4</span> Công cụ phát triển</div>
+      <h2 class="q-title">nx.dev giải quyết vấn đề gì?</h2>
+      <p class="lede">Nx là build system và monorepo manager hiện đại cho JavaScript/TypeScript, dùng để quản lý nhiều ứng dụng và thư viện trong một repo lớn (monorepo) một cách tối ưu và hiệu quả.</p>
+
+      <h3 class="sub">Cấu trúc repo điển hình</h3>
+      <div class="code-label neutral">Monorepo với Nx</div>
+      <pre><code>my-monorepo/
+├── apps/
+│   ├── web/            # Next.js app (frontend)
+│   ├── api/            # NestJS app (backend)
+│   └── mobile/         # Expo app (React Native)
+├── libs/
+│   ├── ui/             # UI components (web &amp; mobile dùng chung)
+│   └── utils/          # Logic dùng chung giữa web/api/mobile
+├── tools/
+├── nx.json
+├── package.json
+└── tsconfig.base.json</code></pre>
+
+      <div class="callout">
+        <span class="callout-label">Vì sao chọn monorepo</span>
+        <p>Code dùng chung (types, validation, UI component) nằm ở <code>libs/</code> nên không phải publish package nội bộ hay copy code giữa các repo. Nx còn biết app nào phụ thuộc lib nào, nên chỉ build / test lại đúng phần bị ảnh hưởng thay vì chạy lại toàn bộ repo.</p>
+      </div>
+    </section>

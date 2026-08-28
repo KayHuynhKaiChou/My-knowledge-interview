@@ -1,0 +1,130 @@
+    <section class="qa" id="socket-io" data-nav="Socket.IO">
+      <div class="q-tag"><span class="n">1</span> Socket &amp; Realtime</div>
+      <h2 class="q-title">Socket.IO</h2>
+      <ul>
+        <li>là một thư viện JavaScript cho ứng dụng web thời gian thực (real-time), cho phép giao tiếp hai chiều giữa client và server thông qua cơ chế event-driven. Nó sử dụng <b>WebSocket</b> làm kênh vận chuyển chủ đạo nhưng có thêm fallback như long polling khi WebSocket không khả dụng</li>
+        <li>Trong Socket.IO, <code>emit</code> là phương thức <b>gửi sự kiện</b>, còn <code>on</code> là cách <b>nhận và xử lý sự kiện đó</b>. Ví dụ emit(“send”, …) thì on(“send”, …) sẽ nhận, cùng “send” name</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="khac-biet-giua-socket-emit-va-io-emit" data-nav="Khác biệt giữa socket.emit() và io.emit()">
+      <div class="q-tag"><span class="n">1</span> Socket &amp; Realtime</div>
+      <h2 class="q-title">Khác biệt giữa socket.emit() và io.emit()</h2>
+      <ul>
+        <li><b>socket.emit()</b>: gửi sự kiện chỉ đến client đang kết nối qua socket (client cụ thể)</li>
+        <li><b>io.emit()</b>: gửi sự kiện đến <b>tất cả các client đang kết nối</b> tới server</li>
+        <li>socket.broadcast.emit(): để gửi đến tất cả client <b>ngoại trừ</b> chính client phát ra sự kiện</li>
+      </ul>
+      <p>Giả sử có A,B,C trong 1 room, khi A gửi msg</p>
+      <ul>
+        <li>socket.emit : chỉ A nhận , B và C thì ko</li>
+        <li>socket.broadcast.emit : B và C nhận, A ko nhận</li>
+        <li>io.emit: A,B,C nhận</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="namespace" data-nav="Namespace">
+      <div class="q-tag"><span class="n">1</span> Socket &amp; Realtime</div>
+      <h2 class="q-title">Namespace</h2>
+      <p>là các "kênh" logic để phân tách giao tiếp giữa nhiều nhóm client – server trên cùng một kết nối vật lý. Giúp tổ chức sự kiện, phân quyền, và quản lý riêng biệt cho từng loại kết nối.</p>
+    </section>
+
+    <section class="qa" id="socket" data-nav="Socket">
+      <div class="q-tag"><span class="n">1</span> Socket &amp; Realtime</div>
+      <h2 class="q-title">Socket</h2>
+      <ul>
+        <li>Là  một <b>điểm cuối (endpoint)</b> trong một kết nối. Để hai máy tính "nói chuyện" với nhau, mỗi máy tính cần phải mở một socket.</li>
+        <li>Một kết nối mạng hoàn chỉnh cần <b>hai socket</b>:</li>
+        <li>Một socket ở <b>máy khách (client)</b> (ví dụ: trình duyệt web của bạn).</li>
+        <li>Một socket ở <b>máy chủ (server)</b> (ví dụ: máy chủ của Google).</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="http" data-nav="HTTP">
+      <div class="q-tag"><span class="n">1</span> Socket &amp; Realtime</div>
+      <h2 class="q-title">HTTP</h2>
+      <p>Là 1 giao thức 1 chiều được dùng để trao đổi dữ liệu giữa client-server  dựa trên mô hình request-response</p>
+    </section>
+
+    <section class="qa" id="websocket" data-nav="WebSocket">
+      <div class="q-tag"><span class="n">1</span> Socket &amp; Realtime</div>
+      <h2 class="q-title">WebSocket</h2>
+      <p>là giao thức hỗ trợ giao tiếp hai chiều giữa client và server để tạo một kết nối trao đổi dữ liệu.</p>
+      <p><b>Tóm lại:</b></p>
+      <ul>
+        <li>socket đóng vai trò như 1 đường dây của HTTP và Websocket trong việc giao tiếp vì nó là cấp thấp , còn 2 thg HTTP và Websocket là cấp cao hơn</li>
+        <li>1 chiều tức là client gửi request &lt;=&gt; server phản hồi response và chỉ khi client gửi - thì server mới phản hồi , tức là nếu có dữ liệu mới thì server ko tự động phản hồi về cho client mà client phải request</li>
+        <li>2 chiều tức là client chỉ request lần đầu và những lần sau server tự phản hồi khi có dữ liệu mới đc cập nhật</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="sse-server-sent-events" data-nav="SSE (Server-Sent Events)">
+      <div class="q-tag"><span class="n">1</span> Socket &amp; Realtime</div>
+      <h2 class="q-title">SSE (Server-Sent Events)</h2>
+      <ul>
+        <li>là một công nghệ truyền dữ liệu thời gian thực từ server xuống client, được tiêu chuẩn hóa trong HTML5.</li>
+        <li>SSE hoạt động theo cơ chế một chiều, tức là chỉ cho phép server gửi dữ liệu xuống client thông qua một kết nối HTTP duy nhất. Khi client (thường là trình duyệt) mở một kết nối SSE tới server, server sẽ giữ kết nối đó luôn mở và liên tục gửi các cập nhật mới xuống.</li>
+        <li>Điều này đặc biệt phù hợp cho các ứng dụng cần cập nhật thông tin theo thời gian thực, ví dụ như bảng điều khiển dữ liệu trực tiếp (dashboard), thông báo hệ thống (notifications), hoặc luồng tin tức mới nhất (news feed).</li>
+      </ul>
+      <p><b>Đặc điểm</b></p>
+      <pre><code>SSE (Server-Sent Events)
+WebSocket</code></pre>
+      <p><b>Hướng dữ liệu</b></p>
+      <p><b>1 chiều</b> (Server ➔ Client)</p>
+      <p><b>2 chiều</b> (Server ⇆ Client)</p>
+      <p><b>Độ phức tạp</b></p>
+      <p>Đơn giản, dùng HTTP chuẩn.</p>
+      <p>Phức tạp hơn, cần handshake và giao thức riêng (ws://).</p>
+      <p><b>Tự động reconnect</b></p>
+      <p><b>Có sẵn</b> (Native hỗ trợ).</p>
+      <p>Phải tự viết code xử lý.</p>
+      <p><b>Dữ liệu</b></p>
+      <p>Chỉ dạng Text (UTF-8).</p>
+      <p>Hỗ trợ cả Text và Binary (ảnh, âm thanh...).</p>
+      <p><b>Khi nào dùng?</b></p>
+      <p>Thông báo, cập nhật giá Coin/Chứng khoán, <b>ChatGPT trả lời (streaming)</b>.</p>
+      <p>Chat realtime, Game online, Ứng dụng vẽ chung.</p>
+    </section>
+
+    <section class="qa" id="ocr-optical-character-recognition" data-nav="OCR (Optical Character Recognition)">
+      <div class="q-tag"><span class="n">1</span> Socket &amp; Realtime</div>
+      <h2 class="q-title">OCR (Optical Character Recognition)</h2>
+      <p>là công nghệ chuyển hình ảnh chứa chữ viết tay, in ấn thành văn bản có thể chỉnh sửa và tìm kiếm</p>
+    </section>
+
+    <section class="qa" id="webrtc-web-real-time-communication" data-nav="WebRTC (Web Real-Time Communication)">
+      <div class="q-tag"><span class="n">1</span> Socket &amp; Realtime</div>
+      <h2 class="q-title">WebRTC (Web Real-Time Communication)</h2>
+      <p>là một công nghệ mã nguồn mở cho phép truyền tải âm thanh, video và dữ liệu trực tiếp giữa các trình duyệt web mà không cần cài đặt thêm phần mềm hay plugin trung gian. Công nghệ này giúp kết nối ngang hàng (P2P) nhanh chóng, giảm độ trễ tối đa và được hỗ trợ trên hầu hết các trình duyệt lớn như Chrome, Firefox hay Safari.</p>
+    </section>
+
+    <section class="qa" id="rxjs" data-nav="RxJS">
+      <div class="q-tag"><span class="n">1</span> Angular / RxJS</div>
+      <h2 class="q-title">RxJS</h2>
+      <p>is a library for composing asynchronous and event-based programs by using observable sequences</p>
+    </section>
+
+    <section class="qa" id="reactive-state" data-nav="Reactive state">
+      <div class="q-tag"><span class="n">1</span> Angular / RxJS</div>
+      <h2 class="q-title">Reactive state</h2>
+      <ul>
+        <li>Angular dùng RxJS (thông qua stream)</li>
+        <li>React dùng virtual DOM</li>
+        <li>Vue dùng Proxy</li>
+      </ul>
+      <p>Observable</p>
+      <ul>
+        <li>Nguồn dữ liệu có thể phát ra 1 tập hợp nhiều giá trị theo thời gian (giống “dòng dữ liệu stream”) =&gt; nó giống như provider.</li>
+        <li>Nó không tự chạy, mà chỉ bắt đầu khi có người “nghe” nó (subscribe).</li>
+      </ul>
+      <p>Observer</p>
+      <ul>
+        <li>là một đối tượng sử dụng các giá trị được cung cấp bởi một Observable =&gt; nó giống consumer</li>
+        <li>gồm 3 callback chính: next, error, complete</li>
+      </ul>
+      <p>Subcription</p>
+      <ul>
+        <li>là 1 obj đại diện cho kết quả của việc gọi .subscribe() trên một Observable.</li>
+        <li>có method .unsubcribe() để hủy việc phát các giá trị của observable (hay là hủy stream)</li>
+      </ul>
+    </section>

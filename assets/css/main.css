@@ -1,0 +1,873 @@
+  :root{
+    --bg:#0b0e13;
+    --bg-raised:#12161d;
+    --bg-card:#151a22;
+    --ledger:#0f1319;
+    --border:#232a35;
+    --border-soft:#1c222c;
+    --ink:#dbe2ea;
+    --ink-dim:#8b95a5;
+    --ink-faint:#5c6577;
+    --amber:#e8a33d;
+    --amber-dim:#8a6a3a;
+    --teal:#4fd1c5;
+    --teal-dim:#2c6b66;
+    --red:#e0654f;
+    --green:#6fcf97;
+    --serif:'Source Serif 4', Georgia, serif;
+    --display:'Space Grotesk', sans-serif;
+    --mono:'JetBrains Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--serif);
+    font-size:16px;
+    line-height:1.65;
+  }
+  ::selection{background:var(--amber-dim); color:#fff;}
+
+  /* subtle ledger-line texture on background */
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    background-image: repeating-linear-gradient(to bottom, transparent, transparent 27px, rgba(255,255,255,0.012) 28px);
+    pointer-events:none;
+    z-index:0;
+  }
+
+  a{color:var(--teal);}
+
+  /* ---------- Layout ---------- */
+  .shell{
+    display:grid;
+    grid-template-columns:280px 1fr;
+    min-height:100vh;
+    position:relative;
+    z-index:1;
+  }
+  @media (max-width: 900px){
+    .shell{grid-template-columns:1fr;}
+  }
+
+  /* ---------- Sidebar ---------- */
+  .sidebar{
+    border-right:1px solid var(--border);
+    padding:32px 24px;
+    position:sticky;
+    top:0;
+    height:100vh;
+    overflow-y:auto;
+    background:linear-gradient(180deg, var(--bg-raised), var(--bg));
+  }
+  @media (max-width: 900px){
+    .sidebar{position:relative; height:auto; border-right:none; border-bottom:1px solid var(--border);}
+  }
+  .brand{
+    font-family:var(--display);
+    font-weight:700;
+    font-size:14px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--amber);
+    margin-bottom:4px;
+  }
+  .brand-sub{
+    font-family:var(--mono);
+    font-size:11.5px;
+    color:var(--ink-faint);
+    margin-bottom:28px;
+    line-height:1.5;
+  }
+  .nav-label{
+    font-family:var(--mono);
+    font-size:10.5px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--ink-faint);
+    margin:0 0 12px 2px;
+  }
+  .nav-list{list-style:none; margin:0; padding:0;}
+  .nav-list li{margin-bottom:2px;}
+  .nav-list a{
+    display:flex;
+    gap:10px;
+    align-items:baseline;
+    padding:8px 10px;
+    border-radius:6px;
+    text-decoration:none;
+    color:var(--ink-dim);
+    font-family:var(--display);
+    font-size:13.5px;
+    font-weight:500;
+    transition:background .15s ease, color .15s ease;
+    border-left:2px solid transparent;
+  }
+  .nav-list a:hover{background:var(--bg-card); color:var(--ink);}
+  .nav-list a.active{
+    background:var(--bg-card);
+    color:var(--amber);
+    border-left:2px solid var(--amber);
+  }
+  .nav-num{
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--ink-faint);
+    min-width:16px;
+  }
+  .nav-list a.active .nav-num{color:var(--amber);}
+
+  /* ---------- Main ---------- */
+  main{padding:56px 48px 120px; max-width:880px;}
+  @media (max-width: 700px){ main{padding:40px 20px 100px;} }
+  @media (max-width: 480px){
+    main{padding:32px 16px 90px;}
+    .hero{margin-bottom:44px;}
+    .hero p{font-size:15.5px;}
+    h2.q-title{font-size:21px;}
+    h3.sub{font-size:15px; margin:28px 0 12px;}
+    pre{padding:14px 14px; font-size:12px;}
+    table{font-size:12.5px;}
+    thead th, tbody td{padding:10px 10px;}
+    .q-tag{font-size:11px;}
+    section.qa{margin-bottom:56px;}
+    section.qa + section.qa{padding-top:40px;}
+  }
+  /* tables: allow horizontal scroll on narrow screens without breaking column alignment */
+  @media (max-width: 700px){
+    table{display:block; overflow-x:auto; -webkit-overflow-scrolling:touch; white-space:nowrap;}
+    thead th, tbody td{white-space:normal; min-width:130px;}
+  }
+  pre{ -webkit-overflow-scrolling:touch; }
+  img, svg{max-width:100%;}
+
+  .hero{margin-bottom:64px;}
+  .hero-kicker{
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:0.15em;
+    text-transform:uppercase;
+    color:var(--teal);
+    margin-bottom:14px;
+  }
+  .hero h1{
+    font-family:var(--display);
+    font-size:clamp(28px, 4vw, 42px);
+    font-weight:700;
+    line-height:1.15;
+    margin:0 0 18px;
+    color:#fff;
+  }
+  .hero p{
+    color:var(--ink-dim);
+    font-size:17px;
+    max-width:60ch;
+    margin:0 0 24px;
+  }
+  .hero-meta{
+    display:flex; gap:20px; flex-wrap:wrap;
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--ink-faint);
+    border-top:1px solid var(--border-soft);
+    padding-top:18px;
+  }
+  .hero-meta span b{color:var(--ink-dim); font-weight:600;}
+
+  section.qa{
+    scroll-margin-top:24px;
+    margin-bottom:76px;
+    padding-top:8px;
+  }
+  section.qa + section.qa{
+    border-top:1px solid var(--border-soft);
+    padding-top:56px;
+  }
+  .q-tag{
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--ink-faint);
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    margin-bottom:10px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .q-tag .n{
+    font-family:var(--display);
+    font-size:13px;
+    color:var(--bg);
+    background:var(--amber);
+    width:22px; height:22px;
+    border-radius:5px;
+    display:inline-flex; align-items:center; justify-content:center;
+    font-weight:700;
+  }
+  h2.q-title{
+    font-family:var(--display);
+    font-size:26px;
+    font-weight:700;
+    color:#fff;
+    margin:0 0 22px;
+    line-height:1.3;
+  }
+  h3.sub{
+    font-family:var(--display);
+    font-size:16.5px;
+    font-weight:600;
+    color:var(--teal);
+    margin:34px 0 14px;
+  }
+  h4.subsub{
+    font-family:var(--display);
+    font-size:14.5px;
+    font-weight:600;
+    color:var(--ink);
+    margin:22px 0 10px;
+  }
+  p{margin:0 0 14px; color:var(--ink);}
+  .lede{color:var(--ink-dim); font-size:16.5px;}
+
+  ul,ol{padding-left:22px; margin:0 0 16px;}
+  li{margin-bottom:7px;}
+
+  code{
+    font-family:var(--mono);
+    background:rgba(255,255,255,0.06);
+    padding:1px 6px;
+    border-radius:4px;
+    font-size:0.88em;
+    color:var(--teal);
+  }
+
+  pre{
+    background:var(--ledger);
+    border:1px solid var(--border);
+    border-left:3px solid var(--teal-dim);
+    border-radius:8px;
+    padding:18px 20px;
+    overflow-x:auto;
+    margin:0 0 20px;
+    font-family:var(--mono);
+    font-size:13px;
+    line-height:1.65;
+    color:#c3d0de;
+  }
+  pre.bad{border-left-color:var(--red);}
+  pre.good{border-left-color:var(--green);}
+  pre code{background:none; padding:0; color:inherit; font-size:inherit;}
+  .code-label{
+    font-family:var(--mono);
+    font-size:10.5px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    margin-bottom:8px;
+    display:inline-block;
+    padding:2px 8px;
+    border-radius:4px;
+  }
+  .code-label.bad{background:rgba(224,101,79,0.15); color:var(--red);}
+  .code-label.good{background:rgba(111,207,151,0.15); color:var(--green);}
+  .code-label.neutral{background:rgba(79,209,197,0.15); color:var(--teal);}
+
+  .callout{
+    background:var(--bg-card);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:18px 20px;
+    margin:0 0 22px;
+    position:relative;
+  }
+  .callout .callout-label{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--amber);
+    margin-bottom:8px;
+    display:block;
+    font-weight:600;
+  }
+  .callout.answer{border-color:var(--teal-dim); background:linear-gradient(180deg, rgba(79,209,197,0.06), transparent);}
+  .callout.answer .callout-label{color:var(--teal);}
+  .callout p:last-child{margin-bottom:0;}
+  .callout em, .callout i{color:var(--ink);}
+  .callout p{font-style:italic; color:var(--ink);}
+
+  table{
+    width:100%;
+    border-collapse:collapse;
+    margin:0 0 24px;
+    font-size:14px;
+    background:var(--bg-card);
+    border:1px solid var(--border);
+    border-radius:10px;
+    overflow:hidden;
+  }
+  thead th{
+    background:var(--bg-raised);
+    font-family:var(--display);
+    font-weight:600;
+    text-align:left;
+    padding:12px 14px;
+    color:var(--amber);
+    font-size:13px;
+    border-bottom:1px solid var(--border);
+  }
+  tbody td{
+    padding:12px 14px;
+    border-bottom:1px solid var(--border-soft);
+    color:var(--ink-dim);
+    vertical-align:top;
+  }
+  tbody tr:last-child td{border-bottom:none;}
+  tbody td:first-child{color:var(--ink); font-weight:600;}
+  tbody tr:hover{background:rgba(255,255,255,0.015);}
+
+  .flow{
+    display:flex;
+    flex-direction:column;
+    gap:0;
+    margin:0 0 22px;
+    font-family:var(--mono);
+    font-size:12.8px;
+    background:var(--ledger);
+    border:1px solid var(--border);
+    border-radius:8px;
+    overflow:hidden;
+  }
+  .flow-step{
+    display:grid;
+    grid-template-columns:64px 1fr;
+    border-bottom:1px solid var(--border-soft);
+  }
+  .flow-step:last-child{border-bottom:none;}
+  .flow-time{
+    padding:10px 12px;
+    color:var(--ink-faint);
+    border-right:1px solid var(--border-soft);
+    background:rgba(255,255,255,0.015);
+  }
+  .flow-text{padding:10px 14px; color:#c3d0de;}
+  .flow-text.locked{color:var(--red);}
+  .flow-text.ok{color:var(--green);}
+  @media (max-width: 480px){
+    .flow-step{grid-template-columns:1fr;}
+    .flow-time{border-right:none; border-bottom:1px solid var(--border-soft); font-weight:600;}
+  }
+
+  .verdict{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-family:var(--mono);
+    font-size:11.5px;
+    font-weight:600;
+    padding:3px 10px;
+    border-radius:20px;
+    margin-bottom:12px;
+  }
+  .verdict.no{background:rgba(224,101,79,0.15); color:var(--red);}
+  .verdict.yes{background:rgba(111,207,151,0.15); color:var(--green);}
+
+  .grid-2{display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-bottom:20px;}
+  @media (max-width: 640px){ .grid-2{grid-template-columns:1fr;} }
+  .case-card{
+    background:var(--bg-card);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:18px 20px;
+  }
+  .case-card h5{
+    font-family:var(--display);
+    font-size:14px;
+    margin:0 0 10px;
+    color:var(--amber);
+  }
+  .case-card ul{margin-bottom:0;}
+
+  footer{
+    max-width:880px;
+    margin:0 auto;
+    padding:0 48px 60px;
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--ink-faint);
+    border-top:1px solid var(--border-soft);
+    padding-top:24px;
+  }
+  @media (max-width: 700px){ footer{padding:24px 20px 60px;} }
+
+  .interview-line{
+    background:var(--bg-card);
+    border-left:3px solid var(--amber-dim);
+    border-radius:0 8px 8px 0;
+    padding:16px 20px;
+    margin:0 0 20px;
+  }
+  .interview-line .callout-label{
+    font-family:var(--mono); font-size:11px; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--amber); font-weight:600; margin-bottom:8px; display:block;
+  }
+  .interview-line p{font-style:italic; margin-bottom:0; color:var(--ink);}
+
+  /* mobile top nav toggle */
+  .mobile-toggle{display:none;}
+  @media (max-width:900px){
+    .mobile-toggle{
+      display:block;
+      position:sticky;
+      top:0;
+      z-index:20;
+      width:100%;
+      background:var(--bg-card);
+      color:var(--amber);
+      border:none;
+      border-bottom:1px solid var(--border);
+      padding:14px 20px;
+      font-family:var(--mono);
+      font-size:12px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      text-align:left;
+    }
+    .sidebar{display:none;}
+    .sidebar.open{display:block;}
+  }
+
+  /* ================================================================
+     Chan tran ngang tren mobile: grid item mac dinh co min-width:auto,
+     nen mot khoi <pre>/<table> dai se keo rong ca layout thay vi tu cuon.
+     ================================================================ */
+  .shell > *{min-width:0;}
+  main{min-width:0;}
+  pre, .flow{max-width:100%;}
+
+  /* URL dai / ten bien dai phai tu xuong dong, neu khong se lam vo layout
+     tren man hinh nho. Rieng trong <pre> van giu nguyen de cuon ngang. */
+  p, li, td, th, a, code{overflow-wrap:anywhere;}
+  pre, pre code{overflow-wrap:normal;}
+
+  /* ================================================================
+     Header menu tong: dieu huong giua cac chu de
+     ================================================================ */
+  :root{ --topbar-h:56px; }
+
+  .topbar{
+    position:sticky;
+    top:0;
+    z-index:40;
+    display:flex;
+    align-items:center;
+    gap:18px;
+    height:var(--topbar-h);
+    padding:0 24px;
+    background:rgba(11,14,19,0.92);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--border);
+  }
+  /* Logo: badge chu nhat mang mau nhan hieu + wordmark mot mau,
+     ngan cach voi menu bang mot duong ke doc */
+  .topbar-brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    text-decoration:none;
+    padding-right:16px;
+    margin-right:2px;
+    border-right:1px solid var(--border);
+    white-space:nowrap;
+  }
+  /* Icon la SVG inline (cung hinh voi assets/favicon.svg) */
+  .brand-mark{
+    width:27px;
+    height:27px;
+    flex:none;
+    display:block;
+  }
+  .brand-text{
+    font-family:var(--display);
+    font-weight:600;
+    font-size:14px;
+    color:var(--ink);
+    letter-spacing:0.01em;
+    transition:color .15s ease;
+  }
+  .topbar-brand:hover .brand-text{color:#fff;}
+
+  .topbar-nav{
+    display:flex;
+    align-items:center;
+    gap:2px;
+    flex:1;
+    /* flex item mac dinh min-width:auto -> phai dat 0 thi thanh menu moi
+       chiu co lai va tu cuon ngang thay vi tran ra ngoai header */
+    min-width:0;
+    /* Tren desktop phai de overflow visible, neu khong menu tha xuong
+       (position:absolute) se bi vung cuon cua thanh nhom cat mat */
+    overflow:visible;
+    scrollbar-width:none;
+    -webkit-overflow-scrolling:touch;
+  }
+  .topbar-nav::-webkit-scrollbar{display:none;}
+  @media (max-width: 900px){
+    .topbar-nav{overflow-x:auto;}
+  }
+  /* Nhom chu de: dung <details> nen mo/dong duoc ca tren mobile khong can JS */
+  .nav-group{position:relative; flex:none;}
+  .nav-group > summary{
+    list-style:none;
+    cursor:pointer;
+    padding:7px 12px;
+    border-radius:6px;
+    font-family:var(--display);
+    font-size:13px;
+    font-weight:500;
+    color:var(--ink-dim);
+    white-space:nowrap;
+    border:1px solid transparent;
+    user-select:none;
+    transition:color .15s ease, background .15s ease, border-color .15s ease;
+  }
+  .nav-group > summary::-webkit-details-marker{display:none;}
+  .nav-group > summary::after{content:"▾"; margin-left:6px; font-size:10px; opacity:.65;}
+  .nav-group > summary:hover{color:var(--ink); background:var(--bg-card);}
+  .nav-group.has-active > summary{
+    color:var(--amber);
+    background:var(--bg-card);
+    border-color:var(--amber-dim);
+  }
+  .nav-group[open] > summary{background:var(--bg-card); color:var(--ink);}
+
+  .nav-dropdown{
+    position:absolute;
+    top:calc(100% + 6px);
+    left:0;
+    z-index:60;
+    min-width:230px;
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+    padding:8px;
+    background:var(--bg-raised);
+    border:1px solid var(--border);
+    border-radius:10px;
+    box-shadow:0 14px 34px rgba(0,0,0,0.5);
+  }
+  .nav-dropdown a{
+    padding:8px 10px;
+    border-radius:6px;
+    font-family:var(--display);
+    font-size:13px;
+    color:var(--ink-dim);
+    text-decoration:none;
+    white-space:nowrap;
+  }
+  .nav-dropdown a:hover{background:var(--bg-card); color:var(--ink);}
+  .nav-dropdown a.active{color:var(--amber); background:var(--bg-card);}
+  @media (max-width: 900px){
+    /* Tren mobile menu tha xuong chiem het be ngang, dung position:fixed de
+       khong bi thanh nhom (cuon ngang) cat mat */
+    .nav-dropdown{
+      position:fixed;
+      left:8px;
+      right:8px;
+      top:calc(var(--topbar-h) + 6px);
+      min-width:0;
+      max-height:70vh;
+      overflow-y:auto;
+    }
+  }
+
+  /* ================================================================
+     Tim kiem: nut tren header + lop phu ket qua
+     ================================================================ */
+  .search-trigger{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex:none;
+    margin-left:auto;
+    padding:6px 10px 6px 12px;
+    background:var(--bg-card);
+    border:1px solid var(--border);
+    border-radius:8px;
+    color:var(--ink-faint);
+    font-family:var(--display);
+    font-size:12.5px;
+    cursor:pointer;
+    transition:border-color .15s ease, color .15s ease;
+  }
+  .search-trigger:hover{border-color:var(--amber-dim); color:var(--ink-dim);}
+  .search-trigger .search-icon{font-size:16px; line-height:1; color:var(--amber);}
+  .search-trigger kbd{
+    font-family:var(--mono);
+    font-size:10.5px;
+    padding:1px 6px;
+    border:1px solid var(--border);
+    border-radius:4px;
+    color:var(--ink-faint);
+    background:var(--ledger);
+  }
+  @media (max-width: 900px){
+    .search-trigger{padding:6px 10px;}
+    .search-trigger .search-label, .search-trigger kbd{display:none;}
+  }
+
+  .search-overlay{
+    position:fixed;
+    inset:0;
+    z-index:80;
+    background:rgba(4,6,10,0.72);
+    backdrop-filter:blur(3px);
+    display:flex;
+    justify-content:center;
+    padding:12vh 16px 24px;
+  }
+  .search-overlay[hidden]{display:none;}
+  .search-box{
+    width:min(720px, 100%);
+    max-height:70vh;
+    display:flex;
+    flex-direction:column;
+    background:var(--bg-raised);
+    border:1px solid var(--border);
+    border-radius:12px;
+    box-shadow:0 24px 60px rgba(0,0,0,0.6);
+    overflow:hidden;
+  }
+  #searchInput{
+    width:100%;
+    padding:16px 18px;
+    border:none;
+    border-bottom:1px solid var(--border);
+    background:transparent;
+    color:var(--ink);
+    font-family:var(--display);
+    font-size:15px;
+    outline:none;
+  }
+  #searchInput::placeholder{color:var(--ink-faint);}
+
+  .search-results{overflow-y:auto; padding:6px;}
+  .search-empty{padding:18px; color:var(--ink-faint); font-family:var(--mono); font-size:12.5px;}
+  .search-hit{
+    display:block;
+    padding:10px 12px;
+    border-radius:8px;
+    text-decoration:none;
+    border:1px solid transparent;
+  }
+  .search-hit:hover, .search-hit.is-active{background:var(--bg-card); border-color:var(--border);}
+  .search-hit .hit-topic{
+    font-family:var(--mono);
+    font-size:10.5px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--amber);
+    display:block;
+    margin-bottom:3px;
+  }
+  .search-hit .hit-title{
+    font-family:var(--display);
+    font-size:14px;
+    font-weight:600;
+    color:var(--ink);
+    display:block;
+    margin-bottom:3px;
+  }
+  .search-hit .hit-snippet{
+    font-size:13px;
+    color:var(--ink-dim);
+    line-height:1.5;
+    display:block;
+  }
+  .search-hit mark{background:rgba(232,163,61,0.22); color:var(--amber); padding:0 2px; border-radius:3px;}
+  .search-hint{
+    padding:8px 14px;
+    border-top:1px solid var(--border);
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--ink-faint);
+  }
+  @media (max-width: 600px){
+    .search-overlay{padding:8vh 10px 16px;}
+    .search-hint{display:none;}
+  }
+
+  /* Anh minh hoa lay tu tai lieu goc */
+  .doc-figure{margin:0 0 20px;}
+  .doc-figure img{
+    display:block;
+    width:100%;
+    border:1px solid var(--border);
+    border-radius:8px;
+    background:var(--ledger);
+  }
+  @media (max-width: 900px){
+    .topbar{padding:0 12px; gap:10px;}
+    /* Man hinh hep chi giu badge, bo wordmark de danh cho cho menu */
+    .topbar-brand{padding-right:12px; gap:0;}
+    .brand-text{display:none;}
+    .nav-group > summary{font-size:12.5px; padding:6px 10px;}
+  }
+
+  /* Sidebar & nut mo menu mobile phai nam duoi header sticky */
+  .sidebar{top:var(--topbar-h); height:calc(100vh - var(--topbar-h));}
+  @media (max-width:900px){
+    .mobile-toggle{top:var(--topbar-h);}
+    .sidebar{height:auto;}
+  }
+  .shell{min-height:calc(100vh - var(--topbar-h));}
+
+  /* Trang chu khong co sidebar */
+  .shell.no-sidebar{grid-template-columns:1fr;}
+  .shell.no-sidebar main{margin:0 auto;}
+
+  /* ================================================================
+     Sidebar: link ve trang chu, muc luc trong trang
+     ================================================================ */
+  .brand-link{text-decoration:none; display:block; margin-bottom:4px;}
+  .brand-link:hover .brand{color:#fff;}
+
+  .nav-block{margin-bottom:26px;}
+  .nav-list a .nav-text{flex:1; min-width:0;}
+
+  /* Muc luc trong trang (sinh boi JS tu cac h3.sub) */
+  .toc-list{list-style:none; margin:0; padding:0; border-left:1px solid var(--border-soft);}
+  .toc-list li{margin:0;}
+  .toc-list a{
+    display:block;
+    padding:6px 12px;
+    font-family:var(--display);
+    font-size:12.5px;
+    color:var(--ink-faint);
+    text-decoration:none;
+    border-left:2px solid transparent;
+    margin-left:-1px;
+    transition:color .15s ease, border-color .15s ease;
+  }
+  .toc-list a:hover{color:var(--ink-dim);}
+  .toc-list a.active{color:var(--teal); border-left-color:var(--teal);}
+
+  /* Breadcrumb dau trang */
+  .crumb{
+    font-family:var(--mono);
+    font-size:11.5px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color:var(--ink-faint);
+    margin-bottom:26px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .crumb a{color:var(--ink-dim); text-decoration:none;}
+  .crumb a:hover{color:var(--amber);}
+  .crumb .sep{color:var(--border);}
+
+  /* ================================================================
+     The chu de / the cau hoi
+     ================================================================ */
+  .topic-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(300px, 1fr));
+    gap:16px;
+    margin-bottom:40px;
+  }
+  @media (max-width: 520px){ .topic-grid{grid-template-columns:1fr;} }
+  .topic-card{
+    display:block;
+    background:var(--bg-card);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:18px 20px;
+    text-decoration:none;
+    color:inherit;
+    transition:border-color .15s ease, transform .15s ease, background .15s ease;
+  }
+  .topic-card:hover{
+    border-color:var(--amber-dim);
+    background:var(--bg-raised);
+    transform:translateY(-2px);
+  }
+  .topic-card .card-num{
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--amber);
+    letter-spacing:.1em;
+    display:block;
+    margin-bottom:8px;
+  }
+  .topic-card h3{
+    font-family:var(--display);
+    font-size:16px;
+    font-weight:600;
+    color:#fff;
+    margin:0 0 8px;
+    line-height:1.35;
+  }
+  .topic-card p{
+    color:var(--ink-dim);
+    font-size:14px;
+    margin:0;
+    line-height:1.55;
+  }
+  .topic-card .card-meta{
+    display:block;
+    margin-top:12px;
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--ink-faint);
+  }
+
+  /* ================================================================
+     Pager: cau truoc / cau sau
+     ================================================================ */
+  .pager{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+    margin-top:8px;
+    padding-top:28px;
+    border-top:1px solid var(--border-soft);
+  }
+  @media (max-width: 560px){ .pager{grid-template-columns:1fr;} }
+  .pager a{
+    display:block;
+    padding:14px 16px;
+    border:1px solid var(--border);
+    border-radius:10px;
+    text-decoration:none;
+    background:var(--bg-card);
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .pager a:hover{border-color:var(--teal-dim); background:var(--bg-raised);}
+  .pager .pager-dir{
+    display:block;
+    font-family:var(--mono);
+    font-size:10.5px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--ink-faint);
+    margin-bottom:6px;
+  }
+  .pager .pager-title{
+    font-family:var(--display);
+    font-size:14px;
+    font-weight:600;
+    color:var(--ink);
+    line-height:1.4;
+  }
+  .pager a:hover .pager-title{color:var(--teal);}
+  .pager .next{text-align:right;}
+  @media (max-width: 560px){ .pager .next{text-align:left;} }
+
+  /* Trang chi tiet chi co 1 section nen bo khoang cach thua duoi cung */
+  main > section.qa:last-of-type{margin-bottom:40px;}
+
+  /* Anchor offset khi nhay toi section (header sticky che mat tieu de) */
+  section.qa{scroll-margin-top:calc(var(--topbar-h) + 16px);}

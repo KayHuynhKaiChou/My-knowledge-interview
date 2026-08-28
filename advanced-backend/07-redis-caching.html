@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Redis là gì, dùng trong những case study thực tế nào của dự án?">
+<title>07. Redis — khái niệm & case study — Advanced Backend</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body data-root="../">
+
+<header class="topbar">
+  <a class="topbar-brand" href="../index.html" aria-label="Interview Knowledge — trang chủ">
+    <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true">
+      <defs><linearGradient id="ikBadge" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#f0b355"/><stop offset="1" stop-color="#b9752a"/>
+      </linearGradient></defs>
+      <rect x="2" y="2" width="60" height="60" rx="15" fill="url(#ikBadge)"/>
+      <path d="M21 21 L33 32 L21 43" fill="none" stroke="#0b0e13" stroke-width="7"
+            stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M37 43 H46" stroke="#0b0e13" stroke-width="7" stroke-linecap="round"/>
+    </svg>
+    <span class="brand-text">Interview Knowledge</span>
+  </a>
+  <nav class="topbar-nav">
+    <details class="nav-group has-active">
+      <summary>Backend</summary>
+      <div class="nav-dropdown">
+        <a href="../advanced-backend/index.html" class="active">Advanced Backend</a>
+        <a href="../backend-dotnet-nestjs/index.html">.NET &amp; NestJS</a>
+        <a href="../database-sql/index.html">Database &amp; SQL</a>
+        <a href="../backend-infrastructure/index.html">Hạ tầng</a>
+        <a href="../realtime-socket/index.html">Realtime &amp; Socket</a>
+        <a href="../case-studies/index.html">Case studies</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Frontend</summary>
+      <div class="nav-dropdown">
+        <a href="../javascript-core/index.html">JavaScript &amp; TS</a>
+        <a href="../react/index.html">React &amp; State</a>
+        <a href="../nextjs/index.html">Next.js</a>
+        <a href="../css-html/index.html">CSS &amp; HTML</a>
+        <a href="../browser-web-api/index.html">Browser &amp; Web API</a>
+        <a href="../react-native/index.html">React Native</a>
+        <a href="../frontend-tooling/index.html">Frontend Tooling</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Quy trình &amp; Nền tảng</summary>
+      <div class="nav-dropdown">
+        <a href="../git/index.html">Git</a>
+        <a href="../testing-environments/index.html">Testing</a>
+        <a href="../saas-platforms/index.html">SaaS &amp; Nền tảng</a>
+        <a href="../auth-blockchain/index.html">Auth &amp; Blockchain</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Khác</summary>
+      <div class="nav-dropdown">
+        <a href="../interview-intro/index.html">Giới thiệu &amp; English</a>
+        <a href="../project-notes/index.html">Ghi chú dự án</a>
+      </div>
+    </details>
+  </nav>
+  <button class="search-trigger" id="searchTrigger" aria-label="Tìm kiếm nội dung">
+    <span class="search-icon" aria-hidden="true">⌕</span>
+    <span class="search-label">Tìm kiếm</span>
+    <kbd>/</kbd>
+  </button>
+</header>
+
+<div class="search-overlay" id="searchOverlay" hidden>
+  <div class="search-box" role="dialog" aria-label="Tìm kiếm nội dung">
+    <input type="search" id="searchInput" autocomplete="off" spellcheck="false"
+           placeholder="Tìm trong toàn bộ nội dung — closure, saga, index, rebase…">
+    <div class="search-results" id="searchResults"></div>
+    <div class="search-hint">Enter mở mục · ↑↓ chọn · Esc đóng</div>
+  </div>
+</div>
+
+<div class="shell">
+  <button class="mobile-toggle" id="navToggle" aria-label="Mở mục lục">☰ Mục lục</button>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">Advanced Backend</div>
+    <div class="brand-sub">12 mục &middot; sổ tay ôn phỏng vấn</div>
+
+    <div class="nav-block">
+      <p class="nav-label">Nội dung</p>
+      <ul class="nav-list">
+        <li><a href="01-race-condition-lock-deadlock.html"><span class="nav-num">01</span><span class="nav-text">Race Condition, Lock &amp; Deadlock</span></a></li>
+        <li><a href="02-idempotency.html"><span class="nav-num">02</span><span class="nav-text">Idempotency</span></a></li>
+        <li><a href="03-distributed-transaction-saga.html"><span class="nav-num">03</span><span class="nav-text">Transaction xuyên service</span></a></li>
+        <li><a href="04-queue-async-processing.html"><span class="nav-num">04</span><span class="nav-text">Queue &amp; Async Processing</span></a></li>
+        <li><a href="05-rate-limiting.html"><span class="nav-num">05</span><span class="nav-text">Rate Limiting</span></a></li>
+        <li><a href="06-database-query-optimization.html"><span class="nav-num">06</span><span class="nav-text">Tối ưu Database &amp; Query</span></a></li>
+        <li><a href="07-redis-caching.html" class="active"><span class="nav-num">07</span><span class="nav-text">Redis &mdash; khái niệm &amp; case study</span></a></li>
+        <li><a href="08-scalability-pagination.html"><span class="nav-num">08</span><span class="nav-text">Scalability &amp; Pagination</span></a></li>
+        <li><a href="09-database-index.html"><span class="nav-num">09</span><span class="nav-text">Index &mdash; cơ chế &amp; đánh đổi</span></a></li>
+        <li><a href="10-background-job.html"><span class="nav-num">10</span><span class="nav-text">Background Job</span></a></li>
+        <li><a href="11-multi-tenant.html"><span class="nav-num">11</span><span class="nav-text">Multi-tenant</span></a></li>
+        <li><a href="12-api-design.html"><span class="nav-num">12</span><span class="nav-text">API Design</span></a></li>
+      </ul>
+    </div>
+
+    <div class="nav-block">
+      <p class="nav-label">Trong trang này</p>
+      <div id="pageToc"></div>
+    </div>
+  </aside>
+  <main>
+    <div class="crumb">
+      <a href="index.html">Advanced Backend</a>
+      <span class="sep">/</span>
+      <span>Câu 07</span>
+    </div>
+
+    <section class="qa" id="q7">
+      <div class="q-tag"><span class="n">7</span> Câu hỏi ứng dụng thường gặp</div>
+      <h2 class="q-title">"Redis là gì, dùng trong những case study thực tế nào của dự án?"</h2>
+
+      <h3 class="sub">7.1 — Redis là gì</h3>
+      <p>Redis là <b>in-memory database</b> — dữ liệu được lưu trực tiếp trong RAM thay vì ổ đĩa như DB truyền thống (MySQL, PostgreSQL) — nên đọc/ghi nhanh hơn rất nhiều lần (dưới 1ms so với 5-20ms của DB đọc từ ổ đĩa). Đánh đổi lại: RAM có giới hạn dung lượng và đắt hơn ổ đĩa nhiều, nên Redis không dùng để thay thế hoàn toàn DB chính — nó đóng vai trò là <b>lớp tăng tốc / lưu trữ tạm thời</b> phía trên 1 nguồn dữ liệu gốc.</p>
+      <div class="callout">
+        <span class="callout-label">Redis không chỉ lưu "thông tin tạm" theo nghĩa hẹp</span>
+        <p>Nhiều người mới học nghĩ Redis chỉ hợp với dữ liệu ngắn hạn (OTP, session). Thực tế Redis còn được dùng để <b>cache lại chính dữ liệu đã có trong DB</b> (profile user, thông tin sản phẩm...) — không phải vì bản thân dữ liệu đó có tính tạm thời, mà vì mục đích là <b>đọc nhanh hơn</b>, giảm tải cho DB chính. DB vẫn luôn là "nguồn sự thật" (source of truth); Redis chỉ giữ 1 bản sao, có thể mất đi bất cứ lúc nào (restart, hết TTL, bị evict do hết RAM) mà hệ thống vẫn hoạt động bình thường — chỉ chậm hơn tạm thời vì phải query lại DB. Đây chính là tiêu chí để phân biệt "cái gì nên để trong Redis" và "cái gì bắt buộc phải nằm trong DB": nếu mất dữ liệu đó mà hệ thống vẫn chạy được (chỉ chậm hơn), nó hợp để cache; nếu mất là hỏng luôn nghiệp vụ, nó phải nằm trong DB.</p>
+      </div>
+
+      <h3 class="sub">7.2 — Case study thực tế: Redis dùng ở đâu trong 1 dự án</h3>
+      <table>
+        <thead><tr><th>Case study</th><th>Cấu trúc Redis dùng</th><th>Xem lại ở mục</th></tr></thead>
+        <tbody>
+          <tr><td><b>Cache lại record DB</b> — profile user, thông tin sản phẩm, danh mục</td><td>String / Hash, kèm TTL</td><td>7.3 (bên dưới)</td></tr>
+          <tr><td><b>Session / đăng nhập</b> — lưu trạng thái đăng nhập user, JWT blacklist</td><td>String, kèm TTL theo thời gian hết hạn phiên</td><td>—</td></tr>
+          <tr><td><b>Rate limiting</b> — giới hạn số request/user</td><td>String (fixed window), Sorted Set (sliding window log)</td><td>Câu 5</td></tr>
+          <tr><td><b>OTP / mã xác thực tạm</b></td><td>String, TTL vài phút</td><td>—</td></tr>
+          <tr><td><b>Message queue nhẹ</b> — job background đơn giản</td><td>List (LPUSH/BRPOP), hoặc Redis Streams cho queue có ack</td><td>Câu 4, Câu 10</td></tr>
+          <tr><td><b>Distributed lock</b> — khoá xuyên nhiều instance backend</td><td>String với lệnh <code>SET key value NX EX</code> (chỉ set nếu chưa tồn tại, kèm TTL)</td><td>1.6 (khi cần lock ngoài phạm vi 1 DB transaction)</td></tr>
+          <tr><td><b>Leaderboard / bảng xếp hạng</b> — top sản phẩm bán chạy, ranking game</td><td>Sorted Set (điểm số làm score, tự sắp xếp)</td><td>—</td></tr>
+          <tr><td><b>Bộ đếm real-time</b> — lượt xem bài viết, số người online</td><td>String (<code>INCR</code>), chấp nhận sai số nhỏ</td><td>—</td></tr>
+          <tr><td><b>Pub/Sub</b> — thông báo real-time giữa các service, chat đơn giản</td><td>Redis Pub/Sub channel</td><td>—</td></tr>
+          <tr><td><b>Idempotency key</b> — chống xử lý trùng request/message</td><td>String, kèm TTL (ví dụ 24h)</td><td>Câu 2, Câu 4</td></tr>
+        </tbody>
+      </table>
+      <p>Điểm chung: hầu hết case study trên đều đã xuất hiện rải rác ở các câu trước — Redis là "sợi chỉ" chạy xuyên suốt nhiều bài toán khác nhau (rate limit, queue, idempotency...), không phải chỉ dùng riêng cho việc cache DB.</p>
+
+      <h3 class="sub">7.3 — Cache lại record DB: vì sao cần, và cách tránh "lệch" giữa Redis và DB</h3>
+      <p>Cache (Redis) và Database là <b>2 hệ thống lưu trữ tách biệt</b>, không tự động đồng bộ với nhau — update DB xong, Redis không tự biết để cập nhật theo, trừ khi code chủ động làm việc đó. Đây là nguồn gốc của "lệch" (cache inconsistency).</p>
+      <pre class="bad"><code>Bước 1: DB có name = "Nguyen Van A", Redis cache cũng "Nguyen Van A" (khớp nhau)
+
+Bước 2: User đổi tên → UPDATE DB SET name = 'Nguyen Van B'
+        → DB đã đúng, NHƯNG code QUÊN cập nhật/xoá Redis cache
+
+Bước 3: Request khác đọc profile → check cache trước → cache VẪN "Nguyen Van A"
+        → trả về dữ liệu CŨ dù DB đã có dữ liệu MỚI  → ĐÂY LÀ "LỆCH"</code></pre>
+      <p>Ngay cả khi code làm đúng (update DB xong thì xoá cache ngay), vẫn có <b>khoảng lệch tạm thời rất ngắn</b> giữa lúc DB commit xong và lúc cache được xoá theo — vì 2 thao tác này không xảy ra trong cùng 1 tích tắc:</p>
+      <pre><code>t=5ms:    UPDATE DB xong → DB đã đúng
+t=5.05ms: Request KHÁC đọc cache đúng lúc này → cache CHƯA kịp xoá → trả dữ liệu cũ
+t=6ms:    Code xoá cache xong → từ giờ cache mới đúng trở lại</code></pre>
+      <div class="callout">
+        <span class="callout-label">Vì sao không dùng cache để check số dư trước khi trừ tiền (nhắc lại mục 6.5)</span>
+        <p>DB thật đã còn 2 triệu sau khi trừ, nhưng nếu cache chưa kịp cập nhật vẫn hiển thị 10 triệu — 1 request khác dựa vào cache để quyết định "còn đủ tiền cho phép rút thêm" sẽ dẫn tới rút vượt quá số dư thực có. Đây là lý do cache chỉ nên dùng để <b>hiển thị</b>, không dùng làm căn cứ cho quyết định nghiệp vụ quan trọng — quyết định đó luôn phải đọc trực tiếp từ DB với đúng lock.</p>
+      </div>
+
+      <h3 class="sub">7.4 — Tổng quan các cấu trúc dữ liệu chính trong Redis</h3>
+      <p>Redis không chỉ là "key-value đơn giản" — nó hỗ trợ nhiều kiểu cấu trúc dữ liệu khác nhau, mỗi loại có đặc tính riêng phù hợp cho từng bài toán.</p>
+
+      <h4 class="subsub">1. String — đơn giản nhất, lưu 1 giá trị</h4>
+      <pre><code>SET user:123:name "Nguyen Van A"
+GET user:123:name → "Nguyen Van A"
+
+INCR page_views:article_5    → tăng bộ đếm lên 1</code></pre>
+      <p><b>Dùng khi:</b> giá trị đơn giản, chỉ cần đọc/ghi nguyên khối — cache 1 record (dạng JSON string), session token, OTP, bộ đếm đơn giản (<code>INCR</code>), rate limit fixed window (mục 5.2), idempotency key (Câu 2), distributed lock (<code>SET key value NX EX</code>, mục 1.6).</p>
+
+      <h4 class="subsub">2. Hash — giống 1 object có nhiều field, gọn hơn String riêng lẻ</h4>
+      <pre><code>HSET user:123 name "Nguyen Van A" age 30 city "HCM"
+HGET user:123 name → "Nguyen Van A"
+HGETALL user:123 → { name: "...", age: 30, city: "..." }</code></pre>
+      <p><b>Dùng khi:</b> dữ liệu có nhiều field liên quan tới nhau, muốn đọc/sửa từng field riêng lẻ mà không cần đọc/ghi lại toàn bộ object — ví dụ Token Bucket (mục 5.4, chỉ cần 2 field <code>tokens</code> và <code>lastRefill</code>), cache 1 record có cấu trúc (thay vì lưu cả record dưới dạng 1 chuỗi JSON string rồi phải parse lại mỗi lần đọc).</p>
+
+      <h4 class="subsub">3. List — danh sách có thứ tự, thêm/lấy ở 2 đầu</h4>
+      <pre><code>LPUSH job_queue "job_abc123"     → thêm job vào đầu danh sách
+RPOP job_queue                    → lấy job ra từ cuối danh sách (FIFO)</code></pre>
+      <p><b>Dùng khi:</b> cần hàng đợi đơn giản (queue nhẹ, Câu 10) — worker liên tục <code>BRPOP</code> (blocking pop) để lấy job xử lý dần. Khác Kafka/SQS ở chỗ List đơn giản hơn nhiều, không có partition, không đảm bảo bền vững cao — chỉ phù hợp job không quá quan trọng (không phải thanh toán).</p>
+
+      <h4 class="subsub">4. Set — tập hợp không trùng lặp, không có thứ tự</h4>
+      <pre><code>SADD user:123:favorites "product_1" "product_2"
+SISMEMBER user:123:favorites "product_1" → true (kiểm tra có tồn tại không)
+SINTER user:123:favorites user:456:favorites → giao của 2 tập hợp</code></pre>
+      <p><b>Dùng khi:</b> cần kiểm tra "có tồn tại chưa" cực nhanh, hoặc tính toán tập hợp (giao/hợp/hiệu) — ví dụ: danh sách sản phẩm yêu thích, tag của bài viết, kiểm tra user đã đọc bài viết X chưa (tránh đếm view trùng), tìm bạn chung giữa 2 user.</p>
+
+      <h4 class="subsub">5. Sorted Set (ZSET) — giống Set nhưng mỗi phần tử có thêm 1 "điểm số" để tự sắp xếp</h4>
+      <pre><code>ZADD leaderboard 1500 "player_A"
+ZADD leaderboard 2300 "player_B"
+ZREVRANGE leaderboard 0 9 WITHSCORES   → lấy top 10 điểm cao nhất
+ZSCORE leaderboard "player_A" → 1500</code></pre>
+      <p><b>Dùng khi:</b> cần dữ liệu luôn được sắp xếp theo 1 tiêu chí số (điểm số, thời gian, giá...) và truy vấn theo khoảng — đây chính là cấu trúc dùng cho <b>Sliding Window Log</b> (mục 5.3, dùng timestamp làm score để lọc theo khoảng thời gian), <b>leaderboard/bảng xếp hạng</b> (điểm số game, top sản phẩm bán chạy), hoặc feed tin tức sắp xếp theo thời gian đăng.</p>
+
+      <h4 class="subsub">6. Pub/Sub — kênh phát-nhận tin nhắn real-time, không lưu trữ</h4>
+      <pre><code>// Service A (publisher)
+PUBLISH notifications:user_123 "Bạn có đơn hàng mới"
+
+// Service B (subscriber) — đang lắng nghe kênh này
+SUBSCRIBE notifications:user_123
+→ nhận ngay lập tức: "Bạn có đơn hàng mới"</code></pre>
+      <p><b>Dùng khi:</b> cần gửi thông báo tức thời giữa các service hoặc tới client đang kết nối (qua WebSocket) — ví dụ chat real-time đơn giản, thông báo đẩy khi có đơn hàng mới, đồng bộ trạng thái giữa nhiều instance backend (ví dụ khi 1 instance update cache, publish để các instance khác biết mà invalidate cache local của chúng).</p>
+      <div class="callout">
+        <span class="callout-label">Điểm khác biệt quan trọng: Pub/Sub không lưu trữ gì cả</span>
+        <p>Nếu không có ai đang <code>SUBSCRIBE</code> vào đúng lúc message được publish, message đó <b>mất luôn vĩnh viễn</b>, không giống List hay Streams (bên dưới) là dữ liệu vẫn nằm đó chờ được lấy ra. Vì vậy Pub/Sub <b>không phù hợp cho job quan trọng</b> (không thể dùng cho thanh toán) — chỉ hợp với thông báo real-time mà mất 1-2 cái cũng không sao (ví dụ 1 chat message bị mất do subscriber vừa mất kết nối, người dùng có thể gửi lại).</p>
+      </div>
+
+      <h4 class="subsub">7. Redis Streams — giống Kafka thu nhỏ, có lưu trữ + ack</h4>
+      <pre><code>XADD orders_stream * order_id 123 amount 500000
+XREADGROUP GROUP workers consumer1 COUNT 1 STREAMS orders_stream >
+→ worker nhận được message, xử lý xong thì XACK để đánh dấu đã xử lý</code></pre>
+      <p><b>Dùng khi:</b> cần queue có độ tin cậy cao hơn List/Pub-Sub — có lưu trữ lại lịch sử message, hỗ trợ nhiều consumer group, hỗ trợ cơ chế ack giống Kafka (message chưa ack sẽ được giao lại) — đúng tinh thần "at-least-once delivery" đã nói ở mục 4.4. Đây là lựa chọn khi muốn dùng Redis làm message queue "nghiêm túc" hơn thay vì chỉ dùng List đơn giản.</p>
+
+      <h4 class="subsub">Bảng tổng hợp để nhớ nhanh khi phỏng vấn</h4>
+      <table>
+        <thead><tr><th>Cấu trúc</th><th>Đặc tính chính</th><th>Case study điển hình</th></tr></thead>
+        <tbody>
+          <tr><td>String</td><td>Giá trị đơn, atomic increment</td><td>Cache đơn giản, session, OTP, rate limit fixed window, idempotency key, distributed lock</td></tr>
+          <tr><td>Hash</td><td>Object nhiều field, sửa từng field riêng</td><td>Token Bucket, cache record có cấu trúc</td></tr>
+          <tr><td>List</td><td>Hàng đợi FIFO đơn giản</td><td>Queue nhẹ cho background job không quan trọng</td></tr>
+          <tr><td>Set</td><td>Tập hợp không trùng, phép giao/hợp</td><td>Check tồn tại nhanh, tag, favorite, tránh đếm trùng</td></tr>
+          <tr><td>Sorted Set</td><td>Tự sắp xếp theo điểm số</td><td>Sliding Window Log, leaderboard, feed theo thời gian</td></tr>
+          <tr><td>Pub/Sub</td><td>Real-time, không lưu trữ, mất nếu không ai nghe</td><td>Chat đơn giản, notification tức thời, đồng bộ cache giữa instance</td></tr>
+          <tr><td>Streams</td><td>Queue có lưu trữ + ack, giống Kafka thu nhỏ</td><td>Message queue cần độ tin cậy, event sourcing nhẹ</td></tr>
+        </tbody>
+      </table>
+      <div class="interview-line">
+        <span class="callout-label">Trả lời mẫu khi phỏng vấn</span>
+        <p>"Em chọn cấu trúc dựa trên hình dạng dữ liệu và cách mình cần truy vấn nó — cần sắp xếp theo điểm số thì Sorted Set, cần object nhiều field sửa riêng lẻ thì Hash, cần kiểm tra tồn tại/tính giao-hợp thì Set, cần hàng đợi đơn giản thì List, còn cần độ tin cậy cao hơn cho queue thì em cân nhắc Streams thay vì List thường."</p>
+      </div>
+
+      <h3 class="sub">7.5 — 3 chiến lược ghi cache phổ biến</h3>
+      <table>
+        <thead><tr><th>Chiến lược</th><th>Cách hoạt động</th><th>Rủi ro / phù hợp khi</th></tr></thead>
+        <tbody>
+          <tr><td>Write-through</td><td>Ghi DB xong ghi luôn cache trong cùng flow (đồng bộ)</td><td>Cache luôn mới nhưng chậm hơn 1 chút vì thêm bước ghi cache</td></tr>
+          <tr><td>Write-behind</td><td>Ghi cache trước, DB ghi bất đồng bộ sau</td><td>Nhanh nhưng rủi ro mất dữ liệu nếu cache crash trước khi flush — <b>không phù hợp cho dữ liệu tiền</b></td></tr>
+          <tr><td>Cache-aside (phổ biến nhất)</td><td>Đọc: check cache trước, miss thì đọc DB rồi set cache. Ghi: update DB rồi <b>invalidate (xoá)</b> cache</td><td>Không update cache trực tiếp để tránh out-of-order write</td></tr>
+        </tbody>
+      </table>
+      <h4 class="subsub">Race condition ở cache-aside</h4>
+      <p>2 request cùng cache-miss → cả 2 cùng đọc DB → cả 2 cùng set cache — nếu 1 trong 2 đọc dữ liệu cũ hơn, cache cuối cùng có thể là data cũ (ai set sau thắng, không nhất thiết mới nhất). Giảm thiểu bằng cách set cache kèm timestamp/version (chỉ ghi đè nếu mới hơn), hoặc dùng mutex ngắn khi cache-miss để chỉ 1 request đi đọc DB.</p>
+
+      <div class="interview-line">
+        <span class="callout-label">Trả lời mẫu khi phỏng vấn</span>
+        <p>"Redis em dùng cho nhiều mục đích trong dự án: cache lại dữ liệu hay đọc để giảm tải DB, lưu session/OTP, làm rate limiter, làm queue nhẹ cho background job, distributed lock khi cần khoá xuyên nhiều instance, và idempotency key để chống xử lý trùng. Với riêng việc cache lại dữ liệu từ DB, em dùng chiến lược cache-aside — đọc thì check cache trước miss mới query DB, ghi thì update DB rồi xoá cache thay vì update cache trực tiếp — và luôn đặt TTL dự phòng để nếu có bug quên xoá cache, dữ liệu cũ cũng tự hết hạn sau 1 khoảng thời gian, không lệch mãi mãi."</p>
+      </div>
+    </section>
+
+    <nav class="pager">
+      <a class="prev" href="06-database-query-optimization.html"><span class="pager-dir">← Câu trước</span><span class="pager-title">06. Tối ưu Database &amp; Query</span></a>
+      <a class="next" href="08-scalability-pagination.html"><span class="pager-dir">Câu tiếp theo →</span><span class="pager-title">08. Scalability &amp; Pagination</span></a>
+    </nav>
+  </main>
+</div>
+
+<footer>
+  Interview Knowledge — sổ tay ôn phỏng vấn tổng hợp từ ghi chép cá nhân.
+  Ưu tiên trả lời theo cấu trúc: vấn đề → giải pháp → vì sao chọn cách này thay vì cách khác.
+</footer>
+
+<script src="../assets/search-index.js" defer></script>
+<script src="../assets/js/main.js" defer></script>
+</body>
+</html>

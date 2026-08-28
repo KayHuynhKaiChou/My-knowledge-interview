@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="CDN, RedisBloom, upload file NestJS, HTTP caching, reverse proxy, Hyper-V, SSD vs HDD, GPU.">
+<title>Backend & Hạ tầng — Interview Knowledge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body data-root="../">
+
+<header class="topbar">
+  <a class="topbar-brand" href="../index.html" aria-label="Interview Knowledge — trang chủ">
+    <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true">
+      <defs><linearGradient id="ikBadge" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#f0b355"/><stop offset="1" stop-color="#b9752a"/>
+      </linearGradient></defs>
+      <rect x="2" y="2" width="60" height="60" rx="15" fill="url(#ikBadge)"/>
+      <path d="M21 21 L33 32 L21 43" fill="none" stroke="#0b0e13" stroke-width="7"
+            stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M37 43 H46" stroke="#0b0e13" stroke-width="7" stroke-linecap="round"/>
+    </svg>
+    <span class="brand-text">Interview Knowledge</span>
+  </a>
+  <nav class="topbar-nav">
+    <details class="nav-group has-active">
+      <summary>Backend</summary>
+      <div class="nav-dropdown">
+        <a href="../advanced-backend/index.html">Advanced Backend</a>
+        <a href="../backend-dotnet-nestjs/index.html">.NET &amp; NestJS</a>
+        <a href="../database-sql/index.html">Database &amp; SQL</a>
+        <a href="../backend-infrastructure/index.html" class="active">Hạ tầng</a>
+        <a href="../realtime-socket/index.html">Realtime &amp; Socket</a>
+        <a href="../case-studies/index.html">Case studies</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Frontend</summary>
+      <div class="nav-dropdown">
+        <a href="../javascript-core/index.html">JavaScript &amp; TS</a>
+        <a href="../react/index.html">React &amp; State</a>
+        <a href="../nextjs/index.html">Next.js</a>
+        <a href="../css-html/index.html">CSS &amp; HTML</a>
+        <a href="../browser-web-api/index.html">Browser &amp; Web API</a>
+        <a href="../react-native/index.html">React Native</a>
+        <a href="../frontend-tooling/index.html">Frontend Tooling</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Quy trình &amp; Nền tảng</summary>
+      <div class="nav-dropdown">
+        <a href="../git/index.html">Git</a>
+        <a href="../testing-environments/index.html">Testing</a>
+        <a href="../saas-platforms/index.html">SaaS &amp; Nền tảng</a>
+        <a href="../auth-blockchain/index.html">Auth &amp; Blockchain</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Khác</summary>
+      <div class="nav-dropdown">
+        <a href="../interview-intro/index.html">Giới thiệu &amp; English</a>
+        <a href="../project-notes/index.html">Ghi chú dự án</a>
+      </div>
+    </details>
+  </nav>
+  <button class="search-trigger" id="searchTrigger" aria-label="Tìm kiếm nội dung">
+    <span class="search-icon" aria-hidden="true">⌕</span>
+    <span class="search-label">Tìm kiếm</span>
+    <kbd>/</kbd>
+  </button>
+</header>
+
+<div class="search-overlay" id="searchOverlay" hidden>
+  <div class="search-box" role="dialog" aria-label="Tìm kiếm nội dung">
+    <input type="search" id="searchInput" autocomplete="off" spellcheck="false"
+           placeholder="Tìm trong toàn bộ nội dung — closure, saga, index, rebase…">
+    <div class="search-results" id="searchResults"></div>
+    <div class="search-hint">Enter mở mục · ↑↓ chọn · Esc đóng</div>
+  </div>
+</div>
+
+<div class="shell">
+  <button class="mobile-toggle" id="navToggle" aria-label="Mở mục lục">☰ Mục lục</button>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">Backend &amp; Hạ tầng</div>
+    <div class="brand-sub">9 mục &middot; sổ tay ôn phỏng vấn</div>
+
+    <div class="nav-block">
+      <p class="nav-label">Nội dung</p>
+      <ul class="nav-list">
+        <li><a href="#cdn"><span class="nav-num">01</span><span class="nav-text">CDN</span></a></li>
+        <li><a href="#redis-bloom"><span class="nav-num">02</span><span class="nav-text">RedisBloom / Bloom Filter</span></a></li>
+        <li><a href="#nestjs-file-upload"><span class="nav-num">03</span><span class="nav-text">Upload file trong NestJS</span></a></li>
+        <li><a href="#ssd-vs-hdd"><span class="nav-num">04</span><span class="nav-text">SSD vs HDD</span></a></li>
+        <li><a href="#gpu"><span class="nav-num">05</span><span class="nav-text">GPU</span></a></li>
+        <li><a href="#hyper-v"><span class="nav-num">06</span><span class="nav-text">Hyper-V</span></a></li>
+        <li><a href="#reverse-proxy"><span class="nav-num">07</span><span class="nav-text">Reverse Proxy</span></a></li>
+        <li><a href="#http-caching"><span class="nav-num">08</span><span class="nav-text">HTTP caching</span></a></li>
+        <li><a href="#thumbnail"><span class="nav-num">09</span><span class="nav-text">Thumbnail</span></a></li>
+      </ul>
+    </div>
+  </aside>
+  <main>
+    <div class="hero">
+      <div class="hero-kicker">Interview prep · Backend / Infrastructure</div>
+      <h1>Backend &amp; Hạ tầng</h1>
+      <p class="lede">Những khái niệm hạ tầng hay bị hỏi kèm sau phần backend: CDN, Bloom filter, HTTP caching, reverse proxy, ảo hoá và phần cứng ảnh hưởng thế nào tới hiệu năng hệ thống.</p>
+    </div>
+
+<!-- ============ CDN ============ -->
+    <section class="qa" id="cdn" data-nav="CDN">
+      <div class="q-tag"><span class="n">1</span> Khái niệm hạ tầng</div>
+      <h2 class="q-title">CDN là gì và đặt ở đâu trong hệ thống?</h2>
+      <div class="callout answer">
+        <span class="callout-label">Đáp án</span>
+        <p>CDN (Content Delivery Network) là hệ thống gồm nhiều máy chủ đặt ở nhiều vị trí địa lý khác nhau. Mục tiêu là phân phối nội dung tĩnh — hình ảnh, video, file JS/CSS, trang web tĩnh — tới người dùng nhanh hơn, bằng cách phục vụ từ máy chủ gần người dùng nhất thay vì luôn đi về origin server.</p>
+      </div>
+
+      <h3 class="sub">Lợi ích của việc dùng CDN</h3>
+      <table>
+        <thead><tr><th>Lợi ích</th><th>Giải thích</th></tr></thead>
+        <tbody>
+          <tr><td>Tăng tốc tải trang</td><td>Giảm độ trễ vì nội dung được tải từ máy chủ gần người dùng.</td></tr>
+          <tr><td>Giảm tải máy chủ gốc</td><td>CDN xử lý phần lớn các yêu cầu cho tài nguyên tĩnh.</td></tr>
+          <tr><td>Tăng khả năng chịu tải</td><td>Phục vụ nhiều người dùng cùng lúc mà origin không bị quá tải.</td></tr>
+          <tr><td>Bảo mật hơn</td><td>Nhiều CDN hỗ trợ chống DDoS, SSL/TLS, tường lửa ứng dụng (WAF).</td></tr>
+          <tr><td>Ổn định hơn</td><td>Nếu một máy chủ CDN gặp sự cố, các máy chủ khác tiếp quản.</td></tr>
+        </tbody>
+      </table>
+
+      <div class="interview-line">
+        <span class="callout-label">Trả lời mẫu khi phỏng vấn</span>
+        <p>"CDN nằm trước origin và chỉ phục vụ nội dung tĩnh: ảnh, video, bundle JS/CSS. Lợi ích lớn nhất không chỉ là tốc độ do phục vụ từ edge gần người dùng, mà còn là giảm tải cho server gốc — phần lớn request tĩnh không còn chạm tới backend, nên backend chỉ còn lo phần động. Ngoài ra CDN thường kèm sẵn chống DDoS và SSL nên cũng là một lớp bảo mật."</p>
+      </div>
+    </section>
+
+    <!-- ============ RedisBloom ============ -->
+    <section class="qa" id="redis-bloom" data-nav="RedisBloom / Bloom Filter">
+      <div class="q-tag"><span class="n">2</span> Khái niệm hạ tầng</div>
+      <h2 class="q-title">RedisBloom — Bloom Filter dùng để làm gì?</h2>
+      <p class="lede">Bloom filter là cấu trúc dữ liệu xác suất, trả lời câu hỏi “phần tử này <b>chắc chắn chưa từng có</b> hay <b>có thể đã có</b>” với bộ nhớ rất nhỏ. RedisBloom là module cung cấp cấu trúc này ngay trên Redis.</p>
+
+      <h3 class="sub">Dùng khi nào</h3>
+      <ul>
+        <li>Khi cần kiểm tra sự tồn tại của một phần tử trong tập cực lớn — ví dụ tìm 1 user trong hàng tỷ user — mà không muốn quét database.</li>
+        <li>Kết quả có thể <b>false positive</b> (báo “có thể có” dù thực tế không có), nhưng <b>không bao giờ false negative</b>: đã báo “chưa có” thì chắc chắn chưa có.</li>
+      </ul>
+
+      <div class="callout">
+        <span class="callout-label">Cách dùng thực tế</span>
+        <p>Đặt bloom filter trước database: nếu filter nói “chưa từng có” thì trả lời ngay, khỏi cần query. Chỉ khi filter nói “có thể có” mới đi xuống DB kiểm tra chính xác. Nhờ vậy phần lớn request tra cứu vô nghĩa bị chặn ở tầng Redis.</p>
+      </div>
+    </section>
+
+    <!-- ============ NestJS file upload ============ -->
+    <section class="qa" id="nestjs-file-upload" data-nav="Upload file trong NestJS">
+      <div class="q-tag"><span class="n">3</span> Backend / NestJS</div>
+      <h2 class="q-title"><code>@UseInterceptors(FileInterceptor('file'))</code> làm gì?</h2>
+      <p class="lede">Đây là cú pháp decorator của NestJS để xử lý upload file từ phía client. Nó dùng interceptor để can thiệp vào quá trình xử lý request, giúp NestJS trích xuất file từ <code>multipart/form-data</code>.</p>
+
+      <h3 class="sub">Giải thích từng phần</h3>
+      <h4 class="subsub"><code>@UseInterceptors(...)</code></h4>
+      <ul>
+        <li>Là decorator trong NestJS, dùng để áp dụng một hoặc nhiều interceptor cho route handler.</li>
+        <li>Interceptor là lớp trung gian cho phép xử lý logic trước và sau khi controller method chạy — giống middleware nhưng mạnh hơn.</li>
+      </ul>
+
+      <h4 class="subsub"><code>FileInterceptor('file')</code></h4>
+      <ul>
+        <li>Là interceptor do NestJS cung cấp qua thư viện <code>@nestjs/platform-express</code>.</li>
+        <li>Bên dưới nó dùng <code>multer</code> để xử lý việc upload file.</li>
+        <li><code>'file'</code> là <b>tên của field trong form</b> chứa file upload.</li>
+      </ul>
+
+      <div class="code-label neutral">Form phía client</div>
+      <pre><code>&lt;input type="file" name="file" /&gt;</code></pre>
+
+      <div class="code-label good">Controller phía NestJS</div>
+      <pre class="good"><code>@Post('upload')
+@UseInterceptors(FileInterceptor('file'))
+uploadFile(@UploadedFile() file: Express.Multer.File) {
+  // file.originalname, file.mimetype, file.buffer / file.path
+  return { name: file.originalname, size: file.size };
+}</code></pre>
+    </section>
+
+    <!-- ============ SSD vs HDD ============ -->
+    <section class="qa" id="ssd-vs-hdd" data-nav="SSD vs HDD">
+      <div class="q-tag"><span class="n">4</span> Phần cứng</div>
+      <h2 class="q-title">SSD khác HDD ở những điểm nào?</h2>
+      <table>
+        <thead><tr><th>Tiêu chí</th><th>SSD (Solid State Drive)</th><th>HDD (Hard Disk Drive)</th></tr></thead>
+        <tbody>
+          <tr><td>Tốc độ</td><td>Rất nhanh (đọc/ghi nhanh gấp 5–20 lần)</td><td>Chậm hơn nhiều so với SSD</td></tr>
+          <tr><td>Độ bền</td><td>Không có bộ phận cơ học, ít hỏng do va đập</td><td>Có bộ phận quay, dễ hỏng nếu bị rung lắc</td></tr>
+          <tr><td>Tiếng ồn</td><td>Hoạt động êm, không phát ra tiếng</td><td>Có thể phát ra tiếng khi hoạt động</td></tr>
+          <tr><td>Tiêu thụ điện</td><td>Ít điện năng hơn</td><td>Tốn nhiều điện năng hơn</td></tr>
+          <tr><td>Dung lượng phổ biến</td><td>128GB – 2TB</td><td>500GB – 10TB hoặc hơn</td></tr>
+          <tr><td>Giá thành (cùng dung lượng)</td><td>Đắt hơn (cao gấp 2–4 lần hoặc hơn)</td><td>Rẻ hơn nhiều</td></tr>
+          <tr><td>Khả năng phục hồi dữ liệu khi lỗi</td><td>Khó hơn nếu bị lỗi nặng</td><td>Dễ phục hồi dữ liệu hơn</td></tr>
+          <tr><td>Ứng dụng phù hợp</td><td>Laptop, gaming, làm việc chuyên nghiệp, hệ điều hành</td><td>Lưu trữ lớn, backup, camera giám sát…</td></tr>
+        </tbody>
+      </table>
+
+      <div class="callout">
+        <span class="callout-label">Liên hệ khi làm backend</span>
+        <p>Database đặt trên SSD giúp giảm mạnh thời gian random read — thứ mà index B-Tree phụ thuộc rất nhiều. Ngược lại, dữ liệu lịch sử / log ít truy cập thì để trên HDD dung lượng lớn sẽ rẻ hơn nhiều.</p>
+      </div>
+    </section>
+
+    <!-- ============ GPU ============ -->
+    <section class="qa" id="gpu" data-nav="GPU">
+      <div class="q-tag"><span class="n">5</span> Phần cứng</div>
+      <h2 class="q-title">GPU là gì, khác CPU chỗ nào?</h2>
+      <p>GPU (Graphics Processing Unit) là bộ xử lý đồ họa — con chip chuyên xử lý hình ảnh, màu sắc và chuyển động trên màn hình máy tính hoặc điện thoại.</p>
+      <p>Nhờ có hàng nghìn nhân hoạt động cùng lúc, GPU giúp giảm tải cho CPU khi chạy các tác vụ nặng. Điểm mấu chốt để trả lời phỏng vấn: CPU mạnh ở <b>xử lý tuần tự phức tạp với ít luồng</b>, còn GPU mạnh ở <b>xử lý song song rất nhiều phép tính đơn giản</b> — nên GPU cũng được dùng cho các tác vụ ngoài đồ họa như encode video, machine learning.</p>
+    </section>
+
+<section class="qa" id="hyper-v" data-nav="Hyper-V">
+      <div class="q-tag"><span class="n">6</span> Kiến thức nền</div>
+      <h2 class="q-title">Hyper-V</h2>
+      <p>là một công nghệ ảo hóa do Microsoft phát triển, cho phép tạo và quản lý các máy ảo trên hệ điều hành Windows. Nó được tích hợp sẵn trong các phiên bản Windows Server và một số phiên bản Windows Pro và Enterprise dành cho máy tính cá nhân.<b>Proxy</b></p>
+    </section>
+
+    <section class="qa" id="reverse-proxy" data-nav="Reverse Proxy">
+      <div class="q-tag"><span class="n">7</span> Kiến thức nền</div>
+      <h2 class="q-title">Reverse Proxy</h2>
+      <figure class="doc-figure"><img src="../assets/img/backend-infrastructure-reverse-proxy-01.png" alt="Minh hoạ" loading="lazy"></figure>
+    </section>
+
+    <section class="qa" id="http-caching" data-nav="HTTP caching">
+      <div class="q-tag"><span class="n">8</span> Kiến thức nền</div>
+      <h2 class="q-title">HTTP caching</h2>
+      <ul>
+        <li>là cơ chế giúp <b>trình duyệt (hoặc proxy)</b> lưu lại phản hồi từ server để <b>tái sử dụng</b> trong tương lai mà <b>không cần gửi lại request đến server</b>, từ đó:</li>
+        <li>Giảm tải server</li>
+        <li>Tăng tốc độ tải trang</li>
+        <li>Tiết kiệm băng thông</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="thumbnail" data-nav="Thumbnail">
+      <div class="q-tag"><span class="n">9</span> Kiến thức nền</div>
+      <h2 class="q-title">Thumbnail</h2>
+      <ul>
+        <li>là một phiên bản <b>rút gọn, nén, và thu nhỏ</b> của ảnh gốc, thường được dùng để:</li>
+        <li>Tăng tốc độ load UI</li>
+        <li>Hiển thị ảnh preview trong danh sách, gallery, video, bài viết, v.v.</li>
+        <li>Tiết kiệm băng thông</li>
+        <li>Giảm memory footprint khi render số lượng lớn ảnh</li>
+      </ul>
+    </section>
+  </main>
+</div>
+
+<footer>
+  Interview Knowledge — sổ tay ôn phỏng vấn tổng hợp từ ghi chép cá nhân.
+  Ưu tiên trả lời theo cấu trúc: vấn đề → giải pháp → vì sao chọn cách này thay vì cách khác.
+</footer>
+
+<script src="../assets/search-index.js" defer></script>
+<script src="../assets/js/main.js" defer></script>
+</body>
+</html>

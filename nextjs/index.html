@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="CSR/SSR/SSG, RSC payload, streaming, PPR, revalidation, prefetching, metadata, server-only.">
+<title>Next.js & Rendering — Interview Knowledge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body data-root="../">
+
+<header class="topbar">
+  <a class="topbar-brand" href="../index.html" aria-label="Interview Knowledge — trang chủ">
+    <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true">
+      <defs><linearGradient id="ikBadge" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#f0b355"/><stop offset="1" stop-color="#b9752a"/>
+      </linearGradient></defs>
+      <rect x="2" y="2" width="60" height="60" rx="15" fill="url(#ikBadge)"/>
+      <path d="M21 21 L33 32 L21 43" fill="none" stroke="#0b0e13" stroke-width="7"
+            stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M37 43 H46" stroke="#0b0e13" stroke-width="7" stroke-linecap="round"/>
+    </svg>
+    <span class="brand-text">Interview Knowledge</span>
+  </a>
+  <nav class="topbar-nav">
+    <details class="nav-group">
+      <summary>Backend</summary>
+      <div class="nav-dropdown">
+        <a href="../advanced-backend/index.html">Advanced Backend</a>
+        <a href="../backend-dotnet-nestjs/index.html">.NET &amp; NestJS</a>
+        <a href="../database-sql/index.html">Database &amp; SQL</a>
+        <a href="../backend-infrastructure/index.html">Hạ tầng</a>
+        <a href="../realtime-socket/index.html">Realtime &amp; Socket</a>
+        <a href="../case-studies/index.html">Case studies</a>
+      </div>
+    </details>
+    <details class="nav-group has-active">
+      <summary>Frontend</summary>
+      <div class="nav-dropdown">
+        <a href="../javascript-core/index.html">JavaScript &amp; TS</a>
+        <a href="../react/index.html">React &amp; State</a>
+        <a href="../nextjs/index.html" class="active">Next.js</a>
+        <a href="../css-html/index.html">CSS &amp; HTML</a>
+        <a href="../browser-web-api/index.html">Browser &amp; Web API</a>
+        <a href="../react-native/index.html">React Native</a>
+        <a href="../frontend-tooling/index.html">Frontend Tooling</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Quy trình &amp; Nền tảng</summary>
+      <div class="nav-dropdown">
+        <a href="../git/index.html">Git</a>
+        <a href="../testing-environments/index.html">Testing</a>
+        <a href="../saas-platforms/index.html">SaaS &amp; Nền tảng</a>
+        <a href="../auth-blockchain/index.html">Auth &amp; Blockchain</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Khác</summary>
+      <div class="nav-dropdown">
+        <a href="../interview-intro/index.html">Giới thiệu &amp; English</a>
+        <a href="../project-notes/index.html">Ghi chú dự án</a>
+      </div>
+    </details>
+  </nav>
+  <button class="search-trigger" id="searchTrigger" aria-label="Tìm kiếm nội dung">
+    <span class="search-icon" aria-hidden="true">⌕</span>
+    <span class="search-label">Tìm kiếm</span>
+    <kbd>/</kbd>
+  </button>
+</header>
+
+<div class="search-overlay" id="searchOverlay" hidden>
+  <div class="search-box" role="dialog" aria-label="Tìm kiếm nội dung">
+    <input type="search" id="searchInput" autocomplete="off" spellcheck="false"
+           placeholder="Tìm trong toàn bộ nội dung — closure, saga, index, rebase…">
+    <div class="search-results" id="searchResults"></div>
+    <div class="search-hint">Enter mở mục · ↑↓ chọn · Esc đóng</div>
+  </div>
+</div>
+
+<div class="shell">
+  <button class="mobile-toggle" id="navToggle" aria-label="Mở mục lục">☰ Mục lục</button>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">Next.js &amp; Rendering</div>
+    <div class="brand-sub">17 mục &middot; sổ tay ôn phỏng vấn</div>
+
+    <div class="nav-block">
+      <p class="nav-label">Nội dung</p>
+      <ul class="nav-list">
+        <li><a href="#generatemetadata"><span class="nav-num">01</span><span class="nav-text">generateMetadata</span></a></li>
+        <li><a href="#next-headers"><span class="nav-num">02</span><span class="nav-text">next/headers</span></a></li>
+        <li><a href="#csr"><span class="nav-num">03</span><span class="nav-text">CSR</span></a></li>
+        <li><a href="#ssr"><span class="nav-num">04</span><span class="nav-text">SSR</span></a></li>
+        <li><a href="#ssg"><span class="nav-num">05</span><span class="nav-text">SSG</span></a></li>
+        <li><a href="#server-rendering"><span class="nav-num">06</span><span class="nav-text">Server Rendering</span></a></li>
+        <li><a href="#revalidation"><span class="nav-num">07</span><span class="nav-text">Revalidation</span></a></li>
+        <li><a href="#prefetching"><span class="nav-num">08</span><span class="nav-text">Prefetching</span></a></li>
+        <li><a href="#streaming"><span class="nav-num">09</span><span class="nav-text">Streaming</span></a></li>
+        <li><a href="#interleaving"><span class="nav-num">10</span><span class="nav-text">Interleaving</span></a></li>
+        <li><a href="#phan-biet-client-comp-va-server-comp"><span class="nav-num">11</span><span class="nav-text">Phân biệt Client Comp và Server Comp</span></a></li>
+        <li><a href="#import-server-only"><span class="nav-num">12</span><span class="nav-text">import 'server-only'</span></a></li>
+        <li><a href="#partial-prerendering"><span class="nav-num">13</span><span class="nav-text">Partial Prerendering</span></a></li>
+        <li><a href="#cookies"><span class="nav-num">14</span><span class="nav-text">Cookies</span></a></li>
+        <li><a href="#pre-rendering"><span class="nav-num">15</span><span class="nav-text">Pre-rendering</span></a></li>
+        <li><a href="#metadata"><span class="nav-num">16</span><span class="nav-text">Metadata</span></a></li>
+        <li><a href="#open-graph-images"><span class="nav-num">17</span><span class="nav-text">Open Graph Images</span></a></li>
+      </ul>
+    </div>
+  </aside>
+  <main>
+    <div class="hero">
+      <div class="hero-kicker">Interview prep · Next.js / Rendering</div>
+      <h1>Next.js &amp; Rendering</h1>
+      <p class="lede">CSR, SSR, SSG và các cơ chế mới của App Router: RSC payload, streaming, partial prerendering, revalidation, prefetching và metadata.</p>
+    </div>
+
+<section class="qa" id="generatemetadata" data-nav="generateMetadata">
+      <div class="q-tag"><span class="n">1</span> React Native &amp; Libs</div>
+      <h2 class="q-title">generateMetadata</h2>
+      <ul>
+        <li>Đây là <b>hàm đặc biệt</b> trong Next.js App Router (từ Next.js 13)</li>
+        <li>Được khai báo <b>bên trong file </b><b>page.tsx</b>, hoặc layout.tsx</li>
+        <li>Được Next.js <b>tự động gọi</b> trong quá trình server render (hoặc static render)</li>
+        <li>Dùng để <b>tạo metadata (SEO, title, description, OpenGraph, Twitter Card, favicon, canonical...)</b>Tất cả thông tin này Next.js sẽ đưa vào &lt;head&gt; của HTML thông qua thẻ &lt;meta/&gt;</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="next-headers" data-nav="next/headers">
+      <div class="q-tag"><span class="n">2</span> React Native &amp; Libs</div>
+      <h2 class="q-title">next/headers</h2>
+      <ul>
+        <li>is an function that allows you to read the HTTP incoming request headers from a Server Components or Server Functions</li>
+        <li>Kể từ Next.js v15, headers() chuyển thành async – bạn phải sử dụng await hoặc React use()</li>
+        <li>các pair key-value default</li>
+      </ul>
+      <figure class="doc-figure"><img src="../assets/img/nextjs-next-headers-01.png" alt="Minh hoạ" loading="lazy"></figure>
+      <ul>
+        <li>Nếu muốn thêm 1 cặp key-value mới thì thêm tại <a href="http://middleware.ts" target="_blank" rel="noopener">middleware.ts</a></li>
+        <li>Code mẫu: trong page hoặc layout.tsx:</li>
+      </ul>
+      <pre><code>import { headers } from 'next/headers'const headersList = headers();</code></pre>
+      <p>const targetLocale = headersList.get(‘authorization’)</p>
+    </section>
+
+    <section class="qa" id="csr" data-nav="CSR">
+      <div class="q-tag"><span class="n">3</span> Next.js</div>
+      <h2 class="q-title">CSR</h2>
+      <ul>
+        <li>là quá trình render HTML trực tiếp tại client bằng JS , phù hợp cho các website động</li>
+        <li>Thường use với API</li>
+        <li>SEO kém vì con bot tìm kiếm có thể không xử lý tốt JavaScript.</li>
+        <li>Phổ biến trong SPA</li>
+        <li>Lần đầu tải chậm do chạy file JS , sau đó thì tải nhanh , ổn định</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="ssr" data-nav="SSR">
+      <div class="q-tag"><span class="n">4</span> Next.js</div>
+      <h2 class="q-title">SSR</h2>
+      <ul>
+        <li>là quá trình render HTML trực tiếp trên server trước khi trang web được gửi đến trình duyệt của người dùng. Thay vì chờ đến khi code JavaScript tải xong như CSR, người dùng sẽ nhận được HTML đã render từ trước.</li>
+        <li>Thường dùng trong MVC</li>
+        <li>SEO tốt hơn vì nội dung đã sẵn sàng trong HTML được gửi tới trình duyệt, giúp các bot tìm kiếm dễ dàng thu thập dữ liệu.</li>
+        <li>Phổ biến trong MPA</li>
+        <li>Lần đầu tải nhanh , sau đó tải chậm vì phải load lại cả trang</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="ssg" data-nav="SSG">
+      <div class="q-tag"><span class="n">5</span> Next.js</div>
+      <h2 class="q-title">SSG</h2>
+      <ul>
+        <li>là quá trình render HTML tĩnh tại thời điểm build, các file HTML tĩnh này sẽ đc lưu trong CDN hoặc server tĩnh nào đó. Khi user send request (lúc truy cập web), request này sẽ đưa tới CDN hoặc server tĩnh nhằm query để lấy HTML tĩnh phù hợp. Sau đó thực hiện hydrate với JS để gắn event , data dynamic , … cho HTML tĩnh này thành HTML động</li>
+        <li>chỉ có trong các framework như NextJS , Nuxt , …</li>
+        <li>không phù hợp với HTML động vì sau khi change data thì phải re-build lại , mà việc build là tốn time hơn, ví dụ mấy page như blog , introduce , … thì nên dùng SSG</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="server-rendering" data-nav="Server Rendering">
+      <div class="q-tag"><span class="n">6</span> Next.js</div>
+      <h2 class="q-title">Server Rendering</h2>
+      <ul>
+        <li>Layouts and Pages are React Server Components by default.- React Server Component will render into React Server Component Payload (RSCP)- Send RSCP to client</li>
+        <li>There are two types of server rendering:</li>
+        <li>Static Rendering (or Prerendering) happens at build time or during revalidation and the result is cached.</li>
+        <li>Dynamic Rendering happens at request time in response to a client request.</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="revalidation" data-nav="Revalidation">
+      <div class="q-tag"><span class="n">7</span> Next.js</div>
+      <h2 class="q-title">Revalidation</h2>
+      <ul>
+        <li>dùng trong ISR</li>
+        <li>là quá trình mà Next.js làm mới dữ liệu đã được cache, sau một khoảng thời gian hoặc một sự kiện, để đảm bảo nội dung trong cache vẫn mới và chính xác.</li>
+        <li>dùng cache() , revalidateTag() , revalidatePath()</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="prefetching" data-nav="Prefetching">
+      <div class="q-tag"><span class="n">8</span> Next.js</div>
+      <h2 class="q-title">Prefetching</h2>
+      <ul>
+        <li>là cơ chế <b>tải trước dữ liệu và JavaScript của một trang</b> trước khi người dùng thực sự click vào link đó, giúp <b>chuyển trang gần như tức thì</b>.</li>
+        <li>Mặc định, khi component Link của next <b>xuất hiện trong viewport</b> (scroll tới hoặc hiển thị), Next.js sẽ prefetching</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="streaming" data-nav="Streaming">
+      <div class="q-tag"><span class="n">9</span> Next.js</div>
+      <h2 class="q-title">Streaming</h2>
+      <ul>
+        <li>là quá trình cho phép server gửi 1 phần dynamic route tới client ngay khi chúng ok- ví dụ folder product có 3 file là layout.tsx, page.tsx, loading.tsx</li>
+        <li>server sẽ stream 2 file layout.tsx và loading.tsx lên client trước</li>
+        <li>sau đó stream nốt page.tsx lên</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="interleaving" data-nav="Interleaving">
+      <div class="q-tag"><span class="n">10</span> Next.js</div>
+      <h2 class="q-title">Interleaving</h2>
+      <p>cho phép bạn <b>truyền Server Component làm prop (</b><code>children</code><b> cũng được)</b> <b>vào Client Component</b>.</p>
+    </section>
+
+    <section class="qa" id="phan-biet-client-comp-va-server-comp" data-nav="Phân biệt Client Comp và Server Comp">
+      <div class="q-tag"><span class="n">11</span> Next.js</div>
+      <h2 class="q-title">Phân biệt Client Comp và Server Comp</h2>
+      <p>client comp</p>
+      <p>server comp</p>
+      <p>import</p>
+      <p>client comp ko thể import server comp</p>
+      <p>server comp có thể import client comp</p>
+      <p>nơi chạy</p>
+      <p>chạy trên trình duyệt của user</p>
+      <p>render trên server rồi gửi HTML tĩnh về client</p>
+      <p>react hooks, custom hooks</p>
+      <p>dùng đc useState, …</p>
+      <p>ko dùng đc</p>
+      <p>event handlers, Browser-only APIs (localstorage, …)</p>
+      <p>dùng đc</p>
+      <p>ko dùng đc</p>
+      <p>page.tsx và layout.tsx</p>
+      <p>ko phải client comp</p>
+      <p>default là server comp</p>
+      <p>Dấu hiệu nhận biết</p>
+      <ul>
+        <li>có ‘use client’</li>
+        <li>ko có ‘use client’ nhưng được import trong 1 component có ‘use client’ =&gt; nó cx là client comp , do client context</li>
+      </ul>
+      <p>ko có ‘use client’</p>
+      <p>Interleaving</p>
+      <p>Client comp có thể nhận prop (hoặc prop children) là server compVd: Modal (client) wrap Cart (server)</p>
+      <p>ko có</p>
+      <p>React context</p>
+      <p>comp A dùng hook createContext và return 1 .Provider =&gt; A phải có ‘use client’</p>
+      <p>bên server comp chỉ import component Provider (có ‘use client’)</p>
+      <p>Third-party components</p>
+      <p>Chỉ client comp mới có thể import lib UI bên ngoài (vd: lib carousel, …)</p>
+      <p>Nếu muốn dùng lib UI bên ngoài trong server comp thì phải wrap lib UI này = 1 component mới và comp này có ‘use client’, sau đó import component mới đó vào server comp</p>
+      <p>fetch để call API</p>
+      <ul>
+        <li>dùng fetch của browser (Window.fetch)</li>
+        <li>fetch của browser ko cache , chỉ run khi hydrate hay user trigger event (click button , …)</li>
+        <li>dùng fetch của Node (Next.js build-in)</li>
+        <li>fetch của Node có cache , revalidate , ISR , streaming</li>
+        <li>nên dùng khi mới navigate tới 1 page và auto call API sau đó</li>
+      </ul>
+      <p>process.env</p>
+      <p>ko nên dùng vì sẽ bị lộ ở client</p>
+      <p>dùng được</p>
+      <p>use() của react</p>
+      <ul>
+        <li>nếu use() của React 18 trở xuống (Next.js 13/14) thì KHÔNG dùng đc ở client</li>
+        <li>nếu use() ở React 19 thì dùng đc ở client</li>
+      </ul>
+      <p>use() bản nào cx dùng đc ở server</p>
+      <p>fetching data</p>
+      <p>dùng fetch, SWR , React query</p>
+      <p>dùng fetch , ORM database</p>
+      <p>server function</p>
+      <p>import dùng đc , hay dùng ở &lt;button formAction={createPost}&gt;Create&lt;/button&gt; hoặc&lt;form action={createPost}&gt;với createPost là 1 server funcbên cạnh đó có thể dùng useTransition chứa startTransition khi call server func</p>
+      <p>import dùng đc, thường hay dùng:&lt;form action={createPost}&gt; hoặc button với formAction</p>
+    </section>
+
+    <section class="qa" id="import-server-only" data-nav="import 'server-only'">
+      <div class="q-tag"><span class="n">12</span> Next.js</div>
+      <h2 class="q-title">import 'server-only'</h2>
+      <ul>
+        <li>Đây là <b>một module ảo</b> do Next.js cung cấp.</li>
+        <li>Mục đích: <b>Đánh dấu file này chỉ được chạy ở server side</b>.</li>
+        <li>Nếu lỡ <b>import file đó bên client</b> (component client, hoặc <code>use client</code>), nó sẽ <b>throw error</b> ngay.</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="partial-prerendering" data-nav="Partial Prerendering">
+      <div class="q-tag"><span class="n">13</span> Next.js</div>
+      <h2 class="q-title">Partial Prerendering</h2>
+      <ul>
+        <li>là sự kết hợp giữa SSG + SSR Streaming</li>
+        <li>cách config:</li>
+        <li><code>next.config.js</code> bật <b>global</b>.</li>
+        <li><code>export const experimental_ppr = true</code> bật local ngay trong file page hoặc layout.</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="cookies" data-nav="Cookies">
+      <div class="q-tag"><span class="n">14</span> Next.js</div>
+      <h2 class="q-title">Cookies</h2>
+      <ul>
+        <li>là 1 Server Action API chỉ dùng được trong Server Components hoặc Route Handlers. Nó cho phép đọc cookies từ HTTP request trong môi trường server, KHÔNG chạy ở client.</li>
+        <li>có thể dùng trong server function</li>
+        <li>import { cookies } from 'next/headers'</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="pre-rendering" data-nav="Pre-rendering">
+      <div class="q-tag"><span class="n">15</span> Next.js</div>
+      <h2 class="q-title">Pre-rendering</h2>
+      <ul>
+        <li>là Next.js <b>tạo HTML sẵn</b> cho mỗi trang <b>trước khi trình duyệt tải hay nói cách khác là nhận HTML từ server</b>. Điều này giúp trang hiển thị nhanh và SEO tốt hơn.</li>
+        <li>gồm có 2 loại là SSG và SSR</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="metadata" data-nav="Metadata">
+      <div class="q-tag"><span class="n">16</span> Next.js</div>
+      <h2 class="q-title">Metadata</h2>
+      <ul>
+        <li>Next.js cung cấp Metadata API để dễ dàng cấu hình các thẻ metadata như title, description, keywords, openGraph, twitter,... nhằm nâng cao hiệu quả SEO và cách hiển thị khi chia sẻ liên kế</li>
+        <li>Metadata được Next.js sinh ra tự động trong <code>&lt;head&gt;</code></li>
+        <li>Có hai cách chính để định nghĩa metadata:</li>
+      </ul>
+      <figure class="doc-figure"><img src="../assets/img/nextjs-metadata-01.png" alt="Minh hoạ" loading="lazy"></figure>
+    </section>
+
+    <section class="qa" id="open-graph-images" data-nav="Open Graph Images">
+      <div class="q-tag"><span class="n">17</span> Next.js</div>
+      <h2 class="q-title">Open Graph Images</h2>
+      <ul>
+        <li>là những hình đại diện xuất hiện khi bạn chia sẻ link lên các mạng xã hội — nó giúp nội dung của bạn bắt mắt và chuyên nghiệp hơn</li>
+        <li>các <b>cách tạo OG image trong Next:</b></li>
+        <li><b>OG image tĩnh bằng file convention</b></li>
+      </ul>
+      <figure class="doc-figure"><img src="../assets/img/nextjs-open-graph-images-01.png" alt="Minh hoạ" loading="lazy"></figure>
+      <p><b>OG image động bằng code (next/og)</b></p>
+      <figure class="doc-figure"><img src="../assets/img/nextjs-open-graph-images-02.png" alt="Minh hoạ" loading="lazy"></figure>
+      <p><b>Khai báo OG image qua Metadata API (URL ảnh có sẵn)</b></p>
+      <figure class="doc-figure"><img src="../assets/img/nextjs-open-graph-images-03.png" alt="Minh hoạ" loading="lazy"></figure>
+    </section>
+  </main>
+</div>
+
+<footer>
+  Interview Knowledge — sổ tay ôn phỏng vấn tổng hợp từ ghi chép cá nhân.
+  Ưu tiên trả lời theo cấu trúc: vấn đề → giải pháp → vì sao chọn cách này thay vì cách khác.
+</footer>
+
+<script src="../assets/search-index.js" defer></script>
+<script src="../assets/js/main.js" defer></script>
+</body>
+</html>

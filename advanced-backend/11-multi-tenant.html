@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Multi-tenant là gì, khi nào cần dùng, thiết kế sao cho đúng?">
+<title>11. Multi-tenant — Advanced Backend</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body data-root="../">
+
+<header class="topbar">
+  <a class="topbar-brand" href="../index.html" aria-label="Interview Knowledge — trang chủ">
+    <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true">
+      <defs><linearGradient id="ikBadge" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#f0b355"/><stop offset="1" stop-color="#b9752a"/>
+      </linearGradient></defs>
+      <rect x="2" y="2" width="60" height="60" rx="15" fill="url(#ikBadge)"/>
+      <path d="M21 21 L33 32 L21 43" fill="none" stroke="#0b0e13" stroke-width="7"
+            stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M37 43 H46" stroke="#0b0e13" stroke-width="7" stroke-linecap="round"/>
+    </svg>
+    <span class="brand-text">Interview Knowledge</span>
+  </a>
+  <nav class="topbar-nav">
+    <details class="nav-group has-active">
+      <summary>Backend</summary>
+      <div class="nav-dropdown">
+        <a href="../advanced-backend/index.html" class="active">Advanced Backend</a>
+        <a href="../backend-dotnet-nestjs/index.html">.NET &amp; NestJS</a>
+        <a href="../database-sql/index.html">Database &amp; SQL</a>
+        <a href="../backend-infrastructure/index.html">Hạ tầng</a>
+        <a href="../realtime-socket/index.html">Realtime &amp; Socket</a>
+        <a href="../case-studies/index.html">Case studies</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Frontend</summary>
+      <div class="nav-dropdown">
+        <a href="../javascript-core/index.html">JavaScript &amp; TS</a>
+        <a href="../react/index.html">React &amp; State</a>
+        <a href="../nextjs/index.html">Next.js</a>
+        <a href="../css-html/index.html">CSS &amp; HTML</a>
+        <a href="../browser-web-api/index.html">Browser &amp; Web API</a>
+        <a href="../react-native/index.html">React Native</a>
+        <a href="../frontend-tooling/index.html">Frontend Tooling</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Quy trình &amp; Nền tảng</summary>
+      <div class="nav-dropdown">
+        <a href="../git/index.html">Git</a>
+        <a href="../testing-environments/index.html">Testing</a>
+        <a href="../saas-platforms/index.html">SaaS &amp; Nền tảng</a>
+        <a href="../auth-blockchain/index.html">Auth &amp; Blockchain</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Khác</summary>
+      <div class="nav-dropdown">
+        <a href="../interview-intro/index.html">Giới thiệu &amp; English</a>
+        <a href="../project-notes/index.html">Ghi chú dự án</a>
+      </div>
+    </details>
+  </nav>
+  <button class="search-trigger" id="searchTrigger" aria-label="Tìm kiếm nội dung">
+    <span class="search-icon" aria-hidden="true">⌕</span>
+    <span class="search-label">Tìm kiếm</span>
+    <kbd>/</kbd>
+  </button>
+</header>
+
+<div class="search-overlay" id="searchOverlay" hidden>
+  <div class="search-box" role="dialog" aria-label="Tìm kiếm nội dung">
+    <input type="search" id="searchInput" autocomplete="off" spellcheck="false"
+           placeholder="Tìm trong toàn bộ nội dung — closure, saga, index, rebase…">
+    <div class="search-results" id="searchResults"></div>
+    <div class="search-hint">Enter mở mục · ↑↓ chọn · Esc đóng</div>
+  </div>
+</div>
+
+<div class="shell">
+  <button class="mobile-toggle" id="navToggle" aria-label="Mở mục lục">☰ Mục lục</button>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">Advanced Backend</div>
+    <div class="brand-sub">12 mục &middot; sổ tay ôn phỏng vấn</div>
+
+    <div class="nav-block">
+      <p class="nav-label">Nội dung</p>
+      <ul class="nav-list">
+        <li><a href="01-race-condition-lock-deadlock.html"><span class="nav-num">01</span><span class="nav-text">Race Condition, Lock &amp; Deadlock</span></a></li>
+        <li><a href="02-idempotency.html"><span class="nav-num">02</span><span class="nav-text">Idempotency</span></a></li>
+        <li><a href="03-distributed-transaction-saga.html"><span class="nav-num">03</span><span class="nav-text">Transaction xuyên service</span></a></li>
+        <li><a href="04-queue-async-processing.html"><span class="nav-num">04</span><span class="nav-text">Queue &amp; Async Processing</span></a></li>
+        <li><a href="05-rate-limiting.html"><span class="nav-num">05</span><span class="nav-text">Rate Limiting</span></a></li>
+        <li><a href="06-database-query-optimization.html"><span class="nav-num">06</span><span class="nav-text">Tối ưu Database &amp; Query</span></a></li>
+        <li><a href="07-redis-caching.html"><span class="nav-num">07</span><span class="nav-text">Redis &mdash; khái niệm &amp; case study</span></a></li>
+        <li><a href="08-scalability-pagination.html"><span class="nav-num">08</span><span class="nav-text">Scalability &amp; Pagination</span></a></li>
+        <li><a href="09-database-index.html"><span class="nav-num">09</span><span class="nav-text">Index &mdash; cơ chế &amp; đánh đổi</span></a></li>
+        <li><a href="10-background-job.html"><span class="nav-num">10</span><span class="nav-text">Background Job</span></a></li>
+        <li><a href="11-multi-tenant.html" class="active"><span class="nav-num">11</span><span class="nav-text">Multi-tenant</span></a></li>
+        <li><a href="12-api-design.html"><span class="nav-num">12</span><span class="nav-text">API Design</span></a></li>
+      </ul>
+    </div>
+
+    <div class="nav-block">
+      <p class="nav-label">Trong trang này</p>
+      <div id="pageToc"></div>
+    </div>
+  </aside>
+  <main>
+    <div class="crumb">
+      <a href="index.html">Advanced Backend</a>
+      <span class="sep">/</span>
+      <span>Câu 11</span>
+    </div>
+
+    <section class="qa" id="q11">
+      <div class="q-tag"><span class="n">11</span> Câu hỏi ứng dụng thường gặp</div>
+      <h2 class="q-title">"Multi-tenant là gì, khi nào cần dùng, thiết kế sao cho đúng?"</h2>
+
+      <h3 class="sub">11.1 — Multi-tenant là gì</h3>
+      <p>Multi-tenant (đa khách thuê) là mô hình kiến trúc trong đó <b>1 hệ thống phần mềm duy nhất phục vụ nhiều khách hàng (tenant) khác nhau</b>, mỗi khách hàng có dữ liệu riêng, cấu hình riêng, nhưng đều dùng chung <b>1 codebase, 1 hạ tầng triển khai</b> — thay vì phải dựng riêng 1 bản cài đặt (instance) hoàn toàn tách biệt cho mỗi khách hàng.</p>
+      <p>Đây chính là mô hình đứng sau hầu hết các sản phẩm SaaS (Software as a Service) — ví dụ Slack, Shopify, hay 1 hệ thống quản lý nhân sự bán cho nhiều công ty khác nhau: mỗi công ty là 1 "tenant", đăng nhập vào cùng 1 hệ thống nhưng chỉ nhìn thấy dữ liệu của chính công ty mình, hoàn toàn không thấy được dữ liệu của công ty khác.</p>
+
+      <h3 class="sub">11.2 — Khi nào cần dùng multi-tenant</h3>
+      <ul>
+        <li>Xây dựng sản phẩm <b>SaaS bán cho nhiều khách hàng doanh nghiệp</b> (B2B) — mỗi khách hàng là 1 tổ chức riêng biệt, cần cách ly dữ liệu rõ ràng.</li>
+        <li>Muốn <b>tiết kiệm chi phí vận hành</b> — quản lý 1 hệ thống chung dễ hơn nhiều so với dựng và bảo trì hàng trăm bản cài đặt riêng lẻ cho từng khách hàng.</li>
+        <li>Cần <b>deploy tính năng mới đồng loạt</b> cho mọi khách hàng cùng lúc, thay vì phải cập nhật thủ công từng instance riêng.</li>
+        <li><b>Không nên</b> dùng multi-tenant nếu khách hàng yêu cầu cách ly tuyệt đối ở tầng hạ tầng vật lý (ví dụ ngành ngân hàng, y tế có quy định pháp lý bắt buộc dữ liệu phải nằm trên hạ tầng riêng hoàn toàn) — lúc đó vẫn phải cân nhắc single-tenant (mỗi khách 1 instance riêng) dù tốn chi phí vận hành hơn.</li>
+      </ul>
+
+      <h3 class="sub">11.3 — 3 mô hình kiến trúc multi-tenant phổ biến</h3>
+      <table>
+        <thead><tr><th>Mô hình</th><th>Cách hoạt động</th><th>Ưu điểm</th><th>Nhược điểm</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><b>Database per tenant</b><br>(Silo model)</td>
+            <td>Mỗi tenant có 1 database riêng biệt hoàn toàn, cùng chung code ứng dụng</td>
+            <td>Cách ly dữ liệu mạnh nhất, dễ backup/restore riêng từng khách, dễ đáp ứng yêu cầu compliance</td>
+            <td>Tốn chi phí hạ tầng (N tenant = N database), khó quản lý migration đồng loạt (phải chạy trên từng DB)</td>
+          </tr>
+          <tr>
+            <td><b>Schema per tenant</b><br>(Bridge model)</td>
+            <td>Chung 1 database, nhưng mỗi tenant có 1 schema riêng (PostgreSQL hỗ trợ tốt mô hình này)</td>
+            <td>Cân bằng giữa cách ly và tiết kiệm chi phí — vẫn tách bảng riêng nhưng chung 1 connection pool, 1 server DB</td>
+            <td>Vẫn giới hạn số lượng tenant tối đa 1 DB có thể chứa nổi (hàng nghìn schema có thể làm chậm DB), migration vẫn phải chạy trên từng schema</td>
+          </tr>
+          <tr>
+            <td><b>Shared database, shared schema</b><br>(Pool model)</td>
+            <td>Tất cả tenant dùng chung 1 database, 1 schema, 1 bộ bảng — phân biệt dữ liệu bằng 1 cột <code>tenant_id</code> trên mỗi bảng</td>
+            <td>Tiết kiệm chi phí nhất, dễ scale số lượng tenant lên rất lớn, migration chạy 1 lần cho tất cả</td>
+            <td>Rủi ro cao nhất nếu code quên lọc <code>tenant_id</code> — dễ rò rỉ dữ liệu chéo giữa các tenant nếu lập trình viên sơ suất</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 class="sub">11.4 — Ví dụ 1 dự án cụ thể: hệ thống giám sát nhân sự bán cho nhiều công ty</h3>
+      <p>Giả sử xây dựng 1 sản phẩm SaaS theo dõi giờ làm việc, chấm công, năng suất nhân viên — bán cho nhiều công ty khách hàng khác nhau (công ty A, công ty B, công ty C...). Mỗi công ty là 1 tenant, có nhân viên riêng, báo cáo riêng, cấu hình quy tắc chấm công riêng (ví dụ công ty A tính giờ làm theo ca, công ty B tính theo giờ hành chính cố định).</p>
+      <p>Chọn mô hình <b>Shared database + <code>tenant_id</code></b> (Pool model) vì số lượng khách hàng có thể lên tới hàng trăm, hàng nghìn công ty nhỏ — dựng riêng DB cho từng công ty sẽ quá tốn kém và khó vận hành:</p>
+      <pre><code>-- Mọi bảng nghiệp vụ đều có thêm cột tenant_id
+CREATE TABLE employees (
+  id BIGINT PRIMARY KEY,
+  tenant_id BIGINT NOT NULL,   -- xác định thuộc công ty nào
+  name VARCHAR(255),
+  email VARCHAR(255)
+);
+
+CREATE TABLE attendance_logs (
+  id BIGINT PRIMARY KEY,
+  tenant_id BIGINT NOT NULL,
+  employee_id BIGINT,
+  check_in_time TIMESTAMP,
+  check_out_time TIMESTAMP
+);
+
+-- Composite index luôn đặt tenant_id làm cột đầu (xem lại mục 9.2)
+CREATE INDEX idx_tenant_employee ON attendance_logs (tenant_id, employee_id, check_in_time);</code></pre>
+      <p><b>Mọi query đều bắt buộc lọc theo <code>tenant_id</code></b>, không có ngoại lệ:</p>
+      <pre class="bad"><code>-- SAI — quên lọc tenant_id, sẽ trả về dữ liệu của TẤT CẢ công ty trộn lẫn
+SELECT * FROM employees WHERE id = 105;</code></pre>
+      <pre class="good"><code>-- ĐÚNG — luôn kèm tenant_id trong mọi câu query
+SELECT * FROM employees WHERE id = 105 AND tenant_id = 42;</code></pre>
+
+      <h4 class="subsub">Xác định tenant nào đang gọi request — resolve tenant_id ở đâu</h4>
+      <p>Thường xác định tenant qua 1 trong các cách: subdomain riêng cho từng công ty (<code>company-a.example.com</code>), header riêng (<code>X-Tenant-ID</code>), hoặc lấy từ thông tin user đã đăng nhập (JWT payload có sẵn <code>tenant_id</code>). Cách phổ biến và an toàn nhất là lấy từ JWT sau khi xác thực — tránh để FE tự gửi <code>tenant_id</code> trong query param (dễ bị giả mạo, gửi sai tenant_id của công ty khác).</p>
+      <pre><code>// NestJS — Guard hoặc Middleware trích tenant_id từ JWT đã xác thực
+@Injectable()
+export class TenantMiddleware implements NestMiddleware {
+  use(req: Request, res: Response, next: NextFunction) {
+    const payload = req['user']; // đã được set bởi JwtAuthGuard chạy trước đó
+    req['tenantId'] = payload.tenantId; // gắn tenantId vào request, dùng xuyên suốt
+    next();
+  }
+}
+
+// employee.service.ts — LUÔN nhận tenantId, không bao giờ query thiếu điều kiện này
+async findEmployeeById(tenantId: number, employeeId: number) {
+  return this.employeeRepo.findOne({
+    where: { id: employeeId, tenantId },   // bắt buộc luôn có tenantId trong where
+  });
+}</code></pre>
+      <div class="callout">
+        <span class="callout-label">Rủi ro lớn nhất của Pool model — và cách phòng ngừa</span>
+        <p>Chỉ cần 1 chỗ trong code quên thêm điều kiện <code>tenant_id</code>, dữ liệu của công ty này có thể lộ sang công ty khác — hậu quả nghiêm trọng cho 1 SaaS B2B. Cách phòng ngừa thực tế: dùng <b>Row-Level Security (RLS)</b> của PostgreSQL để DB tự động lọc theo <code>tenant_id</code> ở tầng database, không phụ thuộc hoàn toàn vào việc lập trình viên nhớ thêm điều kiện ở tầng code; hoặc dùng 1 base repository/base query builder dùng chung, tự động inject <code>tenant_id</code> vào mọi query, tránh lặp lại thủ công dễ sót ở từng chỗ gọi.</p>
+      </div>
+
+      <div class="interview-line">
+        <span class="callout-label">Trả lời mẫu khi phỏng vấn</span>
+        <p>"Multi-tenant là kiến trúc 1 hệ thống phục vụ nhiều khách hàng khác nhau nhưng dùng chung codebase và hạ tầng, mỗi khách hàng là 1 tenant với dữ liệu tách biệt. Em chọn giữa 3 mô hình tuỳ quy mô: database riêng cho từng tenant nếu cần cách ly mạnh và số lượng khách ít, schema riêng nếu cần cân bằng, hoặc shared schema với cột tenant_id nếu cần scale số lượng tenant lớn và tiết kiệm chi phí. Với shared schema, rủi ro lớn nhất là quên lọc tenant_id gây rò rỉ dữ liệu chéo, nên em luôn xác định tenant từ JWT đã xác thực chứ không tin dữ liệu FE tự gửi lên, và cân nhắc dùng Row-Level Security ở tầng DB làm lớp bảo vệ thứ 2 phòng khi code có sai sót."</p>
+      </div>
+    </section>
+
+    <nav class="pager">
+      <a class="prev" href="10-background-job.html"><span class="pager-dir">← Câu trước</span><span class="pager-title">10. Background Job</span></a>
+      <a class="next" href="12-api-design.html"><span class="pager-dir">Câu tiếp theo →</span><span class="pager-title">12. API Design</span></a>
+    </nav>
+  </main>
+</div>
+
+<footer>
+  Interview Knowledge — sổ tay ôn phỏng vấn tổng hợp từ ghi chép cá nhân.
+  Ưu tiên trả lời theo cấu trúc: vấn đề → giải pháp → vì sao chọn cách này thay vì cách khác.
+</footer>
+
+<script src="../assets/search-index.js" defer></script>
+<script src="../assets/js/main.js" defer></script>
+</body>
+</html>

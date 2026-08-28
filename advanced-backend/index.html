@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="12 câu hỏi chuyên sâu về concurrency, lock, idempotency, saga, queue, cache, index và API design — kèm code và câu trả lời mẫu.">
+<title>Advanced Backend — Interview Knowledge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body data-root="../">
+
+<header class="topbar">
+  <a class="topbar-brand" href="../index.html" aria-label="Interview Knowledge — trang chủ">
+    <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true">
+      <defs><linearGradient id="ikBadge" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#f0b355"/><stop offset="1" stop-color="#b9752a"/>
+      </linearGradient></defs>
+      <rect x="2" y="2" width="60" height="60" rx="15" fill="url(#ikBadge)"/>
+      <path d="M21 21 L33 32 L21 43" fill="none" stroke="#0b0e13" stroke-width="7"
+            stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M37 43 H46" stroke="#0b0e13" stroke-width="7" stroke-linecap="round"/>
+    </svg>
+    <span class="brand-text">Interview Knowledge</span>
+  </a>
+  <nav class="topbar-nav">
+    <details class="nav-group has-active">
+      <summary>Backend</summary>
+      <div class="nav-dropdown">
+        <a href="../advanced-backend/index.html" class="active">Advanced Backend</a>
+        <a href="../backend-dotnet-nestjs/index.html">.NET &amp; NestJS</a>
+        <a href="../database-sql/index.html">Database &amp; SQL</a>
+        <a href="../backend-infrastructure/index.html">Hạ tầng</a>
+        <a href="../realtime-socket/index.html">Realtime &amp; Socket</a>
+        <a href="../case-studies/index.html">Case studies</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Frontend</summary>
+      <div class="nav-dropdown">
+        <a href="../javascript-core/index.html">JavaScript &amp; TS</a>
+        <a href="../react/index.html">React &amp; State</a>
+        <a href="../nextjs/index.html">Next.js</a>
+        <a href="../css-html/index.html">CSS &amp; HTML</a>
+        <a href="../browser-web-api/index.html">Browser &amp; Web API</a>
+        <a href="../react-native/index.html">React Native</a>
+        <a href="../frontend-tooling/index.html">Frontend Tooling</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Quy trình &amp; Nền tảng</summary>
+      <div class="nav-dropdown">
+        <a href="../git/index.html">Git</a>
+        <a href="../testing-environments/index.html">Testing</a>
+        <a href="../saas-platforms/index.html">SaaS &amp; Nền tảng</a>
+        <a href="../auth-blockchain/index.html">Auth &amp; Blockchain</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Khác</summary>
+      <div class="nav-dropdown">
+        <a href="../interview-intro/index.html">Giới thiệu &amp; English</a>
+        <a href="../project-notes/index.html">Ghi chú dự án</a>
+      </div>
+    </details>
+  </nav>
+  <button class="search-trigger" id="searchTrigger" aria-label="Tìm kiếm nội dung">
+    <span class="search-icon" aria-hidden="true">⌕</span>
+    <span class="search-label">Tìm kiếm</span>
+    <kbd>/</kbd>
+  </button>
+</header>
+
+<div class="search-overlay" id="searchOverlay" hidden>
+  <div class="search-box" role="dialog" aria-label="Tìm kiếm nội dung">
+    <input type="search" id="searchInput" autocomplete="off" spellcheck="false"
+           placeholder="Tìm trong toàn bộ nội dung — closure, saga, index, rebase…">
+    <div class="search-results" id="searchResults"></div>
+    <div class="search-hint">Enter mở mục · ↑↓ chọn · Esc đóng</div>
+  </div>
+</div>
+
+<div class="shell">
+  <button class="mobile-toggle" id="navToggle" aria-label="Mở mục lục">☰ Mục lục</button>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">Advanced Backend</div>
+    <div class="brand-sub">12 mục &middot; sổ tay ôn phỏng vấn</div>
+
+    <div class="nav-block">
+      <p class="nav-label">Nội dung</p>
+      <ul class="nav-list">
+        <li><a href="01-race-condition-lock-deadlock.html"><span class="nav-num">01</span><span class="nav-text">Race Condition, Lock &amp; Deadlock</span></a></li>
+        <li><a href="02-idempotency.html"><span class="nav-num">02</span><span class="nav-text">Idempotency</span></a></li>
+        <li><a href="03-distributed-transaction-saga.html"><span class="nav-num">03</span><span class="nav-text">Transaction xuyên service</span></a></li>
+        <li><a href="04-queue-async-processing.html"><span class="nav-num">04</span><span class="nav-text">Queue &amp; Async Processing</span></a></li>
+        <li><a href="05-rate-limiting.html"><span class="nav-num">05</span><span class="nav-text">Rate Limiting</span></a></li>
+        <li><a href="06-database-query-optimization.html"><span class="nav-num">06</span><span class="nav-text">Tối ưu Database &amp; Query</span></a></li>
+        <li><a href="07-redis-caching.html"><span class="nav-num">07</span><span class="nav-text">Redis &mdash; khái niệm &amp; case study</span></a></li>
+        <li><a href="08-scalability-pagination.html"><span class="nav-num">08</span><span class="nav-text">Scalability &amp; Pagination</span></a></li>
+        <li><a href="09-database-index.html"><span class="nav-num">09</span><span class="nav-text">Index &mdash; cơ chế &amp; đánh đổi</span></a></li>
+        <li><a href="10-background-job.html"><span class="nav-num">10</span><span class="nav-text">Background Job</span></a></li>
+        <li><a href="11-multi-tenant.html"><span class="nav-num">11</span><span class="nav-text">Multi-tenant</span></a></li>
+        <li><a href="12-api-design.html"><span class="nav-num">12</span><span class="nav-text">API Design</span></a></li>
+      </ul>
+    </div>
+  </aside>
+  <main>
+    <div class="hero">
+      <div class="hero-kicker">Interview prep · Backend / Payment System</div>
+      <h1>Advanced Backend — 12 câu hỏi phỏng vấn thường gặp</h1>
+      <p class="lede">Từ bài toán kinh điển “2 request cùng trừ tiền 1 tài khoản” cho tới idempotency, saga, queue, cache, index và API design. Mỗi câu hỏi là một trang riêng, kèm ví dụ code, so sánh thực tế và câu trả lời mẫu dùng được ngay khi phỏng vấn.</p>
+    </div>
+
+    <p class="nav-label">Mục lục</p>
+    <div class="topic-grid">
+      <a class="topic-card" href="01-race-condition-lock-deadlock.html">
+        <span class="card-num">CÂU 01</span>
+        <h3>Race Condition, Lock &amp; Deadlock</h3>
+        <p>Hai request cùng trừ tiền một tài khoản: khoảng hở đọc&ndash;ghi, pessimistic vs optimistic lock, và cách tránh deadlock.</p>
+      </a>
+      <a class="topic-card" href="02-idempotency.html">
+        <span class="card-num">CÂU 02</span>
+        <h3>Idempotency</h3>
+        <p>User bấm thanh toán 2 lần do mạng chậm &mdash; idempotency key, unique constraint và retry an toàn.</p>
+      </a>
+      <a class="topic-card" href="03-distributed-transaction-saga.html">
+        <span class="card-num">CÂU 03</span>
+        <h3>Transaction xuyên service</h3>
+        <p>Order &ndash; payment &ndash; inventory: saga, outbox pattern, compensation thay cho distributed transaction.</p>
+      </a>
+      <a class="topic-card" href="04-queue-async-processing.html">
+        <span class="card-num">CÂU 04</span>
+        <h3>Queue &amp; Async Processing</h3>
+        <p>1000 request thanh toán cùng lúc: tách xử lý đồng bộ sang hàng đợi, worker, backpressure và retry.</p>
+      </a>
+      <a class="topic-card" href="05-rate-limiting.html">
+        <span class="card-num">CÂU 05</span>
+        <h3>Rate Limiting</h3>
+        <p>Chặn spam rút tiền / đặt hàng: fixed window, sliding window, token bucket và nơi đặt rate limit.</p>
+      </a>
+      <a class="topic-card" href="06-database-query-optimization.html">
+        <span class="card-num">CÂU 06</span>
+        <h3>Tối ưu Database &amp; Query</h3>
+        <p>Bảng transaction log hàng chục triệu row: index, partition, archive và cách đọc EXPLAIN.</p>
+      </a>
+      <a class="topic-card" href="07-redis-caching.html">
+        <span class="card-num">CÂU 07</span>
+        <h3>Redis &mdash; khái niệm &amp; case study</h3>
+        <p>Redis dùng ở đâu trong dự án thật: cache, lock phân tán, rate limit, session và hàng đợi nhẹ.</p>
+      </a>
+      <a class="topic-card" href="08-scalability-pagination.html">
+        <span class="card-num">CÂU 08</span>
+        <h3>Scalability &amp; Pagination</h3>
+        <p>API trả về 10.000 record: offset vs cursor-based pagination, chi phí thực tế của mỗi cách.</p>
+      </a>
+      <a class="topic-card" href="09-database-index.html">
+        <span class="card-num">CÂU 09</span>
+        <h3>Index &mdash; cơ chế &amp; đánh đổi</h3>
+        <p>B-Tree hoạt động ra sao, composite index, và cái giá phải trả khi index quá nhiều.</p>
+      </a>
+      <a class="topic-card" href="10-background-job.html">
+        <span class="card-num">CÂU 10</span>
+        <h3>Background Job</h3>
+        <p>Khi nào tách tác vụ ra chạy nền thay vì xử lý ngay trong request, và cách đảm bảo job không mất.</p>
+      </a>
+      <a class="topic-card" href="11-multi-tenant.html">
+        <span class="card-num">CÂU 11</span>
+        <h3>Multi-tenant</h3>
+        <p>Shared schema, schema riêng hay database riêng &mdash; chọn theo quy mô và yêu cầu cách ly dữ liệu.</p>
+      </a>
+      <a class="topic-card" href="12-api-design.html">
+        <span class="card-num">CÂU 12</span>
+        <h3>API Design</h3>
+        <p>REST vs GraphQL vs gRPC, versioning, idempotent method và chuẩn hoá format response / error.</p>
+      </a>
+    </div>
+  </main>
+</div>
+
+<footer>
+  Interview Knowledge — sổ tay ôn phỏng vấn tổng hợp từ ghi chép cá nhân.
+  Ưu tiên trả lời theo cấu trúc: vấn đề → giải pháp → vì sao chọn cách này thay vì cách khác.
+</footer>
+
+<script src="../assets/search-index.js" defer></script>
+<script src="../assets/js/main.js" defer></script>
+</body>
+</html>

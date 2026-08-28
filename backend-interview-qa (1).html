@@ -1,0 +1,1886 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Backend Concurrency & Payment — Sổ tay phỏng vấn</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0e13;
+    --bg-raised:#12161d;
+    --bg-card:#151a22;
+    --ledger:#0f1319;
+    --border:#232a35;
+    --border-soft:#1c222c;
+    --ink:#dbe2ea;
+    --ink-dim:#8b95a5;
+    --ink-faint:#5c6577;
+    --amber:#e8a33d;
+    --amber-dim:#8a6a3a;
+    --teal:#4fd1c5;
+    --teal-dim:#2c6b66;
+    --red:#e0654f;
+    --green:#6fcf97;
+    --serif:'Source Serif 4', Georgia, serif;
+    --display:'Space Grotesk', sans-serif;
+    --mono:'JetBrains Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--serif);
+    font-size:16px;
+    line-height:1.65;
+  }
+  ::selection{background:var(--amber-dim); color:#fff;}
+
+  /* subtle ledger-line texture on background */
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    background-image: repeating-linear-gradient(to bottom, transparent, transparent 27px, rgba(255,255,255,0.012) 28px);
+    pointer-events:none;
+    z-index:0;
+  }
+
+  a{color:var(--teal);}
+
+  /* ---------- Layout ---------- */
+  .shell{
+    display:grid;
+    grid-template-columns:280px 1fr;
+    min-height:100vh;
+    position:relative;
+    z-index:1;
+  }
+  @media (max-width: 900px){
+    .shell{grid-template-columns:1fr;}
+  }
+
+  /* ---------- Sidebar ---------- */
+  .sidebar{
+    border-right:1px solid var(--border);
+    padding:32px 24px;
+    position:sticky;
+    top:0;
+    height:100vh;
+    overflow-y:auto;
+    background:linear-gradient(180deg, var(--bg-raised), var(--bg));
+  }
+  @media (max-width: 900px){
+    .sidebar{position:relative; height:auto; border-right:none; border-bottom:1px solid var(--border);}
+  }
+  .brand{
+    font-family:var(--display);
+    font-weight:700;
+    font-size:14px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--amber);
+    margin-bottom:4px;
+  }
+  .brand-sub{
+    font-family:var(--mono);
+    font-size:11.5px;
+    color:var(--ink-faint);
+    margin-bottom:28px;
+    line-height:1.5;
+  }
+  .nav-label{
+    font-family:var(--mono);
+    font-size:10.5px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--ink-faint);
+    margin:0 0 12px 2px;
+  }
+  .nav-list{list-style:none; margin:0; padding:0;}
+  .nav-list li{margin-bottom:2px;}
+  .nav-list a{
+    display:flex;
+    gap:10px;
+    align-items:baseline;
+    padding:8px 10px;
+    border-radius:6px;
+    text-decoration:none;
+    color:var(--ink-dim);
+    font-family:var(--display);
+    font-size:13.5px;
+    font-weight:500;
+    transition:background .15s ease, color .15s ease;
+    border-left:2px solid transparent;
+  }
+  .nav-list a:hover{background:var(--bg-card); color:var(--ink);}
+  .nav-list a.active{
+    background:var(--bg-card);
+    color:var(--amber);
+    border-left:2px solid var(--amber);
+  }
+  .nav-num{
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--ink-faint);
+    min-width:16px;
+  }
+  .nav-list a.active .nav-num{color:var(--amber);}
+
+  /* ---------- Main ---------- */
+  main{padding:56px 48px 120px; max-width:880px;}
+  @media (max-width: 700px){ main{padding:40px 20px 100px;} }
+  @media (max-width: 480px){
+    main{padding:32px 16px 90px;}
+    .hero{margin-bottom:44px;}
+    .hero p{font-size:15.5px;}
+    h2.q-title{font-size:21px;}
+    h3.sub{font-size:15px; margin:28px 0 12px;}
+    pre{padding:14px 14px; font-size:12px;}
+    table{font-size:12.5px;}
+    thead th, tbody td{padding:10px 10px;}
+    .q-tag{font-size:11px;}
+    section.qa{margin-bottom:56px;}
+    section.qa + section.qa{padding-top:40px;}
+  }
+  /* tables: allow horizontal scroll on narrow screens without breaking column alignment */
+  @media (max-width: 700px){
+    table{display:block; overflow-x:auto; -webkit-overflow-scrolling:touch; white-space:nowrap;}
+    thead th, tbody td{white-space:normal; min-width:130px;}
+  }
+  pre{ -webkit-overflow-scrolling:touch; }
+  img, svg{max-width:100%;}
+
+  .hero{margin-bottom:64px;}
+  .hero-kicker{
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:0.15em;
+    text-transform:uppercase;
+    color:var(--teal);
+    margin-bottom:14px;
+  }
+  .hero h1{
+    font-family:var(--display);
+    font-size:clamp(28px, 4vw, 42px);
+    font-weight:700;
+    line-height:1.15;
+    margin:0 0 18px;
+    color:#fff;
+  }
+  .hero p{
+    color:var(--ink-dim);
+    font-size:17px;
+    max-width:60ch;
+    margin:0 0 24px;
+  }
+  .hero-meta{
+    display:flex; gap:20px; flex-wrap:wrap;
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--ink-faint);
+    border-top:1px solid var(--border-soft);
+    padding-top:18px;
+  }
+  .hero-meta span b{color:var(--ink-dim); font-weight:600;}
+
+  section.qa{
+    scroll-margin-top:24px;
+    margin-bottom:76px;
+    padding-top:8px;
+  }
+  section.qa + section.qa{
+    border-top:1px solid var(--border-soft);
+    padding-top:56px;
+  }
+  .q-tag{
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--ink-faint);
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    margin-bottom:10px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .q-tag .n{
+    font-family:var(--display);
+    font-size:13px;
+    color:var(--bg);
+    background:var(--amber);
+    width:22px; height:22px;
+    border-radius:5px;
+    display:inline-flex; align-items:center; justify-content:center;
+    font-weight:700;
+  }
+  h2.q-title{
+    font-family:var(--display);
+    font-size:26px;
+    font-weight:700;
+    color:#fff;
+    margin:0 0 22px;
+    line-height:1.3;
+  }
+  h3.sub{
+    font-family:var(--display);
+    font-size:16.5px;
+    font-weight:600;
+    color:var(--teal);
+    margin:34px 0 14px;
+  }
+  h4.subsub{
+    font-family:var(--display);
+    font-size:14.5px;
+    font-weight:600;
+    color:var(--ink);
+    margin:22px 0 10px;
+  }
+  p{margin:0 0 14px; color:var(--ink);}
+  .lede{color:var(--ink-dim); font-size:16.5px;}
+
+  ul,ol{padding-left:22px; margin:0 0 16px;}
+  li{margin-bottom:7px;}
+
+  code{
+    font-family:var(--mono);
+    background:rgba(255,255,255,0.06);
+    padding:1px 6px;
+    border-radius:4px;
+    font-size:0.88em;
+    color:var(--teal);
+  }
+
+  pre{
+    background:var(--ledger);
+    border:1px solid var(--border);
+    border-left:3px solid var(--teal-dim);
+    border-radius:8px;
+    padding:18px 20px;
+    overflow-x:auto;
+    margin:0 0 20px;
+    font-family:var(--mono);
+    font-size:13px;
+    line-height:1.65;
+    color:#c3d0de;
+  }
+  pre.bad{border-left-color:var(--red);}
+  pre.good{border-left-color:var(--green);}
+  pre code{background:none; padding:0; color:inherit; font-size:inherit;}
+  .code-label{
+    font-family:var(--mono);
+    font-size:10.5px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    margin-bottom:8px;
+    display:inline-block;
+    padding:2px 8px;
+    border-radius:4px;
+  }
+  .code-label.bad{background:rgba(224,101,79,0.15); color:var(--red);}
+  .code-label.good{background:rgba(111,207,151,0.15); color:var(--green);}
+  .code-label.neutral{background:rgba(79,209,197,0.15); color:var(--teal);}
+
+  .callout{
+    background:var(--bg-card);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:18px 20px;
+    margin:0 0 22px;
+    position:relative;
+  }
+  .callout .callout-label{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--amber);
+    margin-bottom:8px;
+    display:block;
+    font-weight:600;
+  }
+  .callout.answer{border-color:var(--teal-dim); background:linear-gradient(180deg, rgba(79,209,197,0.06), transparent);}
+  .callout.answer .callout-label{color:var(--teal);}
+  .callout p:last-child{margin-bottom:0;}
+  .callout em, .callout i{color:var(--ink);}
+  .callout p{font-style:italic; color:var(--ink);}
+
+  table{
+    width:100%;
+    border-collapse:collapse;
+    margin:0 0 24px;
+    font-size:14px;
+    background:var(--bg-card);
+    border:1px solid var(--border);
+    border-radius:10px;
+    overflow:hidden;
+  }
+  thead th{
+    background:var(--bg-raised);
+    font-family:var(--display);
+    font-weight:600;
+    text-align:left;
+    padding:12px 14px;
+    color:var(--amber);
+    font-size:13px;
+    border-bottom:1px solid var(--border);
+  }
+  tbody td{
+    padding:12px 14px;
+    border-bottom:1px solid var(--border-soft);
+    color:var(--ink-dim);
+    vertical-align:top;
+  }
+  tbody tr:last-child td{border-bottom:none;}
+  tbody td:first-child{color:var(--ink); font-weight:600;}
+  tbody tr:hover{background:rgba(255,255,255,0.015);}
+
+  .flow{
+    display:flex;
+    flex-direction:column;
+    gap:0;
+    margin:0 0 22px;
+    font-family:var(--mono);
+    font-size:12.8px;
+    background:var(--ledger);
+    border:1px solid var(--border);
+    border-radius:8px;
+    overflow:hidden;
+  }
+  .flow-step{
+    display:grid;
+    grid-template-columns:64px 1fr;
+    border-bottom:1px solid var(--border-soft);
+  }
+  .flow-step:last-child{border-bottom:none;}
+  .flow-time{
+    padding:10px 12px;
+    color:var(--ink-faint);
+    border-right:1px solid var(--border-soft);
+    background:rgba(255,255,255,0.015);
+  }
+  .flow-text{padding:10px 14px; color:#c3d0de;}
+  .flow-text.locked{color:var(--red);}
+  .flow-text.ok{color:var(--green);}
+  @media (max-width: 480px){
+    .flow-step{grid-template-columns:1fr;}
+    .flow-time{border-right:none; border-bottom:1px solid var(--border-soft); font-weight:600;}
+  }
+
+  .verdict{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-family:var(--mono);
+    font-size:11.5px;
+    font-weight:600;
+    padding:3px 10px;
+    border-radius:20px;
+    margin-bottom:12px;
+  }
+  .verdict.no{background:rgba(224,101,79,0.15); color:var(--red);}
+  .verdict.yes{background:rgba(111,207,151,0.15); color:var(--green);}
+
+  .grid-2{display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-bottom:20px;}
+  @media (max-width: 640px){ .grid-2{grid-template-columns:1fr;} }
+  .case-card{
+    background:var(--bg-card);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:18px 20px;
+  }
+  .case-card h5{
+    font-family:var(--display);
+    font-size:14px;
+    margin:0 0 10px;
+    color:var(--amber);
+  }
+  .case-card ul{margin-bottom:0;}
+
+  footer{
+    max-width:880px;
+    margin:0 auto;
+    padding:0 48px 60px;
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--ink-faint);
+    border-top:1px solid var(--border-soft);
+    padding-top:24px;
+  }
+  @media (max-width: 700px){ footer{padding:24px 20px 60px;} }
+
+  .interview-line{
+    background:var(--bg-card);
+    border-left:3px solid var(--amber-dim);
+    border-radius:0 8px 8px 0;
+    padding:16px 20px;
+    margin:0 0 20px;
+  }
+  .interview-line .callout-label{
+    font-family:var(--mono); font-size:11px; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--amber); font-weight:600; margin-bottom:8px; display:block;
+  }
+  .interview-line p{font-style:italic; margin-bottom:0; color:var(--ink);}
+
+  /* mobile top nav toggle */
+  .mobile-toggle{display:none;}
+  @media (max-width:900px){
+    .mobile-toggle{
+      display:block;
+      position:sticky;
+      top:0;
+      z-index:20;
+      width:100%;
+      background:var(--bg-card);
+      color:var(--amber);
+      border:none;
+      border-bottom:1px solid var(--border);
+      padding:14px 20px;
+      font-family:var(--mono);
+      font-size:12px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      text-align:left;
+    }
+    .sidebar{display:none;}
+    .sidebar.open{display:block;}
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <button class="mobile-toggle" id="navToggle">☰ Mục lục — 8 câu hỏi</button>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">Sổ Cái Kỹ Thuật</div>
+    <div class="brand-sub">Backend Concurrency & Payment System<br>Tổng hợp buổi trao đổi — dùng để ôn phỏng vấn</div>
+    <div class="nav-label">12 câu hỏi</div>
+    <ul class="nav-list">
+      <li><a href="#q1"><span class="nav-num">01</span> Race Condition, Lock & Deadlock</a></li>
+      <li><a href="#q2"><span class="nav-num">02</span> Idempotency</a></li>
+      <li><a href="#q3"><span class="nav-num">03</span> Transaction xuyên service</a></li>
+      <li><a href="#q4"><span class="nav-num">04</span> Queue & Async Processing</a></li>
+      <li><a href="#q5"><span class="nav-num">05</span> Rate Limiting</a></li>
+      <li><a href="#q6"><span class="nav-num">06</span> Tối ưu Database & Query</a></li>
+      <li><a href="#q7"><span class="nav-num">07</span> Redis — khái niệm & case study</a></li>
+      <li><a href="#q8"><span class="nav-num">08</span> Scalability & Pagination</a></li>
+      <li><a href="#q9"><span class="nav-num">09</span> Index — cơ chế & đánh đổi</a></li>
+      <li><a href="#q10"><span class="nav-num">10</span> Background Job</a></li>
+      <li><a href="#q11"><span class="nav-num">11</span> Multi-tenant</a></li>
+      <li><a href="#q12"><span class="nav-num">12</span> API Design</a></li>
+    </ul>
+  </aside>
+
+  <main>
+    <div class="hero">
+      <div class="hero-kicker">Interview prep · Backend / Payment System</div>
+      <h1>Race condition, lock &amp; những câu hỏi "đã tối ưu chưa" thường gặp khi phỏng vấn backend</h1>
+      <p class="lede">Tổng hợp lại toàn bộ nội dung đã trao đổi — từ bài toán kinh điển "2 request cùng trừ tiền 1 tài khoản" cho tới idempotency, saga, queue, cache và pagination. Mỗi câu hỏi đi kèm ví dụ code, so sánh thực tế và câu trả lời mẫu để dùng trực tiếp khi phỏng vấn.</p>
+      <div class="hero-meta">
+        <span><b>12</b> nhóm câu hỏi</span>
+        <span><b>Backend</b> · Payment / Transaction</span>
+        <span><b>Stack tham chiếu:</b> SQL, NestJS, Kafka/Queue, Redis</span>
+      </div>
+    </div>
+
+    <!-- ============ Q1 ============ -->
+    <section class="qa" id="q1">
+      <div class="q-tag"><span class="n">1</span> Câu hỏi ứng dụng thường gặp</div>
+      <h2 class="q-title">"10 triệu trong tài khoản, 2 request cùng trừ 6 triệu — xử lý sao?"</h2>
+      <p class="lede">Đây là câu hỏi nền tảng nhất khi phỏng vấn backend/payment. Nó test 3 lớp hiểu biết liền nhau: race condition là gì → 2 loại lock giải quyết ra sao → và rủi ro deadlock khi dùng lock sai cách.</p>
+
+      <h3 class="sub">1.1 — Vấn đề gốc: khoảng hở giữa đọc và ghi</h3>
+      <p>Cách làm sai phổ biến nhất là đọc số dư ra ứng dụng, kiểm tra, rồi mới ghi lại — giữa 3 bước này có một <b>khoảng hở (gap)</b> mà request khác có thể chen vào.</p>
+      <div class="code-label bad">Sai — có khoảng hở giữa đọc và ghi</div>
+      <pre class="bad"><code>const account = await db.query("SELECT balance FROM account WHERE id=1");
+// A và B cùng đọc được balance = 10.000.000
+
+if (account.balance >= 6000000) {   // cả 2 request đều pass điều kiện này
+  await db.query(
+    "UPDATE account SET balance = ? WHERE id=1",
+    account.balance - 6000000        // cả 2 đều tính ra 4.000.000
+  );
+}
+// Kết quả: balance cuối cùng = 4.000.000 (đáng lẽ phải là -2tr / báo lỗi)
+// 1 trong 2 giao dịch coi như "biến mất" — mất tiền hoặc dư tiền sai</code></pre>
+
+      <div class="flow">
+        <div class="flow-step"><div class="flow-time">t=0ms</div><div class="flow-text">Request A: SELECT balance → đọc được 10.000.000</div></div>
+        <div class="flow-step"><div class="flow-time">t=1ms</div><div class="flow-text">Request B: SELECT balance → CŨNG đọc được 10.000.000 (A chưa ghi gì cả)</div></div>
+        <div class="flow-step"><div class="flow-time">t=2ms</div><div class="flow-text locked">Request A: UPDATE balance = 4.000.000</div></div>
+        <div class="flow-step"><div class="flow-time">t=3ms</div><div class="flow-text locked">Request B: UPDATE balance = 4.000.000 (ghi đè, không biết gì về A)</div></div>
+      </div>
+
+      <h3 class="sub">1.2 — Cách giải đúng #1: Atomic UPDATE (khuyên dùng cho phép cộng/trừ đơn giản)</h3>
+      <p>Gộp cả đọc, kiểm tra điều kiện và ghi vào <b>một câu lệnh SQL duy nhất</b> — để DB tự đảm bảo atomic ở tầng row, không cần lock tường minh.</p>
+      <div class="code-label good">Đúng — không có khoảng hở</div>
+      <pre class="good"><code>UPDATE account
+SET balance = balance - 6000000
+WHERE id = 1 AND balance >= 6000000;
+
+-- affected_rows == 1 → trừ thành công
+-- affected_rows == 0 → không đủ tiền, reject</code></pre>
+      <p>Điểm mấu chốt: <code>balance - 6000000</code> là biểu thức <b>tương đối</b>, được DB tính toán ngay tại thời điểm UPDATE thực thi, dựa trên giá trị <b>mới nhất</b> trong DB — không phải giá trị đã đọc ra ứng dụng từ trước. Vì vậy không quan trọng 2 request cách nhau bao lâu (kể cả vài mili giây): DB luôn <b>serialize</b> 2 UPDATE cùng chạm 1 row bằng row-lock ngầm định, request đến sau sẽ chạy trên dữ liệu đã được request trước cập nhật xong.</p>
+
+      <div class="callout">
+        <span class="callout-label">Cẩn thận — lỗi tinh vi khi "tưởng" là atomic</span>
+        <p>Nếu vẫn đọc balance ra app rồi tính rồi <code>SET balance = &lt;giá trị tuyệt đối&gt;</code> (dù có kèm điều kiện WHERE giống hệt), vẫn bị <b>lost update</b>: điều kiện WHERE có thể vẫn đúng (vì check trên giá trị mới nhất) nhưng giá trị SET lại dựa trên dữ liệu cũ, ghi đè mất mọi thay đổi xảy ra ở giữa.</p>
+      </div>
+      <div class="code-label bad">Trông giống atomic nhưng vẫn sai — SET giá trị tuyệt đối tính sẵn ở app</div>
+      <pre class="bad"><code>SELECT balance FROM account WHERE id = 1;  -- đọc được 10.000.000
+-- tính ở app: 10tr - 6tr = 4tr
+UPDATE account SET balance = 4000000 WHERE id = 1 AND balance >= 6000000;</code></pre>
+      <div class="flow">
+        <div class="flow-step"><div class="flow-time">t=0</div><div class="flow-text">Bạn SELECT → đọc được balance = 10.000.000</div></div>
+        <div class="flow-step"><div class="flow-time">t=1</div><div class="flow-text locked">Giao dịch KHÁC cộng thêm 5.000.000 → balance thực tế lúc này là 15.000.000</div></div>
+        <div class="flow-step"><div class="flow-time">t=2</div><div class="flow-text locked">UPDATE ... SET balance = 4000000 WHERE balance >= 6000000 → điều kiện vẫn ĐÚNG (15tr ≥ 6tr) → ghi đè thẳng 4.000.000 → khoản 5tr vừa cộng vào BỊ MẤT TRẮNG</div></div>
+      </div>
+      <p>Chỉ an toàn khi phép tính là biểu thức tương đối, được <b>DB tính ngay trong câu SQL</b> (<code>balance = balance - 6000000</code>) — không phải hard-code hay tính sẵn ở app rồi truyền số tuyệt đối xuống. Vấn đề không nằm ở chỗ "số đó hard-code hay tính toán", mà nằm ở chỗ <b>phép trừ diễn ra ở đâu</b> — ở app (dựa trên dữ liệu cũ, luôn rủi ro) hay ở DB (dựa trên dữ liệu mới nhất tại thời điểm ghi, an toàn).</p>
+
+      <h3 class="sub">1.3 — Cách giải đúng #2: Pessimistic Lock (khi phải tính toán phức tạp ở application)</h3>
+      <p>Atomic UPDATE ở mục 1.2 chỉ viết được khi phép tính là <b>biểu thức tương đối đơn giản</b> mà SQL diễn đạt gọn trong 1 dòng (<code>balance - 6000000</code>). Nhưng nếu số tiền trừ phụ thuộc vào dữ liệu <b>ở bảng khác</b> — ví dụ phải trừ 6 triệu nhưng cộng lại một khoản voucher đang active của account đó — thì bắt buộc phải <b>đọc dữ liệu ra application để tính toán trước</b>, không thể nhét gọn vào 1 câu UPDATE như <code>SET balance = balance - 6000000 + voucher_amount</code> được, vì <code>voucher_amount</code> nằm ở bảng <code>vouchers</code>, không phải cột có sẵn trên bảng <code>account</code>.</p>
+      <p>Đây chính là lúc khoảng hở giữa đọc và ghi quay trở lại — và pessimistic lock được dùng để bịt khoảng hở đó trong lúc application xử lý logic phức tạp:</p>
+      <pre><code>BEGIN;
+
+-- Bước 1: lock row account NGAY KHI ĐỌC — request khác chạm vào row này
+-- sẽ bị BLOCK ở đây cho tới khi transaction này COMMIT
+SELECT balance FROM account WHERE id = 1 FOR UPDATE;   -- app nhận về balance = 10.000.000
+
+-- Bước 2: TÍNH TOÁN Ở APPLICATION — đây là lý do cần lock
+--   - query thêm bảng vouchers để lấy voucher đang active của account này
+--   - áp dụng business rule (voucher tối đa bao nhiêu %, có hết hạn chưa...)
+--   - có thể mất vài chục ms, thậm chí gọi thêm service khác
+const voucher = await db.query(
+  "SELECT amount FROM vouchers WHERE account_id = 1 AND status = 'active' FOR UPDATE"
+);                                         // ví dụ voucher.amount = 500.000
+const newBalance = 10000000 - 6000000 + voucher.amount;   // app tự tính = 4.500.000
+await db.query(
+  "UPDATE vouchers SET status = 'used' WHERE account_id = 1 AND status = 'active'"
+);
+
+-- Bước 3: ghi giá trị ĐÃ TÍNH XONG xuống — an toàn vì suốt từ bước 1
+-- không có request nào khác chen được vào row này
+UPDATE account SET balance = 4500000 WHERE id = 1;
+
+COMMIT;   -- lúc này request khác đang đợi mới được đọc balance mới nhất</code></pre>
+      <p>Nếu không có <code>FOR UPDATE</code> ở bước 1, một request B khác có thể đọc <code>balance = 10.000.000</code> song song trong lúc A đang tính toán voucher, rồi B ghi đè lên kết quả của A ngay sau khi A COMMIT — y hệt bài toán lost update ở mục 1.2, chỉ khác là lần này khoảng hở nằm ở bước tính voucher chứ không phải phép trừ đơn thuần. <code>FOR UPDATE</code> giữ nguyên row bị khoá suốt từ lúc đọc cho tới lúc COMMIT, nên dù application có mất bao lâu để tính toán, không ai chen vào giữa được.</p>
+      <div class="callout">
+        <span class="callout-label">Vậy khi nào chọn atomic UPDATE (1.2), khi nào chọn pessimistic lock (1.3)?</span>
+        <p>Atomic UPDATE khi phép tính viết gọn được thành 1 biểu thức SQL thuần (chỉ dùng cột ngay trên chính bảng đó). Pessimistic lock khi phải đọc thêm dữ liệu từ bảng khác, gọi thêm logic/service, rồi mới tính ra được giá trị cuối cùng để ghi — lúc đó không thể tránh khỏi bước "đọc ra app rồi tính" nên phải khoá row lại trong suốt thời gian đó.</p>
+      </div>
+
+      <h3 class="sub">1.4 — Cách giải đúng #3: Optimistic Lock (dùng cột <code>version</code>)</h3>
+      <pre><code>-- Bước 1: đọc kèm version
+SELECT balance, version FROM account WHERE id = 1;  -- balance=10tr, version=5
+
+-- Bước 2: tính toán ở app (có thể phức tạp, tốn thời gian, gọi thêm service khác...)
+newBalance = balance - 6000000
+
+-- Bước 3: ghi, kèm điều kiện version phải khớp với lúc đọc
+UPDATE account SET balance = newBalance, version = version + 1
+WHERE id = 1 AND version = 5;
+
+-- affected_rows == 0 → version đã đổi, có người update trước → đọc lại & RETRY</code></pre>
+
+      <h3 class="sub">1.5 — Vì sao cần cột <code>version</code> riêng, không tận dụng luôn cột <code>balance</code>?</h3>
+      <p><code>version</code> và <code>balance</code> đều chỉ là column bình thường, không có gì đặc biệt về cơ chế DB — khác biệt nằm ở <b>ý nghĩa</b>: <code>version</code> là con số vô nghĩa về nghiệp vụ, chỉ để trả lời "row này có bị đổi gì không kể từ lúc tôi đọc" — bắt được <b>mọi</b> thay đổi trên row, bất kể đổi field nào. Còn <code>balance</code> là giá trị nghiệp vụ thật. Nếu dùng thẳng <code>balance</code> làm điều kiện chống conflict thay cho <code>version</code>, sẽ dính lại đúng lỗi <b>lost update</b> đã gặp ở mục 1.2 — chỉ khác là lần này có kèm điều kiện WHERE nhưng vẫn không đủ:</p>
+      <div class="code-label bad">Dùng balance thay version — vẫn dính lost update</div>
+      <pre class="bad"><code>SELECT balance FROM account WHERE id = 1;  -- 10tr
+-- tính toán ở app: 10tr - 6tr = 4tr
+UPDATE account SET balance = 4000000 WHERE id = 1 AND balance >= 6000000;</code></pre>
+      <div class="flow">
+        <div class="flow-step"><div class="flow-time">t=0</div><div class="flow-text">Bạn SELECT → đọc được balance = 10tr</div></div>
+        <div class="flow-step"><div class="flow-time">t=1</div><div class="flow-text locked">1 giao dịch KHÁC (ví dụ ai đó chuyển khoản vào) cộng thêm 5tr → balance thực tế bây giờ là 15tr</div></div>
+        <div class="flow-step"><div class="flow-time">t=2</div><div class="flow-text locked">Bạn chạy UPDATE ... SET balance = 4000000 WHERE balance >= 6000000 → điều kiện balance >= 6000000 vẫn ĐÚNG (vì 15tr >= 6tr) → UPDATE thành công, balance bị SET THẲNG thành 4000000 → 5tr vừa được cộng vào LÚC NÃY BỊ MẤT TRẮNG!</div></div>
+      </div>
+      <p>Dùng chính <code>balance</code> làm điều kiện chỉ an toàn khi phép tính là cộng/trừ tương đối viết gọn trong 1 UPDATE, để DB tự tính ngay tại thời điểm ghi (mục 1.2: <code>balance = balance - 6000000</code>). Ngay khi logic phức tạp hơn — phải đọc ra app tính toán rồi mới ghi giá trị tuyệt đối xuống — dùng <code>balance</code> làm điều kiện sẽ không đủ, vì WHERE có thể pass (check đúng trên giá trị mới nhất) trong khi SET lại ghi đè lên thay đổi đã xảy ra ở giữa mà điều kiện đó không hề biết tới. Đây chính là lý do cần một cột riêng, vô can với nghiệp vụ, chỉ để phát hiện "có ai đụng vào row này chưa" — đó là vai trò của <code>version</code>.</p>
+
+      <h3 class="sub">1.6 — So sánh Pessimistic vs Optimistic Lock</h3>
+
+      <div class="callout">
+        <span class="callout-label">3 thuật ngữ dùng trong bảng so sánh: Contention, Connection Pool và Throughput</span>
+        <p><b>Contention</b> (tranh chấp) = mức độ nhiều request cùng muốn đụng vào <b>chung 1 row</b> tại cùng thời điểm. Contention <b>cao</b> nghĩa là rất nhiều request tranh nhau 1 row (ví dụ ví tiền của 1 KOL giờ cao điểm, hàng nghìn giao dịch/giây cùng chạm vào 1 account). Contention <b>thấp</b> nghĩa là hiếm khi có 2 request cùng chạm vào 1 row (ví dụ 1 admin và 1 user A cùng lúc sửa profile của user A, cả tháng chưa chắc có 2 request trùng nhau).</p>
+        <p><b>Connection Pool</b> = một "hồ chứa" gồm sẵn N kết nối (connection) đã mở tới DB, dùng chung cho toàn bộ ứng dụng — vì mở 1 connection mới tới DB khá tốn thời gian (bắt tay TCP, xác thực...), nên hệ thống mở sẵn 1 số lượng cố định (ví dụ 100 connection), mỗi request cần nói chuyện với DB sẽ "mượn" 1 connection trong pool, dùng xong thì trả lại cho request khác dùng tiếp. Vì số lượng connection trong pool là <b>có giới hạn</b>, nếu tại 1 thời điểm có nhiều hơn 100 request cùng cần dùng DB, những request dư ra phải xếp hàng đợi có connection trống mới chạy được — bất kể request đó có liên quan gì tới row đang bị tranh chấp hay không.</p>
+        <p><b>Throughput</b> = số lượng request mà hệ thống (DB) xử lý xong được trong 1 đơn vị thời gian (ví dụ số giao dịch/giây). Throughput không chỉ phụ thuộc vào 1 row đang được tranh chấp — nó còn phụ thuộc vào connection pool nói trên. Nếu pessimistic lock giữ 1 row quá lâu, request đang đợi lock đó vẫn tiếp tục <b>giữ luôn 1 connection trong pool</b> suốt thời gian chờ — dù bản thân nó chỉ cần vài mili giây để chạy nếu không phải đợi. Khi đủ nhiều request cùng đợi như vậy, connection pool có thể bị chiếm hết, khiến cả những request đến <b>row hoàn toàn khác</b> — vốn không liên quan gì tới tranh chấp — cũng bị nghẽn theo vì không còn connection trống để mượn. Đó là lý do throughput của <b>toàn hệ thống</b> giảm, chứ không chỉ riêng những request đang chạm vào row bị tranh chấp.</p>
+      </div>
+
+      <table>
+        <thead><tr><th>Tiêu chí</th><th>Pessimistic Lock</th><th>Optimistic Lock</th></tr></thead>
+        <tbody>
+          <tr><td>Cơ chế</td><td>Khoá row ngay khi đọc, request khác phải <b>đợi</b></td><td>Không khoá, cho chạy song song, <b>check conflict lúc ghi</b> bằng version</td></tr>
+          <tr><td>Hiện thực</td><td><code>SELECT ... FOR UPDATE</code>, hoặc atomic <code>UPDATE ... WHERE</code></td><td>Cột <code>version</code>, <code>UPDATE ... WHERE version = X</code></td></tr>
+          <tr><td>Khi conflict</td><td>Request B tự đợi, không cần code retry</td><td>Request B fail ngay, <b>phải tự viết logic retry</b></td></tr>
+          <tr><td>Throughput khi contention cao</td><td>Giảm — nhiều request xếp hàng, có thể chiếm hết connection pool trong lúc đợi</td><td>Tệ hơn nếu conflict quá nhiều — retry storm, tốn round-trip DB liên tục</td></tr>
+          <tr><td>Throughput khi contention thấp</td><td>Tốt, gần như không khác biệt</td><td>Tốt hơn — không giữ connection chờ, giải phóng ngay sau mỗi request</td></tr>
+          <tr><td>Rủi ro deadlock</td><td>Có</td><td>Không (vì không giữ lock)</td></tr>
+          <tr><td>Case nên dùng</td><td>Ví điện tử giờ cao điểm, giữ chỗ vé sự kiện hot — contention cao, giá trị giao dịch quan trọng</td><td>User sửa profile của chính mình từ 2 thiết bị, 2 tab cùng edit 1 document — contention hiếm nhưng vẫn có thể xảy ra</td></tr>
+        </tbody>
+      </table>
+
+      <div class="interview-line">
+        <span class="callout-label">Trả lời mẫu khi phỏng vấn</span>
+        <p>"Pessimistic lock chọn cách ngăn chặn trước, chấp nhận độ trễ để đảm bảo chắc chắn không conflict. Optimistic lock chọn cách phát hiện sau, không chặn ai cả, chỉ kiểm tra lúc ghi rồi retry nếu có tranh chấp. Em chọn pessimistic khi biết trước tranh chấp xảy ra thường xuyên và giữ lock lâu sẽ nghẽn connection pool — ví dụ ví tiền giờ cao điểm. Em chọn optimistic khi tranh chấp hiếm nhưng vẫn có thể xảy ra — ví dụ user mở app trên 2 thiết bị cùng sửa 1 profile — lúc đó không đáng để lock chờ cho một trường hợp hiếm khi xảy ra."</p>
+      </div>
+
+      <h3 class="sub">1.7 — Retry ở Optimistic Lock: làm sao và khi nào dừng</h3>
+      <pre><code>async function withdrawOptimistic(accountId, amount, maxRetries = 3) {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    const row = await db.query(
+      "SELECT balance, version FROM account WHERE id = ?", [accountId]
+    );
+    if (row.balance < amount) {
+      throw new Error("Không đủ số dư"); // lỗi nghiệp vụ — KHÔNG retry
+    }
+    const result = await db.query(
+      "UPDATE account SET balance = ?, version = version + 1 WHERE id = ? AND version = ?",
+      [row.balance - amount, accountId, row.version]
+    );
+    if (result.affectedRows === 1) return { success: true };
+    await sleep(50 * Math.pow(2, attempt)); // backoff: 50ms, 100ms, 200ms...
+  }
+  throw new Error("Giao dịch thất bại do tranh chấp, vui lòng thử lại sau");
+}</code></pre>
+      <p><b>Dừng retry khi:</b></p>
+      <ul>
+        <li>Đã chạm giới hạn số lần thử (thường 3–5 lần) — row đang bị tranh chấp quá nặng, retry thêm chỉ tốn tài nguyên; nên trả lỗi hoặc chuyển sang queue/pessimistic lock cho riêng row đó.</li>
+        <li>Fail vì lý do <b>nghiệp vụ</b> (không đủ số dư) — không phải do conflict version, retry không giải quyết được gì.</li>
+        <li>Version nhảy bất thường liên tục — nên log điều tra thay vì retry mù.</li>
+      </ul>
+
+      <h3 class="sub">1.8 — Deadlock: khi nào xảy ra, ví dụ cụ thể</h3>
+      <p>Deadlock xảy ra khi 2 (hoặc nhiều) transaction <b>cùng giữ lock của nhau</b> và <b>cùng đợi lock mà đối phương đang giữ</b> — tạo thành vòng chờ khép kín, kẹt vĩnh viễn nếu DB không can thiệp.</p>
+
+      <p><b>Ví dụ:</b> account <code>id=1</code> có 10tr, account <code>id=2</code> có 5tr. Cùng lúc có 2 giao dịch chuyển tiền <b>ngược chiều nhau</b>:</p>
+      <div class="code-label bad">Transaction A — chuyển 1tr từ account 1 → 2</div>
+      <pre class="bad"><code>BEGIN;
+
+-- Bước 1: lock account 1 trước
+SELECT * FROM account WHERE id=1 FOR UPDATE;   -- A LOCK được row 1
+
+-- Bước 2: cần lock thêm account 2 để cộng tiền
+UPDATE account SET balance = balance + 1000000 WHERE id=2;
+-- A phải CHỜ vì row 2 đang bị B giữ lock ...</code></pre>
+      <div class="code-label bad">Transaction B — chuyển 500k từ account 2 → 1 (chạy gần như cùng lúc)</div>
+      <pre class="bad"><code>BEGIN;
+
+-- Bước 1: lock account 2 trước
+SELECT * FROM account WHERE id=2 FOR UPDATE;   -- B LOCK được row 2
+
+-- Bước 2: cần lock thêm account 1 để trừ tiền
+UPDATE account SET balance = balance - 500000 WHERE id=1;
+-- B phải CHỜ vì row 1 đang bị A giữ lock ...
+
+-- KẸT CỨNG: A đợi B nhả row 2, B đợi A nhả row 1 → DEADLOCK</code></pre>
+      <p>DB sẽ tự phát hiện vòng chờ khép kín này (deadlock detector chạy ngầm) và chủ động huỷ 1 trong 2 transaction, trả lỗi kiểu:</p>
+      <pre><code>ERROR 1213: Deadlock found when trying to get lock; try restarting transaction</code></pre>
+      <p>Transaction bị huỷ phải tự rollback và <b>retry lại từ đầu</b> ở tầng application. Transaction còn lại tiếp tục chạy bình thường.</p>
+
+      <div class="flow">
+        <div class="flow-step"><div class="flow-time">A</div><div class="flow-text ok">Chuyển 1tr từ account 1 → 2. Lock account 1 trước (FOR UPDATE) — thành công.</div></div>
+        <div class="flow-step"><div class="flow-time">B</div><div class="flow-text ok">Chuyển 500k từ account 2 → 1. Lock account 2 trước (FOR UPDATE) — thành công.</div></div>
+        <div class="flow-step"><div class="flow-time">A</div><div class="flow-text locked">Cần lock thêm account 2 để cộng tiền → BỊ CHẶN vì B đang giữ.</div></div>
+        <div class="flow-step"><div class="flow-time">B</div><div class="flow-text locked">Cần lock thêm account 1 để trừ tiền → BỊ CHẶN vì A đang giữ.</div></div>
+        <div class="flow-step"><div class="flow-time">⛔</div><div class="flow-text locked">A đợi B, B đợi A → DEADLOCK. DB tự phát hiện và huỷ 1 trong 2 transaction.</div></div>
+      </div>
+      <p><b>Cách tránh:</b> luôn lock các row theo <b>một thứ tự cố định</b> (ví dụ luôn theo <code>id</code> tăng dần), bất kể chiều nghiệp vụ của giao dịch là gì — để không bao giờ có 2 transaction giữ 2 row theo thứ tự ngược nhau.</p>
+      <div class="code-label good">Cả A và B đều lock account có id NHỎ HƠN trước, bất kể chiều chuyển tiền</div>
+      <pre class="good"><code>-- app luôn tính: min_id = LEAST(from_id, to_id), max_id = GREATEST(from_id, to_id)
+BEGIN;
+SELECT * FROM account WHERE id = 1 FOR UPDATE;  -- luôn lock id nhỏ hơn trước
+SELECT * FROM account WHERE id = 2 FOR UPDATE;  -- rồi mới lock id lớn hơn
+-- ... thực hiện UPDATE cả 2 ...
+COMMIT;</code></pre>
+      <p>Dù A chuyển 1→2 hay B chuyển 2→1, <b>cả 2 đều phải lock row id=1 trước tiên</b>. Nếu A đã lock được row 1, B sẽ phải đợi ngay từ bước đầu — không xảy ra tình huống A giữ 1 chờ 2, B giữ 2 chờ 1 cùng lúc. B chỉ đơn giản đứng đợi ở hàng, không có vòng lặp khép kín.</p>
+      <p>Bổ sung thêm: giữ transaction càng ngắn càng tốt, set <code>lock timeout</code> (ví dụ <code>innodb_lock_wait_timeout</code>) để tránh treo vô hạn nếu deadlock detector chậm phát hiện, và ưu tiên atomic UPDATE thay vì nhiều câu lệnh giữ lock khi logic cho phép.</p>
+
+      <h3 class="sub">1.9 — Hiểu lầm thường gặp: Stored Procedure có tự tránh được race condition không?</h3>
+      <div class="verdict no">✕ KHÔNG</div>
+      <p>Chuyển logic vào stored procedure <b>không</b> tự động giải quyết race condition. Vấn đề nằm ở việc có <b>khoảng hở giữa đọc và ghi</b> hay không — không liên quan tới việc code chạy ở tầng application hay bên trong DB. "Không có application nữa" không đồng nghĩa với "không có concurrency nữa": concurrency ở đây là <b>2 session/connection khác nhau</b> gọi vào DB, không liên quan gì tới việc logic nằm ở app hay ở procedure.</p>
+      <div class="code-label bad">Vẫn SAI dù nằm trong stored procedure, vì thiếu FOR UPDATE</div>
+      <pre class="bad"><code>CREATE PROCEDURE withdraw(IN acc_id INT, IN amount DECIMAL)
+BEGIN
+  DECLARE current_balance DECIMAL;
+  -- Bước 1: đọc — PLAIN SELECT, không lock
+  SELECT balance INTO current_balance FROM account WHERE id = acc_id;
+
+  -- Bước 2: tính toán bên trong procedure (vẫn là "tính rồi mới ghi")
+  IF current_balance >= amount THEN
+    SET current_balance = current_balance - amount;
+    -- Bước 3: ghi giá trị đã tính
+    UPDATE account SET balance = current_balance WHERE id = acc_id;
+  END IF;
+END;</code></pre>
+      <p>Kịch bản 2 session gọi gần như đồng thời:</p>
+      <div class="flow">
+        <div class="flow-step"><div class="flow-time">A</div><div class="flow-text">SELECT balance INTO ... → đọc 10tr</div></div>
+        <div class="flow-step"><div class="flow-time">B</div><div class="flow-text">SELECT balance INTO ... → CŨNG đọc 10tr (A chưa UPDATE, chưa commit → chưa đổi gì trong DB, B đọc thoải mái)</div></div>
+        <div class="flow-step"><div class="flow-time">A</div><div class="flow-text locked">current_balance = 10tr - 6tr = 4tr → UPDATE balance = 4tr</div></div>
+        <div class="flow-step"><div class="flow-time">B</div><div class="flow-text locked">current_balance = 10tr - 6tr = 4tr → UPDATE balance = 4tr (ghi đè, không biết gì về A)</div></div>
+      </div>
+      <p>Cả 2 session đều trừ thành công, balance cuối cùng là 4tr thay vì phải là -2tr (báo lỗi) hoặc chỉ 1 trong 2 thành công — y hệt lỗi race condition ở tầng app, vì bản chất vấn đề là <b>plain SELECT không tạo lock</b>, bất kể SELECT đó được gọi từ app hay từ trong procedure.</p>
+
+      <h4 class="subsub">Cách sửa #1 — dùng FOR UPDATE để lock ngay khi đọc</h4>
+      <pre class="good"><code>CREATE PROCEDURE withdraw(IN acc_id INT, IN amount DECIMAL)
+BEGIN
+    DECLARE current_balance DECIMAL;
+
+    START TRANSACTION;
+
+    -- Dùng FOR UPDATE để LOCK row ngay khi đọc
+    SELECT balance INTO current_balance FROM account WHERE id = acc_id FOR UPDATE;
+    -- Session B gọi cùng lúc sẽ bị BLOCK ở đúng dòng này cho tới khi A COMMIT
+
+    IF current_balance >= amount THEN
+        UPDATE account SET balance = balance - amount WHERE id = acc_id;
+        COMMIT;
+    ELSE
+        ROLLBACK;
+    END IF;
+END;</code></pre>
+
+      <h4 class="subsub">Cách sửa #2 — atomic UPDATE ngay trong procedure (gọn nhất)</h4>
+      <pre class="good"><code>CREATE PROCEDURE withdraw(IN acc_id INT, IN amount DECIMAL, OUT success BOOLEAN)
+BEGIN
+    UPDATE account SET balance = balance - amount
+    WHERE id = acc_id AND balance >= amount;
+
+    SET success = (ROW_COUNT() > 0);
+END;</code></pre>
+      <p>Cách 2 là tốt nhất — gọn, không cần transaction tường minh, không cần <code>FOR UPDATE</code>, vì cả đọc-check-ghi nằm trong 1 câu UPDATE atomic, đúng nguyên tắc y hệt mục 1.2. Nguyên tắc không đổi dù logic nằm ở app hay ở DB: muốn an toàn thực sự phải loại bỏ khoảng hở giữa đọc và ghi, chứ không phải chuyển chỗ chạy code.</p>
+
+      <div class="interview-line">
+        <span class="callout-label">Trả lời mẫu khi phỏng vấn</span>
+        <p>"Chuyển logic vào stored procedure không tự động giải quyết race condition, vì vấn đề nằm ở việc có tồn tại khoảng hở giữa đọc và ghi hay không — chứ không phải code chạy ở đâu. Nếu trong procedure vẫn viết kiểu SELECT rồi tính rồi UPDATE mà không lock, thì 2 session gọi procedure đó cùng lúc vẫn interleave với nhau y hệt race condition ở tầng app. Muốn an toàn thực sự, procedure vẫn phải dùng SELECT FOR UPDATE hoặc atomic UPDATE với điều kiện, đúng nguyên tắc y hệt như viết ở application."</p>
+      </div>
+    </section>
+
+    <!-- ============ Q2 ============ -->
+    <section class="qa" id="q2">
+      <div class="q-tag"><span class="n">2</span> Câu hỏi ứng dụng thường gặp</div>
+      <h2 class="q-title">"User bấm nút thanh toán 2 lần do mạng chậm — tránh trừ tiền 2 lần thế nào?"</h2>
+      <div class="callout answer">
+        <span class="callout-label">Đáp án</span>
+        <p>Dùng <b>Idempotency Key</b>: client generate 1 UUID duy nhất cho mỗi thao tác, gửi kèm header. Server lưu key này kèm kết quả xử lý; nếu key đã tồn tại và đã hoàn tất, trả lại y nguyên kết quả cũ thay vì xử lý lại.</p>
+      </div>
+      <pre><code>1. Client gửi request kèm header: Idempotency-Key: uuid-v4
+2. Server check bảng idempotency_keys WHERE key = X
+   - Nếu có & status = completed → trả lại response đã lưu, KHÔNG xử lý lại
+   - Nếu chưa có → INSERT key với status = processing (cột key có UNIQUE constraint)
+3. Xử lý giao dịch thật
+4. Update record: status = completed + lưu response</code></pre>
+      <h3 class="sub">2 request cùng key đến gần như đồng thời thì sao?</h3>
+      <p>Dựa vào <b>UNIQUE constraint</b> trên cột <code>idempotency_key</code> ở DB. Request đến sau sẽ bị lỗi duplicate-key khi INSERT → catch exception, chờ hoặc trả kết quả của request đầu (hoặc 409 bảo client thử lại).</p>
+      <h3 class="sub">Idempotency key nên lưu bao lâu?</h3>
+      <p>Thường 24 giờ — đủ để cover retry do mạng chậm/timeout client, không giữ mãi gây phình dữ liệu. Hết hạn thì cho phép request với key đó chạy như request mới.</p>
+    </section>
+
+    <!-- ============ Q3 ============ -->
+    <section class="qa" id="q3">
+      <div class="q-tag"><span class="n">3</span> Câu hỏi ứng dụng thường gặp</div>
+      <h2 class="q-title">"Nhiều service (order, payment, inventory) — đảm bảo consistency sao khi không dùng distributed transaction?"</h2>
+
+      <h3 class="sub">3.1 — Distributed transaction là gì, vì sao câu hỏi này tồn tại</h3>
+      <p>Trong 1 hệ thống <b>monolith</b> (1 ứng dụng, 1 database duy nhất), khi cần nhiều thao tác cùng thành công hoặc cùng thất bại, chỉ cần dùng transaction bình thường:</p>
+      <pre><code>BEGIN;
+UPDATE orders SET status = 'confirmed' WHERE id = 1;
+UPDATE inventory SET stock = stock - 1 WHERE product_id = 5;
+UPDATE payments SET status = 'paid' WHERE order_id = 1;
+COMMIT;  -- cả 3 dòng cùng thành công, hoặc ROLLBACK cả 3 nếu có lỗi</code></pre>
+      <p>Dễ dàng vì cả 3 bảng nằm trong <b>1 database duy nhất</b> — DB tự đảm bảo tính toàn vẹn (ACID). Nhưng khi hệ thống tách thành <b>microservices</b>, mỗi service thường có DB riêng:</p>
+      <pre><code>Order Service      → có DB riêng (orders_db)
+Inventory Service  → có DB riêng (inventory_db)
+Payment Service    → có DB riêng (payment_db)</code></pre>
+      <p>Lúc này, tạo order + trừ kho + trừ tiền nằm ở <b>3 database khác nhau, thuộc 3 service khác nhau</b> — không thể viết 1 câu <code>BEGIN...COMMIT</code> xuyên qua 3 DB như trên nữa, vì transaction SQL thường chỉ hoạt động trong phạm vi 1 connection tới 1 DB. <b>Distributed transaction</b> chính là tên gọi cho bài toán: đảm bảo "tất cả cùng thành công hoặc tất cả cùng thất bại" khi các thao tác đó nằm rải rác ở nhiều database/service độc lập.</p>
+
+      <h4 class="subsub">Cách giải kinh điển: Two-Phase Commit (2PC) — và vì sao ít dùng trong thực tế</h4>
+      <pre><code>Giai đoạn 1 (Prepare):
+  Coordinator hỏi cả 3 service: "Sẵn sàng commit chưa?"
+  Order Service     → chuẩn bị xong, trả lời "Sẵn sàng" (CHƯA commit thật, đang khoá dữ liệu chờ)
+  Inventory Service → chuẩn bị xong, trả lời "Sẵn sàng" (cũng đang khoá, chờ)
+  Payment Service   → chuẩn bị xong, trả lời "Sẵn sàng" (cũng đang khoá, chờ)
+
+Giai đoạn 2 (Commit):
+  Nếu CẢ 3 đều "Sẵn sàng" → Coordinator ra lệnh commit thật cho cả 3
+  Nếu có 1 cái "Không sẵn sàng" → Coordinator ra lệnh rollback cho cả 3</code></pre>
+      <p>Nhược điểm khiến 2PC ít được dùng trong microservices thực tế:</p>
+      <ul>
+        <li>Cả 3 service phải <b>giữ khoá dữ liệu</b> suốt từ giai đoạn 1 tới giai đoạn 2 — nếu Coordinator crash giữa chừng, cả 3 service kẹt khoá vô thời hạn, không biết commit hay rollback.</li>
+        <li><b>Chậm</b> vì phải chờ round-trip qua lại nhiều lần giữa nhiều service.</li>
+        <li><b>Chịu lỗi kém</b> — chỉ cần 1 service trong chuỗi down tạm thời là cả giao dịch bị treo.</li>
+        <li>Không scale tốt khi số lượng service tăng lên.</li>
+      </ul>
+      <p>Vì vậy, câu hỏi phỏng vấn thường đi tiếp: <i>"Vậy không dùng 2PC thì đảm bảo consistency sao?"</i> — câu trả lời là <b>Saga pattern</b>, chấp nhận đánh đổi sang <b>eventual consistency</b> (dữ liệu sẽ nhất quán sau một khoảng thời gian ngắn, không phải ngay lập tức) để đổi lấy tốc độ và khả năng chịu lỗi tốt hơn.</p>
+
+      <h3 class="sub">3.2 — Đáp án: Saga Pattern</h3>
+      <div class="callout answer">
+        <span class="callout-label">Đáp án</span>
+        <p>Không dùng 2PC vì chậm và không scale tốt. Dùng <b>Saga pattern</b>: chia giao dịch lớn thành các bước nhỏ, mỗi bước là 1 transaction cục bộ; nếu bước nào fail, chạy <b>compensating transaction</b> để hoàn tác các bước trước.</p>
+      </div>
+
+      <p>Saga chọn hướng tiếp cận hoàn toàn ngược với 2PC: <b>không khoá gì cả, không chờ ai cả</b> — mỗi service cứ làm phần việc của mình và <b>commit ngay lập tức</b>, không giữ transaction mở chờ lệnh xác nhận từ ai (khác hẳn 2PC ở mục 3.1, nơi mọi service phải giữ lock chờ tới khi tất cả cùng "sẵn sàng"). Nếu có bước nào ở giữa thất bại, thay vì rollback bằng cách "chưa commit thì huỷ" như 2PC, Saga xử lý bằng cách <b>chạy thêm 1 giao dịch bù trừ (compensating transaction)</b> để đảo ngược tác dụng của các bước đã lỡ commit trước đó.</p>
+
+      <h4 class="subsub">So sánh trực quan với 2PC (dùng lại ví dụ Order / Inventory / Payment)</h4>
+      <div class="code-label bad">2PC — giữ lock, chờ xác nhận từ tất cả trước khi ai cũng commit</div>
+      <pre class="bad"><code>Order Service: BEGIN → INSERT (LOCK, CHỜ) ──┐
+Inventory:     BEGIN → UPDATE (LOCK, CHỜ) ──┼── tất cả commit CÙNG LÚC
+Payment:       BEGIN → UPDATE (LOCK, CHỜ) ──┘   (hoặc rollback cùng lúc)</code></pre>
+      <div class="code-label good">Saga — mỗi bước tự commit ngay, không chờ ai, không khoá</div>
+      <pre class="good"><code>Order Service:     INSERT order (status=pending) → COMMIT NGAY → publish "OrderCreated"
+                                                                          ↓
+Inventory Service:                        nhận event → UPDATE stock -1 → COMMIT NGAY → publish "StockReserved"
+                                                                                                ↓
+Payment Service:                                                  nhận event → UPDATE balance -100k → COMMIT NGAY</code></pre>
+      <p>Mỗi <code>COMMIT NGAY</code> nghĩa là row đó được <b>giải phóng lock ngay lập tức</b>, không ai phải đợi ai — đây là lý do Saga nhanh và không bị kẹt lock vô thời hạn như 2PC khi Coordinator crash.</p>
+
+      <h4 class="subsub">Compensating transaction — khi bước Payment thất bại</h4>
+      <p>Đây là lúc compensating transaction vào việc — thay vì "rollback" (huỷ trước khi commit, như 2PC), Saga phải <b>chủ động chạy một hành động ngược lại</b> vì dữ liệu đã commit thật rồi:</p>
+      <pre class="bad"><code>Order Service:     INSERT order (pending) → COMMIT → publish "OrderCreated"
+Inventory Service: UPDATE stock -1 → COMMIT → publish "StockReserved"
+Payment Service:   UPDATE balance -100k → THẤT BẠI (không đủ tiền)
+                   → publish "PaymentFailed"
+
+-- Hệ thống phải "dọn dẹp" ngược lại 2 bước đã lỡ commit trước đó:
+Inventory Service: nhận "PaymentFailed" → chạy compensating transaction:
+                   UPDATE stock +1   (hoàn lại kho đã trừ)
+Order Service:     nhận "PaymentFailed" → chạy compensating transaction:
+                   UPDATE orders SET status = 'cancelled'   (huỷ đơn, KHÔNG xoá row)</code></pre>
+      <div class="callout">
+        <span class="callout-label">Vì sao không xoá row mà lại UPDATE status = 'cancelled'?</span>
+        <p>Dữ liệu đã commit thật và có thể đã bị hệ thống khác đọc thấy rồi, nên compensating transaction luôn là "làm 1 hành động mới để bù lại", không phải "quay ngược thời gian xoá sạch dấu vết" như rollback thật của 2PC.</p>
+      </div>
+
+      <h4 class="subsub">Vì sao gọi là "eventual consistency" (nhất quán cuối cùng)</h4>
+      <p>Trong khoảng thời gian giữa lúc Order Service commit <code>status=pending</code> và lúc toàn bộ chuỗi compensating chạy xong để đổi thành <code>cancelled</code>, hệ thống ở trạng thái <b>tạm thời không nhất quán</b> — ai đó query đúng lúc đó sẽ thấy đơn hàng "pending" dù thực chất giao dịch sẽ fail. Đây là cái giá phải trả để đổi lấy tốc độ: dữ liệu <b>sẽ</b> nhất quán, chỉ là không phải ngay lập tức như 2PC.</p>
+
+      <h4 class="subsub">Choreography vs Orchestration — 2 cách tổ chức Saga</h4>
+      <div class="grid-2">
+        <div class="case-card">
+          <h5>Choreography</h5>
+          <ul>
+            <li>Các service tự lắng nghe event của nhau, không ai "chỉ huy"</li>
+            <li>Đơn giản khi ít bước</li>
+            <li>Khó trace khi flow dài</li>
+          </ul>
+        </div>
+        <div class="case-card">
+          <h5>Orchestration</h5>
+          <ul>
+            <li>Có 1 Saga Orchestrator trung tâm gọi tuần tự từng service</li>
+            <li>Biết chính xác cần compensate bước nào khi fail</li>
+            <li>Dễ debug, phù hợp flow phức tạp</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="interview-line">
+        <span class="callout-label">Trả lời mẫu khi phỏng vấn</span>
+        <p>"Saga không tránh được việc dữ liệu tạm thời sai lệch — nó chỉ đảm bảo dữ liệu sẽ đúng lại sau một khoảng thời gian ngắn thông qua compensating transaction, đổi lại được tốc độ cao và không bị kẹt lock như 2PC. Với flow ngắn em sẽ chọn choreography cho đơn giản, còn flow nhiều bước và cần dễ debug thì em chọn orchestration để có 1 nơi duy nhất biết toàn cảnh và biết chính xác cần compensate theo thứ tự nào."</p>
+      </div>
+
+      <h3 class="sub">3.3 — Outbox Pattern — tránh lệch dữ liệu khi vừa ghi DB vừa publish message</h3>
+      <p>Vấn đề: nếu DB commit thành công nhưng publish message lên Kafka lại fail (hoặc ngược lại) → dữ liệu và message lệch nhau (dual-write problem).</p>
+      <pre><code>BEGIN;
+UPDATE account SET balance = balance - 6000000 WHERE id = 1;
+INSERT INTO outbox (event_type, payload, status) VALUES ('MoneyDebited', '{...}', 'pending');
+COMMIT;
+-- 1 process riêng (Debezium CDC hoặc polling job) đọc bảng outbox rồi publish lên Kafka
+-- → 2 thay đổi luôn nằm trong cùng 1 transaction atomic, không thể lệch nhau</code></pre>
+    </section>
+
+    <!-- ============ Q4 ============ -->
+    <section class="qa" id="q4">
+      <div class="q-tag"><span class="n">4</span> Câu hỏi ứng dụng thường gặp</div>
+      <h2 class="q-title">"1000 request thanh toán đến cùng lúc — DB không chịu nổi nếu xử lý đồng bộ, thiết kế lại sao?"</h2>
+
+      <h3 class="sub">4.1 — Vấn đề gốc: vì sao xử lý đồng bộ (sync) lại sập khi traffic cao</h3>
+      <p><b>Xử lý đồng bộ</b> nghĩa là: client gửi request lên, server xử lý xong toàn bộ logic (validate, ghi DB, gọi cổng thanh toán...) rồi mới trả response về cho client. Trong lúc xử lý, connection giữa client-server và connection tới DB đều bị <b>giữ chiếm dụng</b> cho tới khi xong.</p>
+      <pre><code>Client gửi request → Server: validate → ghi DB → gọi payment gateway → trả response
+                      (toàn bộ quá trình có thể mất 200-500ms, thậm chí vài giây
+                       nếu payment gateway phản hồi chậm)</code></pre>
+      <p>Traffic thấp thì 1 request 300ms không vấn đề gì. Nhưng nếu <b>1000 request cùng lúc</b>, mỗi request đều cần 1 connection DB để chạy song song — trong khi connection pool của DB chỉ có giới hạn (ví dụ 100 connection, xem lại khái niệm ở mục 1.6). Kết quả: 900 request còn lại phải xếp hàng chờ, có request bị timeout, DB quá tải vì phải xử lý 1000 giao dịch ghi cùng lúc.</p>
+
+      <h3 class="sub">4.2 — Giải pháp: tách "nhận request" và "xử lý request" ra làm 2 việc riêng biệt</h3>
+      <p>Ý tưởng cốt lõi: <b>không bắt client chờ tới khi xử lý xong hoàn toàn mới trả lời</b> — server chỉ làm 1 việc cực nhẹ và nhanh: <b>ghi nhận yêu cầu vào 1 hàng đợi (queue)</b>, rồi trả lời ngay cho client "đã nhận được yêu cầu, sẽ xử lý sau".</p>
+      <pre class="good"><code>Client gửi request → Server: chỉ đẩy message vào QUEUE (thao tác cực nhanh, ~5-10ms)
+                      → trả về NGAY: "202 Accepted, transaction_id = abc123"
+                      (KHÔNG chờ xử lý xong, KHÔNG ghi DB ngay lúc này)
+
+Phía sau, độc lập:
+Worker (tiến trình riêng) → liên tục lấy message ra khỏi queue → xử lý từng cái
+                           (ghi DB, gọi payment gateway...) → cập nhật trạng thái</code></pre>
+      <div class="callout">
+        <span class="callout-label">Ý nghĩa mã 202 Accepted</span>
+        <p>Báo "yêu cầu của bạn đã được chấp nhận để xử lý, nhưng chưa xử lý xong" — khác với <code>200 OK</code> (đã xử lý xong hoàn toàn). Client nhận <code>transaction_id</code> để sau đó hỏi lại "giao dịch abc123 hiện đang ở trạng thái nào" (qua API riêng, hoặc WebSocket/push notification khi xử lý xong).</p>
+      </div>
+      <p>Vì sao cách này giải quyết được vấn đề tải: bước "đẩy vào queue" cực nhẹ và nhanh (không đụng DB, không gọi payment gateway), nên dù 1000 request cùng lúc, server vẫn đẩy hết vào queue trong tích tắc, không nghẽn connection pool DB. Việc xử lý thật sự (nặng, chậm) được <b>Worker xử lý dần theo khả năng thật của hệ thống</b>, không bị dồn ép xử lý 1000 cái cùng lúc.</p>
+
+      <h3 class="sub">4.3 — Giữ đúng thứ tự trên cùng 1 account mà vẫn parallel giữa các account khác</h3>
+      <p>Giả sử user A gửi 2 giao dịch liên tiếp: "rút 5 triệu" rồi ngay sau đó "rút 3 triệu". Nếu Worker xử lý 2 message này <b>không theo đúng thứ tự</b> (chạy song song ngẫu nhiên), có thể dẫn tới sai lệch số dư hoặc logic nghiệp vụ.</p>
+      <p><b>Partition theo <code>account_id</code></b> giải quyết đúng bài toán này: đảm bảo mọi message của cùng 1 account luôn đi vào cùng 1 "làn đường" riêng, được xử lý tuần tự bởi đúng 1 Worker, trong khi account khác thì đi làn khác, xử lý song song không liên quan tới nhau.</p>
+      <pre><code>Account A: rút 5tr (msg 1) → rút 3tr (msg 2)  ─┐
+                                                 ├─→ cùng vào Partition 1 → Worker 1 xử lý TUẦN TỰ
+Account A: msg khác nếu có                     ─┘   (đảm bảo đúng thứ tự cho A)
+
+Account B: chuyển khoản (msg 3)                ─┐
+                                                 ├─→ vào Partition 2 → Worker 2 xử lý
+                                                 ┘   (chạy SONG SONG với Worker 1, không đợi nhau)</code></pre>
+      <p>Kafka/SQS FIFO cho phép khai báo <code>account_id</code> làm "khoá phân vùng" — hệ thống tự đảm bảo message có cùng khoá này luôn vào cùng 1 partition, giữ đúng thứ tự gửi vào cũng là thứ tự xử lý.</p>
+
+      <h3 class="sub">4.4 — Worker crash giữa chừng, message có mất không?</h3>
+      <p>Giả sử Worker đang xử lý message "rút 5tr" của account A, ghi được nửa chừng vào DB thì server crash (mất điện, restart...). Message đó có bị mất luôn không?</p>
+      <p><b>Cơ chế <code>at-least-once delivery</code></b> trả lời câu này: message <b>không bao giờ bị coi là "đã xử lý xong"</b> cho tới khi Worker báo lại (<code>ack</code> — acknowledge) cho hệ thống queue rằng đã xử lý xong hoàn toàn. Nếu Worker crash <b>trước khi kịp ack</b>, hệ thống queue coi message đó "chưa xử lý xong", và sẽ tự động <b>gửi lại (redeliver)</b> message đó cho 1 Worker khác (hoặc chính Worker đó sau khi restart).</p>
+      <pre class="bad"><code>Worker nhận message → bắt đầu xử lý (ghi DB...) → [CRASH TRƯỚC KHI ACK]
+                                                     ↓
+Hệ thống queue: chưa nhận được ack → coi message "chưa xử lý xong"
+                                    → REDELIVER message này cho Worker khác</code></pre>
+      <div class="callout">
+        <span class="callout-label">Hệ quả: "at-least-once" không đảm bảo "đúng chính xác 1 lần"</span>
+        <p>Worker có thể đã <b>ghi DB xong rồi mới crash ngay trước khi kịp gửi ack</b> — hệ thống vẫn tưởng chưa xử lý và gửi lại message, dẫn tới Worker khác xử lý <b>lần thứ 2</b> cho cùng 1 giao dịch — nguy cơ trừ tiền 2 lần.</p>
+      </div>
+      <p><b>Cách khắc phục — consumer (Worker) phải idempotent:</b> áp dụng đúng kỹ thuật idempotency key đã học ở Câu 2. Mỗi message mang theo 1 <code>transaction_id</code> duy nhất, Worker trước khi xử lý sẽ kiểm tra xem <code>transaction_id</code> này đã được xử lý thành công chưa (tra trong DB) — nếu rồi thì bỏ qua, chưa thì mới xử lý — đảm bảo dù message bị gửi lại bao nhiêu lần, kết quả cuối cùng vẫn chỉ như xử lý đúng 1 lần.</p>
+
+      <div class="interview-line">
+        <span class="callout-label">Trả lời mẫu khi phỏng vấn</span>
+        <p>"Em tách việc nhận request và xử lý request ra 2 bước riêng: server chỉ đẩy nhanh vào queue rồi trả 202 Accepted ngay, còn worker phía sau xử lý dần theo khả năng thật của hệ thống — tránh nghẽn connection pool khi traffic dồn cùng lúc. Để giữ đúng thứ tự trên cùng 1 account mà vẫn parallel được giữa các account khác, em partition theo account_id — message cùng account luôn vào 1 partition xử lý tuần tự. Vì hệ thống queue dùng at-least-once delivery, worker có thể nhận lại message đã xử lý rồi nếu chưa kịp ack trước khi crash, nên em bắt buộc consumer phải idempotent bằng transaction_id, tránh trừ tiền 2 lần."</p>
+      </div>
+    </section>
+
+    <!-- ============ Q5 ============ -->
+    <section class="qa" id="q5">
+      <div class="q-tag"><span class="n">5</span> Câu hỏi ứng dụng thường gặp</div>
+      <h2 class="q-title">"Làm sao chặn 1 user spam request rút tiền/đặt hàng liên tục?"</h2>
+
+      <h3 class="sub">5.1 — Rate Limiting là gì</h3>
+      <p>Mục tiêu: giới hạn 1 user/IP chỉ được gọi API tối đa <b>N lần trong 1 khoảng thời gian</b> (ví dụ tối đa 10 request/giây). Nếu không giới hạn, 1 user (cố ý spam hoặc bug ở client tự động retry vô hạn) có thể gửi hàng nghìn request/giây, làm sập DB hoặc chiếm hết tài nguyên của người dùng khác. Vấn đề kỹ thuật cần giải: làm sao đếm được "user này đã gọi bao nhiêu lần trong khoảng thời gian gần đây" một cách chính xác và nhanh — đó là lý do cần thuật toán riêng, không chỉ đơn giản là 1 biến đếm.</p>
+
+      <h3 class="sub">5.2 — Fixed Window Counter: chia thời gian thành khung cố định theo lịch</h3>
+      <p>Chia thời gian thành các khung <b>cố định, đóng theo lịch</b> (giống chia lịch theo tháng — tháng nào cũng bắt đầu từ ngày 1), không phụ thuộc request tới lúc nào. Redis lưu <b>từng khung riêng biệt</b> — mỗi khung là 1 key chứa số lượng request đã đếm được trong khung đó — chứ không phải 1 key duy nhất bị reset giá trị về 0.</p>
+
+      <h4 class="subsub">Làm sao biết request thuộc khung nào</h4>
+      <p>Máy tính quy đổi thời gian thành Unix timestamp (số giây kể từ 1/1/1970), rồi xác định khung bằng phép chia lấy nguyên (<code>floor</code> — chia xong bỏ phần thập phân):</p>
+      <pre><code>window_size = 60 giây (kích thước mỗi khung)
+window_id = floor(unix_timestamp / window_size)</code></pre>
+      <p>Con số <code>window_id</code> đại diện chính xác cho 1 khung 60 giây cụ thể. Bất kỳ request nào rơi vào cùng khoảng 60 giây đó đều tính ra <b>cùng 1 window_id</b>, vì phép chia nguyên bo tất cả các giây trong khoảng về chung 1 khung:</p>
+      <pre><code>9:52:00 → timestamp 1750000320 → floor(1750000320/60) = 29166672  → cùng khung
+9:52:44 → timestamp 1750000364 → floor(1750000364/60) = 29166672  → cùng khung
+9:52:59 → timestamp 1750000379 → floor(1750000379/60) = 29166672  → cùng khung
+9:53:00 → timestamp 1750000380 → floor(1750000380/60) = 29166673  → KHUNG MỚI (khác số)</code></pre>
+
+      <h4 class="subsub">Redis lưu gì cho Fixed Window — key theo window_id, kèm TTL để tự thay khung mới</h4>
+      <p>Mỗi khung 60 giây tương ứng với <b>1 key Redis riêng biệt, có vòng đời độc lập</b> — không phải 1 key bị "reset về 0". Khi khung hết hạn, key cũ tự bị Redis xoá (qua TTL), và khung mới bắt đầu bằng 1 key hoàn toàn mới, độc lập với key cũ.</p>
+      <pre><code>const windowSize = 60; // giây
+
+function checkRateLimit(userId) {
+  const now = Math.floor(Date.now() / 1000);         // unix timestamp hiện tại (giây)
+  const windowId = Math.floor(now / windowSize);       // tính khung — CÔNG THỨC Ở TRÊN
+
+  const key = `rate_limit:${userId}:${windowId}`;
+  // ví dụ key thực tế: "rate_limit:user_123:29166672"
+
+  const count = redis.incr(key);   // tăng bộ đếm của key này lên 1 (chưa có thì tự tạo = 1)
+
+  if (count === 1) {
+    redis.expire(key, windowSize); // lần đầu của khung này → đặt TTL = 60s để tự xoá
+  }
+
+  if (count > 5) {
+    return { allowed: false };     // vượt quá 5 → từ chối (count vẫn giữ nguyên, KHÔNG lùi lại 0)
+  }
+  return { allowed: true };
+}</code></pre>
+      <p><b>Ví dụ minh hoạ (không cần đổi ra Unix timestamp để dễ hình dung, dù thực tế vẫn phải quy đổi như công thức ở trên):</b> giới hạn 5 request / 60 giây. 1 request gửi lúc <b>10:10:20</b> — hệ thống xác định khung 60 giây chứa mốc này là <b>[10:10:00 → 10:11:00]</b> (khung cố định theo lịch tròn phút, không tính lùi từ thời điểm request). Redis lưu 1 key đại diện cho đúng khung này, đặt TTL để key tự hết hạn khi khung kết thúc (còn khoảng 40 giây nữa tính từ 10:10:20, vì khung kết thúc lúc 10:11:00), kèm theo 1 bộ đếm bắt đầu từ 0.</p>
+      <p>Nếu bộ đếm hiện tại &lt; 5 thì request được cho phép và bộ đếm tăng thêm 1. Mọi request khác cũng rơi vào cùng khung [10:10:00 → 10:11:00] — ví dụ lúc 10:10:35, 10:10:50 — đều dùng chung đúng 1 key, 1 bộ đếm đó, cứ tăng dần cho tới khi chạm 5 thì các request tiếp theo trong khung này bị từ chối (429), bộ đếm vẫn giữ nguyên chứ không lùi lại. Khi đồng hồ chạm mốc 10:11:00, key này tự hết hạn (Redis tự xoá) — request đầu tiên rơi vào khung mới [10:11:00 → 10:12:00] sẽ tạo ra 1 key hoàn toàn mới, bộ đếm lại bắt đầu từ 0.</p>
+
+      <div class="callout">
+        <span class="callout-label">Add / xoá diễn ra khi nào</span>
+        <p><b>Add (tăng):</b> mỗi khi có request tới, <code>INCR</code> ngay trên key của khung hiện tại — không có bước "thêm" riêng, <code>INCR</code> tự tạo key nếu chưa có. <b>Xoá:</b> không xoá bằng tay — dùng <code>EXPIRE key 60</code> đặt ngay tại lần đầu tiên key được tạo, để Redis <b>tự động</b> xoá key đó sau đúng 60 giây. Khi khung mới bắt đầu (window_id khác), 1 key hoàn toàn mới được sinh ra, độc lập với key cũ — key cũ tự "chết" theo TTL riêng, không ai cần chủ động dọn.</p>
+      </div>
+
+      <h4 class="subsub">Lỗ hổng kinh điển của Fixed Window</h4>
+      <pre class="bad"><code>10:00:56 → 10:00:59 → user dồn gọi 5 request LIÊN TIẾP, đếm 1→5,
+                       tất cả CHO PHÉP vì cùng thuộc Khung [10:00:00-10:01:00)
+10:01:01 → SANG KHUNG MỚI → đếm reset về 0 (key mới)
+           → user LẠI dồn gọi tiếp 5 request nữa ngay 10:01:01-10:01:04
+              đều CHO PHÉP vì thuộc khung mới, đếm mới toanh
+
+→ KẾT QUẢ: user gọi được 10 request chỉ trong vòng 8 giây,
+   dù quy định là "5 request / 60 giây" — vượt xa ý định giới hạn ban đầu!</code></pre>
+      <p>Đây chính là lý do sinh ra Sliding Window — để xoá bỏ lỗ hổng ở đúng ranh giới giữa 2 khung.</p>
+
+      <h3 class="sub">5.3 — Sliding Window Log: đếm chính xác trong "cửa sổ thời gian trượt"</h3>
+      <p>Đếm số request đã xảy ra trong N giây gần nhất, <b>tính từ chính thời điểm request hiện tại</b> — không cố định theo mốc phút/giây tròn. Mỗi request mới đến, cửa sổ được <b>tính lại hoàn toàn mới</b>: luôn là "N giây ngược về trước tính từ thời điểm request đó", không nối tiếp từ mốc cũ.</p>
+      <p><b>Ví dụ minh hoạ:</b> giới hạn 5 request / 60 giây. Redis đang lưu 1 mảng rỗng <code>[]</code> cho user này. Request đầu tiên gửi vào lúc <b>10:10:20</b> — lấy 10:10:20 làm mốc kết thúc (end time), lùi lại 60 giây để lấy mốc bắt đầu (start time) là <b>10:09:20</b>. Vậy khung đang xét là <b>[10:09:20 → 10:10:20]</b>.</p>
+      <p>Từng phần tử timestamp đang có trong mảng sẽ được kiểm tra: cái nào thuộc khung [10:09:20 → 10:10:20] thì giữ lại, cái nào không thuộc (cũ hơn 10:09:20) thì bị xoá khỏi mảng. Sau khi lọc xong, lấy độ dài mảng (số phần tử còn lại) so sánh với 5 — nếu <b>≥ 5</b> thì trả về 429 (từ chối), nếu <b>&lt; 5</b> thì cho phép và thêm timestamp 10:10:20 vào mảng. Vì đây là request đầu tiên nên mảng đang rỗng, độ dài = 0 &lt; 5 → cho phép, mảng giờ thành <code>[10:10:20]</code>. Request tiếp theo đến lúc nào cũng lặp lại đúng quy trình này — tự tính lại khung riêng của nó, không dùng chung khung cố định với request trước.</p>
+      <p>Vì sao gọi là "trượt" (sliding): khác với fixed window (cửa sổ cố định theo lịch: <code>[0-60s), [60-120s)...</code>, dễ bị spam dồn ở 2 đầu ranh giới khung mà vẫn "hợp lệ" theo từng khung riêng lẻ), sliding window luôn tính lùi đúng N giây từ chính thời điểm hiện tại — không có lỗ hổng ranh giới này.</p>
+
+      <div class="callout">
+        <span class="callout-label">Khác biệt cốt lõi giữa 2 cách xác định mốc khung</span>
+        <p><b>Sliding Window</b>: mốc bắt đầu khung <b>tính lùi lại từ chính thời điểm request</b> (10:10:20 → lùi 60s → 10:09:20) — mỗi request có 1 khung riêng của nó, khung này "trượt" theo sát thời gian thực.</p>
+        <p><b>Fixed Window</b>: mốc khung <b>cố định theo lịch tròn phút</b> (10:10:00 → 10:11:00), không quan tâm request rơi vào giây nào trong phút đó — nhiều request khác nhau (10:10:05, 10:10:20, 10:10:55...) đều dùng chung 1 khung, 1 key, 1 bộ đếm duy nhất cho tới khi phút đó kết thúc.</p>
+      </div>
+
+      <h4 class="subsub">Redis lưu gì cho Sliding Window Log</h4>
+      <p>Redis lưu <b>timestamp của từng request đã xảy ra</b>, dùng cấu trúc <code>Sorted Set</code> (ZSET) — vì ZSET cho phép sắp xếp và lọc theo khoảng giá trị (dùng timestamp làm điểm sắp xếp — "score").</p>
+      <pre><code>const key = `rate_limit:sliding:${userId}`;
+const now = Date.now();
+const windowMs = 60000; // cửa sổ 60 giây
+
+// Bước 1: xoá các timestamp đã "trượt" ra khỏi cửa sổ (cũ hơn 60s so với hiện tại)
+await redis.zremrangebyscore(key, 0, now - windowMs);
+
+// Bước 2: đếm số request còn lại trong cửa sổ
+const count = await redis.zcard(key);
+
+if (count >= 10) {
+  throw new Error("429 Too Many Requests");
+}
+
+// Bước 3: ghi nhận request hiện tại — value phải DUY NHẤT (ZSET không cho trùng value)
+// nên thường ghép thêm số random/uuid vào cùng timestamp
+await redis.zadd(key, now, `${now}-${Math.random()}`);
+await redis.expire(key, 60); // tự dọn key nếu user ngừng gọi hẳn</code></pre>
+      <p>Mỗi request thành công tạo ra <b>1 entry riêng trong ZSET</b> — nếu user gọi 10 request/giây liên tục, ZSET đó chứa hàng trăm entry timestamp. Đây chính là lý do Sliding Window Log tốn bộ nhớ hơn Token Bucket: nó lưu lại "dấu vết" của từng request, kích thước dữ liệu tăng theo số lượng request.</p>
+
+      <div class="callout">
+        <span class="callout-label">Tóm gọn khác biệt cách Redis lưu: Fixed Window vs Sliding Window</span>
+        <p><b>Fixed Window</b>: Redis lưu <b>từng khung riêng biệt</b> — mỗi khung là 1 key (định danh bằng <code>window_id</code>) chứa <b>số lượng request</b> đã đếm trong khung đó (kiểu dữ liệu số nguyên, dùng <code>INCR</code>); khung hết hạn (TTL) thì key tự biến mất, khung mới sinh ra key hoàn toàn mới.</p>
+        <p><b>Sliding Window Log</b>: Redis lưu <b>1 danh sách (mảng) các timestamp</b> của từng request đã xảy ra (dùng ZSET); không có khái niệm "khung" hay "reset" — mỗi request cũ tự "rơi rụng" dần khỏi danh sách khi quá 60 giây tuổi, còn request mới liên tục được thêm vào.</p>
+      </div>
+
+      <h3 class="sub">5.4 — Token Bucket: cái xô chứa token, refill dần theo thời gian</h3>
+      <p>Mỗi user có 1 cái xô (bucket) chứa tối đa N token. Mỗi lần user gọi API, hệ thống lấy đi 1 token trong xô — hết token thì từ chối request (429). Xô này tự động được đổ thêm token dần dần theo thời gian (ví dụ mỗi giây thêm 2 token, tới khi đầy).</p>
+      <pre><code>Xô của user A: [🪙🪙🪙🪙🪙🪙🪙🪙🪙🪙]  10 token đầy
+
+User A gọi 10 request liên tiếp trong 1 giây → dùng hết 10 token
+Xô của user A: [ ]  0 token → request thứ 11 bị từ chối
+
+1 giây sau, xô tự refill thêm 2 token (quy định "refill 2 token/giây")
+Xô của user A: [🪙🪙]  → user lại được gọi thêm 2 request nữa</code></pre>
+      <p>Điểm khác biệt cốt lõi so với Sliding Window: Token Bucket cho phép <b>burst</b> — user được gọi dồn dập 1 lúc (miễn còn token trong xô), nhưng về lâu dài trung bình vẫn bị giới hạn theo tốc độ refill. Giống việc được phép tiêu hết tiền tiết kiệm trong 1 ngày, nhưng lương chỉ về từ từ mỗi tháng.</p>
+
+      <h4 class="subsub">Redis lưu gì cho Token Bucket</h4>
+      <p>Khác hẳn Sliding Window Log, Token Bucket <b>không lưu từng request</b> — chỉ cần lưu đúng <b>2 con số</b> cho mỗi user: số token còn lại trong xô, và thời điểm lần cuối xô được refill (để tính xem đã tới lúc thêm token mới chưa). Dùng cấu trúc <code>Hash</code> trong Redis.</p>
+      <pre><code>const key = `rate_limit:bucket:${userId}`;
+const maxTokens = 10;
+const refillRate = 2; // 2 token mỗi giây
+const now = Date.now();
+
+// Đọc trạng thái xô hiện tại (Redis Hash lưu 2 field: tokens và lastRefill)
+let bucket = await redis.hgetall(key);
+
+if (!bucket || Object.keys(bucket).length === 0) {
+  bucket = { tokens: maxTokens, lastRefill: now };   // lần đầu → xô đầy
+} else {
+  // Tính từ lần refill trước tới giờ đã được thêm bao nhiêu token
+  const elapsedSeconds = (now - bucket.lastRefill) / 1000;
+  const tokensToAdd = elapsedSeconds * refillRate;
+  bucket.tokens = Math.min(maxTokens, bucket.tokens + tokensToAdd);
+  bucket.lastRefill = now;
+}
+
+if (bucket.tokens < 1) {
+  throw new Error("429 Too Many Requests"); // hết token, không có gì để trừ
+}
+
+bucket.tokens -= 1; // trừ 1 token cho request này
+await redis.hset(key, { tokens: bucket.tokens, lastRefill: bucket.lastRefill });
+await redis.expire(key, 3600); // dọn key nếu user ngừng hoạt động lâu</code></pre>
+      <p>Redis chỉ giữ <b>1 record duy nhất cho mỗi user</b> (2 field: <code>tokens</code>, <code>lastRefill</code>), bất kể user đó đã gọi bao nhiêu request trong quá khứ — kích thước dữ liệu <b>cố định</b>, không phình to theo lưu lượng như Sliding Window Log.</p>
+
+      <table>
+        <thead><tr><th>Tiêu chí</th><th>Sliding Window Log</th><th>Token Bucket</th></tr></thead>
+        <tbody>
+          <tr><td>Cấu trúc Redis</td><td><code>Sorted Set</code> (ZSET)</td><td><code>Hash</code> (2 field: tokens, lastRefill)</td></tr>
+          <tr><td>Lưu cái gì</td><td>Từng timestamp của mọi request trong cửa sổ</td><td>Chỉ 2 con số: số token còn lại + thời điểm refill cuối</td></tr>
+          <tr><td>Kích thước dữ liệu</td><td>Tăng theo số lượng request</td><td>Cố định, không đổi dù gọi bao nhiêu request</td></tr>
+          <tr><td>Cho phép burst?</td><td>Không</td><td>Có — gọi dồn dập miễn còn token</td></tr>
+          <tr><td>Phù hợp khi</td><td>Cần chính xác tuyệt đối, traffic không quá lớn</td><td>Traffic có tính đợt, cần tiết kiệm bộ nhớ ở quy mô lớn</td></tr>
+        </tbody>
+      </table>
+
+      <h3 class="sub">5.5 — Rate limit ở API Gateway hay ở Service?</h3>
+      <p><b>"Chặn thô"</b> ở Gateway nghĩa là kiểm tra đơn giản, không cần biết gì về business logic bên trong — chỉ dựa vào thông tin có sẵn ngay ở tầng network/HTTP (IP, user_id trong token, path của API). Gateway đứng trước tất cả service, không biết (và không cần biết) chi tiết nghiệp vụ như "user này có phải VIP không" — chỉ đếm request theo IP/user, vượt ngưỡng thì chặn ngay, không cho đi tiếp vào hệ thống phía sau. Mục đích chính là chặn spam/DDoS quy mô lớn sớm nhất có thể, giống bảo vệ đứng ở cổng chỉ kiểm tra thẻ ra vào, không kiểm tra bạn định làm gì bên trong toà nhà.</p>
+      <pre><code>Request → [API Gateway: check thô — IP này gọi > 100 req/phút chưa? Có → chặn ngay]
+              ↓ (nếu chưa vượt ngưỡng)
+          [Order Service: check tinh — user này có đang có 1 đơn pending chưa
+           thanh toán không? Loại sản phẩm này có giới hạn mua mỗi user không?]</code></pre>
+      <p><b>"Chặn tinh"</b> ở Service là chặn dựa theo logic nghiệp vụ cụ thể của từng chức năng (business rule, không phải chỉ đếm request đơn thuần) — ví dụ "user này đã đặt hàng sản phẩm X quá 3 lần trong ngày rồi". Gateway giảm tải sớm cho toàn hệ thống nhưng khó áp rule theo business logic; Service linh hoạt hơn nhưng request đã tốn tài nguyên đi qua Gateway trước khi bị chặn. Thực tế: dùng <b>cả 2 lớp</b>.</p>
+    </section>
+
+    <!-- ============ Q6 ============ -->
+    <section class="qa" id="q6">
+      <div class="q-tag"><span class="n">6</span> Câu hỏi ứng dụng thường gặp</div>
+      <h2 class="q-title">"Bảng transaction log hàng chục triệu row, query theo account_id ngày càng chậm — tối ưu sao?"</h2>
+
+      <h3 class="sub">6.1 — Composite Index: gộp nhiều cột vào 1 index</h3>
+      <p>Composite index (compound index) là gộp <b>2 hoặc nhiều cột</b> vào chung 1 index, thay vì tạo riêng từng index cho từng cột.</p>
+      <pre><code>CREATE TABLE transactions (
+  id BIGINT PRIMARY KEY,
+  account_id INT,
+  created_at TIMESTAMP,
+  amount DECIMAL,
+  status VARCHAR(20)
+);
+
+-- Query thường gặp: lấy lịch sử giao dịch của 1 account, mới nhất trước
+SELECT * FROM transactions
+WHERE account_id = 123
+ORDER BY created_at DESC
+LIMIT 20;</code></pre>
+      <p>Không có index → DB phải quét toàn bộ hàng chục triệu row để tìm <code>account_id = 123</code>, rồi mới sort — cực chậm.</p>
+      <div class="code-label good">Composite index đúng</div>
+      <pre class="good"><code>CREATE INDEX idx_account_created ON transactions (account_id, created_at);</code></pre>
+      <p><b>Thứ tự cột trong composite index rất quan trọng</b> — index này giúp nhanh khi:</p>
+      <pre><code>WHERE account_id = 123                                 -- ✅ dùng được index (cột đầu)
+WHERE account_id = 123 AND created_at > '2026-01-01'   -- ✅ dùng được cả 2 cột
+WHERE account_id = 123 ORDER BY created_at             -- ✅ index đã sort sẵn theo created_at
+                                                        --    trong phạm vi account_id đó, khỏi sort lại</code></pre>
+      <p>Nhưng <b>không</b> giúp gì nếu query chỉ lọc theo cột thứ 2 mà bỏ qua cột đầu:</p>
+      <pre class="bad"><code>WHERE created_at > '2026-01-01'   -- ❌ không tận dụng được index này,
+                                  --    vì index được sắp xếp theo account_id trước</code></pre>
+      <p>Nguyên tắc: composite index hoạt động giống mục lục sách theo "Chương → Trang" — muốn tra nhanh trang 50 của chương 3, phải biết chương trước; chỉ có "trang 50" mà không biết chương nào thì mục lục này vô dụng.</p>
+
+      <h3 class="sub">6.2 — Partition: chia nhỏ 1 bảng lớn thành nhiều "bảng con" vật lý</h3>
+      <p>Partition không phải là index — nó là cách <b>vật lý chia dữ liệu của 1 bảng ra thành nhiều phần riêng</b> dựa theo 1 cột (thường là thời gian), nhưng vẫn cho phép query như thể đó là 1 bảng duy nhất.</p>
+      <pre><code>-- Partition bảng transactions theo THÁNG dựa vào created_at
+CREATE TABLE transactions (
+  id BIGINT,
+  account_id INT,
+  created_at TIMESTAMP,
+  amount DECIMAL
+) PARTITION BY RANGE (created_at) (
+  PARTITION p_2026_06 VALUES LESS THAN ('2026-07-01'),
+  PARTITION p_2026_07 VALUES LESS THAN ('2026-08-01'),
+  PARTITION p_2026_08 VALUES LESS THAN ('2026-09-01')
+);</code></pre>
+      <p>Về mặt vật lý, dữ liệu tháng 6 nằm ở 1 file/phân vùng riêng, tháng 7 riêng, tháng 8 riêng — dù bạn vẫn <code>SELECT * FROM transactions</code> như 1 bảng bình thường.</p>
+      <pre class="good"><code>-- Query này chỉ cần quét PHÂN VÙNG tháng 8, bỏ qua hoàn toàn tháng 6, 7
+SELECT * FROM transactions
+WHERE created_at >= '2026-08-01' AND created_at < '2026-08-31';</code></pre>
+      <p>DB engine biết ngay chỉ cần đọc <code>p_2026_08</code>, không cần động vào 2 phân vùng kia — gọi là <b>partition pruning</b>. Khác index ở chỗ: index giúp tìm nhanh <b>trong 1 khối dữ liệu</b>, còn partition giúp <b>loại bỏ hẳn cả khối dữ liệu không liên quan</b> trước khi tìm kiếm — hiệu quả rất lớn khi bảng có hàng chục/trăm triệu row trải dài nhiều năm.</p>
+
+      <h3 class="sub">6.3 — Archive dữ liệu cũ: di chuyển dữ liệu ít dùng ra khỏi bảng chính</h3>
+      <p>Dữ liệu cũ (ví dụ giao dịch từ 2 năm trước) gần như không ai còn query hàng ngày nữa — nhưng vẫn nằm trong bảng chính, làm bảng phình to, làm chậm cả index lẫn query của dữ liệu <b>mới</b> (index cũng phải lớn theo, backup cũng lâu hơn).</p>
+      <pre><code>-- Bước 1: copy dữ liệu cũ (>2 năm) sang bảng archive (hoặc storage khác như S3)
+INSERT INTO transactions_archive
+SELECT * FROM transactions
+WHERE created_at < '2024-01-01';
+
+-- Bước 2: xoá khỏi bảng chính sau khi archive thành công
+DELETE FROM transactions WHERE created_at < '2024-01-01';</code></pre>
+      <p>Kết quả: bảng <code>transactions</code> (bảng chính, phục vụ giao dịch hàng ngày) giờ chỉ chứa dữ liệu gần đây, nhỏ gọn, index nhanh, insert/update mượt hơn. Cần tra lịch sử cũ (hiếm khi, thường là báo cáo/audit) thì query sang <code>transactions_archive</code> riêng — chấp nhận chậm hơn vì không phải hot path.</p>
+      <p><b>Kết hợp với partition:</b> thay vì <code>DELETE</code> từng dòng (chậm với bảng lớn), nếu bảng đã partition theo tháng, archive chỉ đơn giản là "gỡ hẳn 1 partition ra" — cực nhanh, không cần quét từng row.</p>
+
+      <h3 class="sub">6.4 — N+1 Query: lỗi rất hay gặp khi dùng ORM</h3>
+      <p>Thay vì lấy hết dữ liệu cần trong 1–2 câu query, code chạy <b>1 query lấy danh sách (N record), rồi thêm N query riêng lẻ</b> để lấy dữ liệu liên quan cho từng record — tổng cộng N+1 lần gọi DB.</p>
+      <div class="code-label bad">Sai — N+1 query</div>
+      <pre class="bad"><code>// Bước 1: 1 query lấy 20 đơn hàng
+const orders = await db.query("SELECT * FROM orders LIMIT 20");   // → 1 query
+
+// Bước 2: LẶP qua từng order, mỗi lần lại query riêng để lấy tên sản phẩm
+for (const order of orders) {
+  const product = await db.query(
+    "SELECT name FROM products WHERE id = ?", [order.product_id]
+  );
+  order.productName = product.name;
+}
+// → thêm 20 query nữa, mỗi order 1 lần
+
+// TỔNG: 1 (lấy orders) + 20 (lấy product từng cái) = 21 query cho có 20 record</code></pre>
+      <p>Với 20 record chưa thấy rõ, nhưng nếu trang danh sách có 1000 đơn hàng → <b>1001 lần gọi DB</b> cho 1 lần load trang, cực chậm dù mỗi query riêng lẻ đều nhanh.</p>
+      <div class="code-label good">Đúng — JOIN 1 lần</div>
+      <pre class="good"><code>SELECT orders.*, products.name AS product_name
+FROM orders
+JOIN products ON products.id = orders.product_id
+LIMIT 20;
+-- CHỈ 1 query duy nhất, lấy hết dữ liệu cần trong 1 lần</code></pre>
+      <div class="code-label good">Hoặc batch IN(...) nếu không tiện JOIN trực tiếp</div>
+      <pre class="good"><code>const orders = await db.query("SELECT * FROM orders LIMIT 20");     // query 1
+const productIds = orders.map(o => o.product_id);                    // gom hết id lại
+const products = await db.query(
+  "SELECT * FROM products WHERE id IN (?)", [productIds]
+);                                                                     // query 2 — LẤY HẾT 1 LẦN
+// rồi map product vào từng order ở tầng app (không cần query DB thêm nữa)</code></pre>
+      <p>Chỉ còn <b>2 query cố định</b>, dù danh sách orders có 20 hay 1000 record — điểm khác biệt cốt lõi: N+1 tăng tuyến tính theo số record, còn cách sửa giữ nguyên số query bất kể data lớn cỡ nào. Nhiều ORM có sẵn cú pháp để tự động hoá việc này (TypeORM: <code>relations</code>, Prisma: <code>include</code>, Sequelize: <code>include</code>) — bản chất bên dưới cũng chuyển thành JOIN hoặc batch <code>IN</code> như trên.</p>
+      <p>Phát hiện N+1 qua log SQL hoặc APM (New Relic, Datadog) đếm số query/request.</p>
+
+      <h3 class="sub">6.5 — Cache balance trong Redis — có nên dùng để check trước khi trừ?</h3>
+      <div class="verdict no">✕ Không dùng cache để check trước khi trừ tiền</div>
+      <p>Chỉ nên cache cho mục đích <b>đọc hiển thị</b> (dashboard). Trừ tiền luôn phải đọc từ DB (nguồn sự thật) với lock đúng cách, vì cache có độ trễ đồng bộ → dùng cache để check số dư trước khi trừ có thể trừ vượt quá thực tế.</p>
+    </section>
+
+    <!-- ============ Q7 ============ -->
+    <section class="qa" id="q7">
+      <div class="q-tag"><span class="n">7</span> Câu hỏi ứng dụng thường gặp</div>
+      <h2 class="q-title">"Redis là gì, dùng trong những case study thực tế nào của dự án?"</h2>
+
+      <h3 class="sub">7.1 — Redis là gì</h3>
+      <p>Redis là <b>in-memory database</b> — dữ liệu được lưu trực tiếp trong RAM thay vì ổ đĩa như DB truyền thống (MySQL, PostgreSQL) — nên đọc/ghi nhanh hơn rất nhiều lần (dưới 1ms so với 5-20ms của DB đọc từ ổ đĩa). Đánh đổi lại: RAM có giới hạn dung lượng và đắt hơn ổ đĩa nhiều, nên Redis không dùng để thay thế hoàn toàn DB chính — nó đóng vai trò là <b>lớp tăng tốc / lưu trữ tạm thời</b> phía trên 1 nguồn dữ liệu gốc.</p>
+      <div class="callout">
+        <span class="callout-label">Redis không chỉ lưu "thông tin tạm" theo nghĩa hẹp</span>
+        <p>Nhiều người mới học nghĩ Redis chỉ hợp với dữ liệu ngắn hạn (OTP, session). Thực tế Redis còn được dùng để <b>cache lại chính dữ liệu đã có trong DB</b> (profile user, thông tin sản phẩm...) — không phải vì bản thân dữ liệu đó có tính tạm thời, mà vì mục đích là <b>đọc nhanh hơn</b>, giảm tải cho DB chính. DB vẫn luôn là "nguồn sự thật" (source of truth); Redis chỉ giữ 1 bản sao, có thể mất đi bất cứ lúc nào (restart, hết TTL, bị evict do hết RAM) mà hệ thống vẫn hoạt động bình thường — chỉ chậm hơn tạm thời vì phải query lại DB. Đây chính là tiêu chí để phân biệt "cái gì nên để trong Redis" và "cái gì bắt buộc phải nằm trong DB": nếu mất dữ liệu đó mà hệ thống vẫn chạy được (chỉ chậm hơn), nó hợp để cache; nếu mất là hỏng luôn nghiệp vụ, nó phải nằm trong DB.</p>
+      </div>
+
+      <h3 class="sub">7.2 — Case study thực tế: Redis dùng ở đâu trong 1 dự án</h3>
+      <table>
+        <thead><tr><th>Case study</th><th>Cấu trúc Redis dùng</th><th>Xem lại ở mục</th></tr></thead>
+        <tbody>
+          <tr><td><b>Cache lại record DB</b> — profile user, thông tin sản phẩm, danh mục</td><td>String / Hash, kèm TTL</td><td>7.3 (bên dưới)</td></tr>
+          <tr><td><b>Session / đăng nhập</b> — lưu trạng thái đăng nhập user, JWT blacklist</td><td>String, kèm TTL theo thời gian hết hạn phiên</td><td>—</td></tr>
+          <tr><td><b>Rate limiting</b> — giới hạn số request/user</td><td>String (fixed window), Sorted Set (sliding window log)</td><td>Câu 5</td></tr>
+          <tr><td><b>OTP / mã xác thực tạm</b></td><td>String, TTL vài phút</td><td>—</td></tr>
+          <tr><td><b>Message queue nhẹ</b> — job background đơn giản</td><td>List (LPUSH/BRPOP), hoặc Redis Streams cho queue có ack</td><td>Câu 4, Câu 10</td></tr>
+          <tr><td><b>Distributed lock</b> — khoá xuyên nhiều instance backend</td><td>String với lệnh <code>SET key value NX EX</code> (chỉ set nếu chưa tồn tại, kèm TTL)</td><td>1.6 (khi cần lock ngoài phạm vi 1 DB transaction)</td></tr>
+          <tr><td><b>Leaderboard / bảng xếp hạng</b> — top sản phẩm bán chạy, ranking game</td><td>Sorted Set (điểm số làm score, tự sắp xếp)</td><td>—</td></tr>
+          <tr><td><b>Bộ đếm real-time</b> — lượt xem bài viết, số người online</td><td>String (<code>INCR</code>), chấp nhận sai số nhỏ</td><td>—</td></tr>
+          <tr><td><b>Pub/Sub</b> — thông báo real-time giữa các service, chat đơn giản</td><td>Redis Pub/Sub channel</td><td>—</td></tr>
+          <tr><td><b>Idempotency key</b> — chống xử lý trùng request/message</td><td>String, kèm TTL (ví dụ 24h)</td><td>Câu 2, Câu 4</td></tr>
+        </tbody>
+      </table>
+      <p>Điểm chung: hầu hết case study trên đều đã xuất hiện rải rác ở các câu trước — Redis là "sợi chỉ" chạy xuyên suốt nhiều bài toán khác nhau (rate limit, queue, idempotency...), không phải chỉ dùng riêng cho việc cache DB.</p>
+
+      <h3 class="sub">7.3 — Cache lại record DB: vì sao cần, và cách tránh "lệch" giữa Redis và DB</h3>
+      <p>Cache (Redis) và Database là <b>2 hệ thống lưu trữ tách biệt</b>, không tự động đồng bộ với nhau — update DB xong, Redis không tự biết để cập nhật theo, trừ khi code chủ động làm việc đó. Đây là nguồn gốc của "lệch" (cache inconsistency).</p>
+      <pre class="bad"><code>Bước 1: DB có name = "Nguyen Van A", Redis cache cũng "Nguyen Van A" (khớp nhau)
+
+Bước 2: User đổi tên → UPDATE DB SET name = 'Nguyen Van B'
+        → DB đã đúng, NHƯNG code QUÊN cập nhật/xoá Redis cache
+
+Bước 3: Request khác đọc profile → check cache trước → cache VẪN "Nguyen Van A"
+        → trả về dữ liệu CŨ dù DB đã có dữ liệu MỚI  → ĐÂY LÀ "LỆCH"</code></pre>
+      <p>Ngay cả khi code làm đúng (update DB xong thì xoá cache ngay), vẫn có <b>khoảng lệch tạm thời rất ngắn</b> giữa lúc DB commit xong và lúc cache được xoá theo — vì 2 thao tác này không xảy ra trong cùng 1 tích tắc:</p>
+      <pre><code>t=5ms:    UPDATE DB xong → DB đã đúng
+t=5.05ms: Request KHÁC đọc cache đúng lúc này → cache CHƯA kịp xoá → trả dữ liệu cũ
+t=6ms:    Code xoá cache xong → từ giờ cache mới đúng trở lại</code></pre>
+      <div class="callout">
+        <span class="callout-label">Vì sao không dùng cache để check số dư trước khi trừ tiền (nhắc lại mục 6.5)</span>
+        <p>DB thật đã còn 2 triệu sau khi trừ, nhưng nếu cache chưa kịp cập nhật vẫn hiển thị 10 triệu — 1 request khác dựa vào cache để quyết định "còn đủ tiền cho phép rút thêm" sẽ dẫn tới rút vượt quá số dư thực có. Đây là lý do cache chỉ nên dùng để <b>hiển thị</b>, không dùng làm căn cứ cho quyết định nghiệp vụ quan trọng — quyết định đó luôn phải đọc trực tiếp từ DB với đúng lock.</p>
+      </div>
+
+      <h3 class="sub">7.4 — Tổng quan các cấu trúc dữ liệu chính trong Redis</h3>
+      <p>Redis không chỉ là "key-value đơn giản" — nó hỗ trợ nhiều kiểu cấu trúc dữ liệu khác nhau, mỗi loại có đặc tính riêng phù hợp cho từng bài toán.</p>
+
+      <h4 class="subsub">1. String — đơn giản nhất, lưu 1 giá trị</h4>
+      <pre><code>SET user:123:name "Nguyen Van A"
+GET user:123:name → "Nguyen Van A"
+
+INCR page_views:article_5    → tăng bộ đếm lên 1</code></pre>
+      <p><b>Dùng khi:</b> giá trị đơn giản, chỉ cần đọc/ghi nguyên khối — cache 1 record (dạng JSON string), session token, OTP, bộ đếm đơn giản (<code>INCR</code>), rate limit fixed window (mục 5.2), idempotency key (Câu 2), distributed lock (<code>SET key value NX EX</code>, mục 1.6).</p>
+
+      <h4 class="subsub">2. Hash — giống 1 object có nhiều field, gọn hơn String riêng lẻ</h4>
+      <pre><code>HSET user:123 name "Nguyen Van A" age 30 city "HCM"
+HGET user:123 name → "Nguyen Van A"
+HGETALL user:123 → { name: "...", age: 30, city: "..." }</code></pre>
+      <p><b>Dùng khi:</b> dữ liệu có nhiều field liên quan tới nhau, muốn đọc/sửa từng field riêng lẻ mà không cần đọc/ghi lại toàn bộ object — ví dụ Token Bucket (mục 5.4, chỉ cần 2 field <code>tokens</code> và <code>lastRefill</code>), cache 1 record có cấu trúc (thay vì lưu cả record dưới dạng 1 chuỗi JSON string rồi phải parse lại mỗi lần đọc).</p>
+
+      <h4 class="subsub">3. List — danh sách có thứ tự, thêm/lấy ở 2 đầu</h4>
+      <pre><code>LPUSH job_queue "job_abc123"     → thêm job vào đầu danh sách
+RPOP job_queue                    → lấy job ra từ cuối danh sách (FIFO)</code></pre>
+      <p><b>Dùng khi:</b> cần hàng đợi đơn giản (queue nhẹ, Câu 10) — worker liên tục <code>BRPOP</code> (blocking pop) để lấy job xử lý dần. Khác Kafka/SQS ở chỗ List đơn giản hơn nhiều, không có partition, không đảm bảo bền vững cao — chỉ phù hợp job không quá quan trọng (không phải thanh toán).</p>
+
+      <h4 class="subsub">4. Set — tập hợp không trùng lặp, không có thứ tự</h4>
+      <pre><code>SADD user:123:favorites "product_1" "product_2"
+SISMEMBER user:123:favorites "product_1" → true (kiểm tra có tồn tại không)
+SINTER user:123:favorites user:456:favorites → giao của 2 tập hợp</code></pre>
+      <p><b>Dùng khi:</b> cần kiểm tra "có tồn tại chưa" cực nhanh, hoặc tính toán tập hợp (giao/hợp/hiệu) — ví dụ: danh sách sản phẩm yêu thích, tag của bài viết, kiểm tra user đã đọc bài viết X chưa (tránh đếm view trùng), tìm bạn chung giữa 2 user.</p>
+
+      <h4 class="subsub">5. Sorted Set (ZSET) — giống Set nhưng mỗi phần tử có thêm 1 "điểm số" để tự sắp xếp</h4>
+      <pre><code>ZADD leaderboard 1500 "player_A"
+ZADD leaderboard 2300 "player_B"
+ZREVRANGE leaderboard 0 9 WITHSCORES   → lấy top 10 điểm cao nhất
+ZSCORE leaderboard "player_A" → 1500</code></pre>
+      <p><b>Dùng khi:</b> cần dữ liệu luôn được sắp xếp theo 1 tiêu chí số (điểm số, thời gian, giá...) và truy vấn theo khoảng — đây chính là cấu trúc dùng cho <b>Sliding Window Log</b> (mục 5.3, dùng timestamp làm score để lọc theo khoảng thời gian), <b>leaderboard/bảng xếp hạng</b> (điểm số game, top sản phẩm bán chạy), hoặc feed tin tức sắp xếp theo thời gian đăng.</p>
+
+      <h4 class="subsub">6. Pub/Sub — kênh phát-nhận tin nhắn real-time, không lưu trữ</h4>
+      <pre><code>// Service A (publisher)
+PUBLISH notifications:user_123 "Bạn có đơn hàng mới"
+
+// Service B (subscriber) — đang lắng nghe kênh này
+SUBSCRIBE notifications:user_123
+→ nhận ngay lập tức: "Bạn có đơn hàng mới"</code></pre>
+      <p><b>Dùng khi:</b> cần gửi thông báo tức thời giữa các service hoặc tới client đang kết nối (qua WebSocket) — ví dụ chat real-time đơn giản, thông báo đẩy khi có đơn hàng mới, đồng bộ trạng thái giữa nhiều instance backend (ví dụ khi 1 instance update cache, publish để các instance khác biết mà invalidate cache local của chúng).</p>
+      <div class="callout">
+        <span class="callout-label">Điểm khác biệt quan trọng: Pub/Sub không lưu trữ gì cả</span>
+        <p>Nếu không có ai đang <code>SUBSCRIBE</code> vào đúng lúc message được publish, message đó <b>mất luôn vĩnh viễn</b>, không giống List hay Streams (bên dưới) là dữ liệu vẫn nằm đó chờ được lấy ra. Vì vậy Pub/Sub <b>không phù hợp cho job quan trọng</b> (không thể dùng cho thanh toán) — chỉ hợp với thông báo real-time mà mất 1-2 cái cũng không sao (ví dụ 1 chat message bị mất do subscriber vừa mất kết nối, người dùng có thể gửi lại).</p>
+      </div>
+
+      <h4 class="subsub">7. Redis Streams — giống Kafka thu nhỏ, có lưu trữ + ack</h4>
+      <pre><code>XADD orders_stream * order_id 123 amount 500000
+XREADGROUP GROUP workers consumer1 COUNT 1 STREAMS orders_stream >
+→ worker nhận được message, xử lý xong thì XACK để đánh dấu đã xử lý</code></pre>
+      <p><b>Dùng khi:</b> cần queue có độ tin cậy cao hơn List/Pub-Sub — có lưu trữ lại lịch sử message, hỗ trợ nhiều consumer group, hỗ trợ cơ chế ack giống Kafka (message chưa ack sẽ được giao lại) — đúng tinh thần "at-least-once delivery" đã nói ở mục 4.4. Đây là lựa chọn khi muốn dùng Redis làm message queue "nghiêm túc" hơn thay vì chỉ dùng List đơn giản.</p>
+
+      <h4 class="subsub">Bảng tổng hợp để nhớ nhanh khi phỏng vấn</h4>
+      <table>
+        <thead><tr><th>Cấu trúc</th><th>Đặc tính chính</th><th>Case study điển hình</th></tr></thead>
+        <tbody>
+          <tr><td>String</td><td>Giá trị đơn, atomic increment</td><td>Cache đơn giản, session, OTP, rate limit fixed window, idempotency key, distributed lock</td></tr>
+          <tr><td>Hash</td><td>Object nhiều field, sửa từng field riêng</td><td>Token Bucket, cache record có cấu trúc</td></tr>
+          <tr><td>List</td><td>Hàng đợi FIFO đơn giản</td><td>Queue nhẹ cho background job không quan trọng</td></tr>
+          <tr><td>Set</td><td>Tập hợp không trùng, phép giao/hợp</td><td>Check tồn tại nhanh, tag, favorite, tránh đếm trùng</td></tr>
+          <tr><td>Sorted Set</td><td>Tự sắp xếp theo điểm số</td><td>Sliding Window Log, leaderboard, feed theo thời gian</td></tr>
+          <tr><td>Pub/Sub</td><td>Real-time, không lưu trữ, mất nếu không ai nghe</td><td>Chat đơn giản, notification tức thời, đồng bộ cache giữa instance</td></tr>
+          <tr><td>Streams</td><td>Queue có lưu trữ + ack, giống Kafka thu nhỏ</td><td>Message queue cần độ tin cậy, event sourcing nhẹ</td></tr>
+        </tbody>
+      </table>
+      <div class="interview-line">
+        <span class="callout-label">Trả lời mẫu khi phỏng vấn</span>
+        <p>"Em chọn cấu trúc dựa trên hình dạng dữ liệu và cách mình cần truy vấn nó — cần sắp xếp theo điểm số thì Sorted Set, cần object nhiều field sửa riêng lẻ thì Hash, cần kiểm tra tồn tại/tính giao-hợp thì Set, cần hàng đợi đơn giản thì List, còn cần độ tin cậy cao hơn cho queue thì em cân nhắc Streams thay vì List thường."</p>
+      </div>
+
+      <h3 class="sub">7.5 — 3 chiến lược ghi cache phổ biến</h3>
+      <table>
+        <thead><tr><th>Chiến lược</th><th>Cách hoạt động</th><th>Rủi ro / phù hợp khi</th></tr></thead>
+        <tbody>
+          <tr><td>Write-through</td><td>Ghi DB xong ghi luôn cache trong cùng flow (đồng bộ)</td><td>Cache luôn mới nhưng chậm hơn 1 chút vì thêm bước ghi cache</td></tr>
+          <tr><td>Write-behind</td><td>Ghi cache trước, DB ghi bất đồng bộ sau</td><td>Nhanh nhưng rủi ro mất dữ liệu nếu cache crash trước khi flush — <b>không phù hợp cho dữ liệu tiền</b></td></tr>
+          <tr><td>Cache-aside (phổ biến nhất)</td><td>Đọc: check cache trước, miss thì đọc DB rồi set cache. Ghi: update DB rồi <b>invalidate (xoá)</b> cache</td><td>Không update cache trực tiếp để tránh out-of-order write</td></tr>
+        </tbody>
+      </table>
+      <h4 class="subsub">Race condition ở cache-aside</h4>
+      <p>2 request cùng cache-miss → cả 2 cùng đọc DB → cả 2 cùng set cache — nếu 1 trong 2 đọc dữ liệu cũ hơn, cache cuối cùng có thể là data cũ (ai set sau thắng, không nhất thiết mới nhất). Giảm thiểu bằng cách set cache kèm timestamp/version (chỉ ghi đè nếu mới hơn), hoặc dùng mutex ngắn khi cache-miss để chỉ 1 request đi đọc DB.</p>
+
+      <div class="interview-line">
+        <span class="callout-label">Trả lời mẫu khi phỏng vấn</span>
+        <p>"Redis em dùng cho nhiều mục đích trong dự án: cache lại dữ liệu hay đọc để giảm tải DB, lưu session/OTP, làm rate limiter, làm queue nhẹ cho background job, distributed lock khi cần khoá xuyên nhiều instance, và idempotency key để chống xử lý trùng. Với riêng việc cache lại dữ liệu từ DB, em dùng chiến lược cache-aside — đọc thì check cache trước miss mới query DB, ghi thì update DB rồi xoá cache thay vì update cache trực tiếp — và luôn đặt TTL dự phòng để nếu có bug quên xoá cache, dữ liệu cũ cũng tự hết hạn sau 1 khoảng thời gian, không lệch mãi mãi."</p>
+      </div>
+    </section>
+
+    <!-- ============ Q8 ============ -->
+    <section class="qa" id="q8">
+      <div class="q-tag"><span class="n">8</span> Câu hỏi ứng dụng thường gặp</div>
+      <h2 class="q-title">"API trả về danh sách 10.000 record — offset hay cursor-based pagination?"</h2>
+
+      <h3 class="sub">8.1 — Lý do 1: Offset tốn hiệu năng — DB phải quét bỏ N row mỗi lần</h3>
+      <div class="code-label bad">Offset — chậm dần khi page càng sâu</div>
+      <pre class="bad"><code>SELECT * FROM comments ORDER BY created_at DESC LIMIT 20 OFFSET 10000;</code></pre>
+      <p>DB không thể "nhảy thẳng" tới row thứ 10000 — dù có index, nó vẫn phải <b>duyệt qua đủ 10000 row đầu tiên rồi mới bỏ đi</b>, chỉ lấy 20 row tiếp theo. Càng phân trang sâu (offset càng lớn), thời gian query càng tăng tuyến tính — trang 1 nhanh, trang 500 chậm hẳn.</p>
+
+      <h3 class="sub">8.2 — Lý do 2: Offset gây lệch dữ liệu khi có insert/delete xen giữa các lần load</h3>
+      <p>Đây là lỗi tinh vi, dễ bị bỏ qua. Ví dụ load danh sách comment, sắp mới nhất lên đầu:</p>
+      <pre class="bad"><code>Trang 1 (OFFSET 0, LIMIT 5): comment [10, 9, 8, 7, 6]  (id giảm dần theo thời gian)
+
+Giữa lúc đó, có 1 comment MỚI (id=11) được ai đó đăng thêm vào
+
+Trang 2 (OFFSET 5, LIMIT 5): DB tính lại từ đầu — giờ thứ tự thực tế đã là
+                              [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
+                              OFFSET 5 nghĩa là "bỏ qua 5 row đầu" = bỏ qua [11,10,9,8,7]
+                              → trả về [6, 5, 4, 3, 2]
+
+→ Comment id=6 xuất hiện Ở CẢ TRANG 1 VÀ TRANG 2 (bị trùng lặp)!
+  Vì ở trang 1, vị trí của "6" là row thứ 5 (index 4).
+  Nhưng khi có thêm comment mới chèn vào đầu, "6" bị đẩy xuống thành row thứ 6 (index 5)
+  → OFFSET 5 giờ lại trúng ngay vào nó lần nữa.</code></pre>
+      <p>Ngược lại, nếu có <b>xoá</b> bớt dữ liệu giữa các lần load, sẽ xảy ra chiều ngược lại — <b>mất hẳn 1 record</b>, không hiển thị ở trang nào cả, vì offset bị "hụt" đi so với vị trí thực tế.</p>
+
+      <h3 class="sub">8.3 — Cursor-based giải quyết cả 2 vấn đề trên như thế nào</h3>
+      <p>Thay vì nói "bỏ qua N row", cursor nói "lấy các row <b>sau</b> row cụ thể này" — dùng chính giá trị dữ liệu thật (không phải vị trí đếm) làm điều kiện lọc:</p>
+      <div class="code-label good">Cursor-based — ổn định ở mọi độ sâu</div>
+      <pre class="good"><code>SELECT * FROM comments
+WHERE created_at < '2026-08-27T10:00:00'
+ORDER BY created_at DESC LIMIT 20;</code></pre>
+      <p>Vì so sánh dựa trên <b>giá trị thật của row cuối cùng đã thấy</b>, dù có bao nhiêu row mới được chèn thêm ở đâu đó, nó không ảnh hưởng tới kết quả của trang tiếp theo — không bị trùng, không bị mất record.</p>
+
+      <h4 class="subsub">Vì sao chỉ dùng created_at chưa đủ — cần composite cursor (created_at + id)</h4>
+      <p><code>created_at</code> có thể bị <b>trùng giá trị</b> giữa nhiều record (2 comment tạo cùng 1 mili giây, hoặc DB chỉ lưu độ chính xác tới giây). Nếu chỉ dùng <code>created_at</code> làm điều kiện, những record có cùng giá trị có thể bị <b>bỏ sót</b> hoặc <b>lặp lại</b> giữa các trang. Giải pháp: kết hợp <code>created_at</code> + <code>id</code> làm điều kiện lọc, vì <code>id</code> luôn duy nhất, đảm bảo thứ tự tuyệt đối dù <code>created_at</code> có bị trùng:</p>
+      <pre class="good"><code>SELECT * FROM comments
+WHERE (created_at, id) < ('2026-08-27T10:00:00', 458)
+ORDER BY created_at DESC, id DESC
+LIMIT 20;</code></pre>
+      <p><code>(created_at, id) &lt; (X, Y)</code> nghĩa là: nhỏ hơn theo <code>created_at</code> trước, nếu bằng nhau thì so tiếp theo <code>id</code> — đảm bảo thứ tự nhất quán tuyệt đối, không có 2 record nào "hoà" nhau để gây trùng/sót.</p>
+
+      <h4 class="subsub">Vì sao cần "encode" cursor thành 1 chuỗi</h4>
+      <p>Thay vì bắt Frontend tự quản lý và gửi lại 2 giá trị riêng (<code>created_at</code> và <code>id</code>) mỗi lần gọi trang tiếp theo, Backend <b>gộp 2 giá trị đó lại, encode thành 1 chuỗi duy nhất</b> (thường bằng Base64) — để FE chỉ cần lưu và gửi lại <b>1 chuỗi cursor duy nhất</b>, không cần biết bên trong nó chứa gì (che giấu cấu trúc dữ liệu thật, tránh FE tự ý sửa/đoán giá trị); và BE có thể đổi cấu trúc cursor sau này mà không phá vỡ hợp đồng API với FE.</p>
+      <pre><code>Dữ liệu thật: { createdAt: "2026-08-27T10:00:00.000Z", id: 458 }
+        ↓ JSON.stringify rồi Base64 encode
+Cursor gửi cho FE: "eyJjcmVhdGVkQXQiOiIyMDI2LTA4LTI3VDEwOjAwOjAwLjAwMFoiLCJpZCI6NDU4fQ=="</code></pre>
+
+      <h3 class="sub">8.4 — Code mẫu NestJS: giao tiếp FE-BE cho cả 2 cách (load comment 1 bài viết)</h3>
+
+      <h4 class="subsub">Offset-based</h4>
+      <pre><code>// comment.controller.ts
+@Controller('posts/:postId/comments')
+export class CommentController {
+  constructor(private commentService: CommentService) {}
+
+  @Get()
+  async getComments(
+    @Param('postId') postId: string,
+    @Query('page') page = 1,
+    @Query('limit') limit = 20,
+  ) {
+    return this.commentService.findByOffset(postId, +page, +limit);
+  }
+}</code></pre>
+      <pre><code>// comment.service.ts
+async findByOffset(postId: string, page: number, limit: number) {
+  const skip = (page - 1) * limit;
+
+  const [data, total] = await this.commentRepo.findAndCount({
+    where: { postId },
+    order: { createdAt: 'DESC', id: 'DESC' },
+    skip,          // TypeORM tự dịch thành OFFSET
+    take: limit,   // và LIMIT
+  });
+
+  return {
+    data,
+    pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+  };
+}</code></pre>
+      <p><b>FE gọi:</b></p>
+      <pre><code>GET /posts/5/comments?page=1&limit=20
+GET /posts/5/comments?page=2&limit=20   ← FE tự tính số trang tiếp theo, tự quản lý "page"</code></pre>
+
+      <h4 class="subsub">Cursor-based</h4>
+      <pre><code>// comment.controller.ts
+@Get()
+async getComments(
+  @Param('postId') postId: string,
+  @Query('cursor') cursor?: string,   // optional — lần đầu load thì không có
+  @Query('limit') limit = 20,
+) {
+  return this.commentService.findByCursor(postId, cursor, +limit);
+}</code></pre>
+      <pre><code>// comment.service.ts
+async findByCursor(postId: string, cursor: string | undefined, limit: number) {
+  const qb = this.commentRepo.createQueryBuilder('c')
+    .where('c.postId = :postId', { postId })
+    .orderBy('c.createdAt', 'DESC')
+    .addOrderBy('c.id', 'DESC')
+    .take(limit + 1); // lấy dư 1 record để biết còn trang tiếp theo hay không
+
+  if (cursor) {
+    const { createdAt, id } = this.decodeCursor(cursor);
+    // điều kiện composite: lấy record "sau" đúng vị trí cursor trỏ tới
+    qb.andWhere(
+      '(c.createdAt < :createdAt) OR (c.createdAt = :createdAt AND c.id < :id)',
+      { createdAt, id },
+    );
+  }
+
+  const rows = await qb.getMany();
+  const hasNextPage = rows.length > limit;
+  const data = hasNextPage ? rows.slice(0, limit) : rows;
+
+  const nextCursor = hasNextPage
+    ? this.encodeCursor(data[data.length - 1])   // encode từ record CUỐI trang này
+    : null;
+
+  return { data, nextCursor };
+}
+
+private encodeCursor(record: Comment): string {
+  const payload = JSON.stringify({ createdAt: record.createdAt, id: record.id });
+  return Buffer.from(payload).toString('base64');
+}
+
+private decodeCursor(cursor: string): { createdAt: string; id: number } {
+  const payload = Buffer.from(cursor, 'base64').toString('utf-8');
+  return JSON.parse(payload);
+}</code></pre>
+      <p><b>FE gọi — luồng giao tiếp:</b></p>
+      <pre><code>Lần 1 (load trang đầu — CHƯA có cursor):
+  GET /posts/5/comments?limit=20
+  → Response: { data: [...20 comment...], nextCursor: "eyJjcmVhdGVkQXQiOi..." }
+
+Lần 2 (user cuộn xuống / bấm "xem thêm" — FE lấy nextCursor từ response trước, gửi lại):
+  GET /posts/5/comments?limit=20&cursor=eyJjcmVhdGVkQXQiOi...
+  → Response: { data: [...20 comment tiếp theo...], nextCursor: "eyJ..." (hoặc null nếu hết) }
+
+FE không cần biết bên trong cursor chứa gì — chỉ cần "cầm" chuỗi BE trả về
+và gửi lại y nguyên ở lần gọi tiếp theo. Khi nextCursor = null → hết dữ liệu, ẩn nút "xem thêm".</code></pre>
+
+      <table>
+        <thead><tr><th></th><th>Offset-based</th><th>Cursor-based</th></tr></thead>
+        <tbody>
+          <tr><td>FE cần biết gì</td><td>Số trang hiện tại (<code>page</code>), tự tăng dần</td><td>Chỉ cầm <code>nextCursor</code> từ response trước, không cần hiểu ý nghĩa bên trong</td></tr>
+          <tr><td>FE có tự nhảy tới trang bất kỳ được không</td><td>Có (<code>?page=50</code>)</td><td>Không — chỉ đi tuần tự từng trang, không nhảy cóc được</td></tr>
+          <tr><td>Khi nào hết dữ liệu</td><td>FE tự so <code>page</code> với <code>totalPages</code></td><td>BE trả <code>nextCursor: null</code></td></tr>
+          <tr><td>Phù hợp UI</td><td>Bảng có số trang (1,2,3...)</td><td>Infinite scroll, nút "xem thêm" (giống load comment Facebook, Instagram)</td></tr>
+        </tbody>
+      </table>
+
+      <div class="interview-line">
+        <span class="callout-label">Trả lời mẫu khi phỏng vấn</span>
+        <p>"Em chọn cursor-based cho feed/infinite-scroll vì 2 lý do: offset càng sâu DB càng phải quét bỏ nhiều row nên chậm dần, và offset dễ bị lệch dữ liệu (trùng hoặc mất record) nếu có insert/delete xen giữa các lần load — vì nó dựa vào vị trí đếm chứ không dựa vào giá trị thật. Cursor thì dùng chính giá trị của record cuối cùng đã thấy làm điều kiện lọc tiếp, nên không bị ảnh hưởng bởi thay đổi dữ liệu ở giữa. Em dùng composite cursor gồm created_at và id thay vì chỉ created_at, để tránh trùng khi nhiều record có cùng thời gian tạo, rồi encode gộp 2 giá trị đó thành 1 chuỗi base64 để FE chỉ cần cầm và gửi lại, không cần biết cấu trúc bên trong."</p>
+      </div>
+
+      <h3 class="sub">8.5 — Chẩn đoán feature search/filter chậm — thứ tự kiểm tra</h3>
+      <ol>
+        <li><code>EXPLAIN ANALYZE</code> — có dùng index không hay full table scan.</li>
+        <li>Kiểm tra N+1 qua query log.</li>
+        <li>Filter phức tạp (<code>OR</code>, <code>LIKE '%...%'</code>) không tận dụng index → cân nhắc Elasticsearch nếu data lớn.</li>
+        <li>Đo riêng thời gian serialize response so với thời gian query DB để biết nghẽn ở đâu.</li>
+      </ol>
+    </section>
+
+    <!-- ============ Q9 ============ -->
+    <section class="qa" id="q9">
+      <div class="q-tag"><span class="n">9</span> Câu hỏi ứng dụng thường gặp</div>
+      <h2 class="q-title">"Index tăng tốc query bằng cách nào, và cái giá phải trả là gì?"</h2>
+      <p class="lede">Index là chủ đề nền tảng nằm phía sau mọi câu hỏi tối ưu ở Câu 6 — nhưng bản thân nó cũng là 1 câu hỏi phỏng vấn riêng: hiểu index tăng tốc <i>đúng những thao tác nào</i>, và quan trọng không kém là hiểu <i>index không miễn phí</i>.</p>
+
+      <h3 class="sub">9.1 — Index là gì (nhắc lại nhanh)</h3>
+      <p>Index giống hệt mục lục ở cuối 1 cuốn sách dày — thay vì phải lật từng trang để tìm 1 từ khoá (full table scan), bạn tra mục lục rồi nhảy thẳng tới đúng trang. Về bản chất, DB duy trì 1 cấu trúc dữ liệu riêng (thường là B-Tree) lưu sẵn giá trị của (các) cột được đánh index kèm theo con trỏ trỏ tới vị trí thật của row trong bảng — giúp tra cứu nhanh hơn quét tuần tự rất nhiều lần khi bảng lớn.</p>
+
+      <h3 class="sub">9.2 — Composite Index: gộp nhiều cột vào 1 index</h3>
+      <p>Composite index (compound index) là gộp <b>2 hoặc nhiều cột</b> vào chung 1 index thay vì tạo riêng từng index cho từng cột.</p>
+      <pre><code>CREATE INDEX idx_account_created ON transactions (account_id, created_at);</code></pre>
+      <p><b>Thứ tự cột quyết định index có dùng được hay không.</b> Index này giúp nhanh khi lọc theo <code>account_id</code> đứng trước, hoặc cả 2 cột theo đúng thứ tự — nhưng vô dụng nếu query chỉ lọc theo <code>created_at</code> mà bỏ qua <code>account_id</code>, vì index được sắp xếp theo cột đầu trước (xem lại ví dụ đầy đủ ở mục 6.1). Nguyên tắc: giống mục lục sách theo "Chương → Trang" — biết chương thì tra trang nhanh, chỉ có số trang mà không biết chương thì mục lục này không giúp được gì.</p>
+
+      <h3 class="sub">9.3 — Index tăng tốc chủ yếu 3 nhóm thao tác</h3>
+      <div class="grid-2">
+        <div class="case-card">
+          <h5>1. WHERE</h5>
+          <ul>
+            <li>Tìm nhanh row thoả điều kiện thay vì quét toàn bảng (full table scan)</li>
+            <li>Càng nhiều row, chênh lệch tốc độ càng lớn</li>
+          </ul>
+        </div>
+        <div class="case-card">
+          <h5>2. ORDER BY</h5>
+          <ul>
+            <li>Nếu cột sort trùng cột trong index (đúng thứ tự), dữ liệu đã nằm sẵn theo thứ tự trong index</li>
+            <li>Khỏi phải load hết rồi sort lại — tốn CPU/memory</li>
+          </ul>
+        </div>
+        <div class="case-card">
+          <h5>3. JOIN</h5>
+          <ul>
+            <li>Index trên cột khoá ngoại (foreign key) giúp tra cứu nhanh</li>
+            <li>DB cần biết ngay "row nào ở bảng B khớp với row này ở bảng A"</li>
+          </ul>
+        </div>
+        <div class="case-card">
+          <h5>Bonus: GROUP BY & UNIQUE check</h5>
+          <ul>
+            <li>GROUP BY theo đúng cột index → gom nhóm nhanh vì dữ liệu đã ở gần nhau</li>
+            <li>Unique constraint (email không trùng) cần tra nhanh giá trị đã tồn tại chưa mỗi lần INSERT</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3 class="sub">9.4 — Nhược điểm của Index: không hề miễn phí</h3>
+      <div class="callout">
+        <span class="callout-label">Đúng — index chiếm thêm dung lượng lưu trữ</span>
+        <p>Index là 1 cấu trúc dữ liệu <b>riêng</b>, tách biệt khỏi bảng gốc, nên nó chiếm thêm dung lượng ổ đĩa — với bảng hàng chục triệu row, 1 index có thể chiếm tới vài chục % dung lượng so với chính bảng dữ liệu đó, và bảng có càng nhiều index thì dung lượng DB càng phình to. Đây là lý do không nên "cứ thêm cột là đánh index" — mỗi index thêm vào là thêm chi phí lưu trữ thật.</p>
+      </div>
+      <ul>
+        <li><b>Ghi chậm hơn (INSERT / UPDATE / DELETE):</b> mỗi lần dữ liệu thay đổi, DB không chỉ ghi vào bảng mà còn phải cập nhật lại <b>tất cả</b> các index liên quan tới cột vừa đổi. Bảng càng nhiều index, thao tác ghi càng chậm — đây là đánh đổi kinh điển giữa tốc độ đọc và tốc độ ghi.</li>
+        <li><b>Tốn dung lượng lưu trữ:</b> như đã nói ở trên, mỗi index là 1 bản sao có cấu trúc riêng của (các) cột được đánh index, không phải miễn phí.</li>
+        <li><b>Tốn thêm bộ nhớ (RAM):</b> DB thường cố gắng giữ index "hot" trong RAM (buffer pool) để tra cứu nhanh — càng nhiều index, buffer pool càng phải chia sẻ cho nhiều thứ, có thể đẩy dữ liệu thật ra khỏi cache sớm hơn.</li>
+        <li><b>Không phải cứ có index là được dùng:</b> composite index sai thứ tự cột (mục 9.2), hoặc query dùng hàm bọc quanh cột (<code>WHERE YEAR(created_at) = 2026</code>) sẽ khiến DB <b>không tận dụng được index</b> dù đã tạo, vẫn full table scan như thường.</li>
+      </ul>
+
+      <div class="interview-line">
+        <span class="callout-label">Trả lời mẫu khi phỏng vấn</span>
+        <p>"Index tăng tốc chủ yếu 3 nhóm thao tác: WHERE (tìm nhanh thay vì full table scan), ORDER BY (dữ liệu đã sắp sẵn theo index, khỏi sort lại), và JOIN (tra cứu nhanh khoá ngoại). Nhưng index không miễn phí — nó là 1 cấu trúc riêng nên chiếm thêm dung lượng ổ đĩa và RAM, và mỗi lần INSERT/UPDATE/DELETE, DB phải cập nhật lại toàn bộ index liên quan nên ghi sẽ chậm hơn. Vì vậy em chỉ đánh index vào những cột thực sự dùng nhiều trong WHERE/ORDER BY/JOIN, chứ không đánh tràn lan cho mọi cột."</p>
+      </div>
+    </section>
+
+    <!-- ============ Q10 ============ -->
+    <section class="qa" id="q10">
+      <div class="q-tag"><span class="n">10</span> Câu hỏi ứng dụng thường gặp</div>
+      <h2 class="q-title">"Background Job là gì, khi nào nên tách 1 tác vụ ra chạy nền thay vì xử lý ngay trong request?"</h2>
+
+      <h3 class="sub">10.1 — Background Job là gì</h3>
+      <p>Background job (tác vụ nền) là 1 đoạn xử lý được chạy <b>tách rời khỏi vòng đời của request-response chính</b> — request trả lời cho client gần như ngay lập tức, còn phần việc nặng/chậm/không cần thiết phải xong ngay thì được đẩy sang chạy ở "phía sau", độc lập với client đang chờ.</p>
+      <p>Đây chính là ý tưởng đã gặp ở <b>Câu 4</b> (đẩy request thanh toán vào queue, worker xử lý sau) — background job là khái niệm <b>tổng quát hơn</b>: Câu 4 là 1 trường hợp cụ thể của background job (dùng message queue để xử lý bất đồng bộ có thứ tự, có đảm bảo không mất dữ liệu). Background job nói chung không nhất thiết phải qua queue — có thể đơn giản là 1 cron job chạy định kỳ, hoặc 1 tác vụ được lên lịch chạy 1 lần vào thời điểm cụ thể.</p>
+
+      <h3 class="sub">10.2 — Vì sao cần tách ra chạy nền thay vì xử lý ngay trong request</h3>
+      <pre class="bad"><code>-- Sai: xử lý gửi email ngay trong request đăng ký, client phải CHỜ email gửi xong mới nhận response
+POST /register
+  → tạo user trong DB
+  → gọi SMTP server gửi email chào mừng (có thể mất 1-3 giây, thậm chí timeout)
+  → trả response cho client
+-- Client đăng ký xong phải đợi cả email gửi xong mới thấy trang load xong,
+-- nếu SMTP server chậm/lỗi, cả request đăng ký bị treo hoặc fail theo,
+-- dù bản chất việc đăng ký đã thành công</code></pre>
+      <pre class="good"><code>-- Đúng: tách việc gửi email ra background job
+POST /register
+  → tạo user trong DB
+  → đẩy job "send_welcome_email" vào queue (thao tác cực nhanh)
+  → trả response NGAY cho client — "đăng ký thành công"
+
+Background worker (độc lập, chạy riêng):
+  → lấy job ra khỏi queue → gọi SMTP gửi email
+  → nếu SMTP lỗi → retry vài lần, không ảnh hưởng gì tới trải nghiệm đăng ký của client</code></pre>
+      <p>Nguyên tắc chọn: nếu 1 tác vụ <b>không cần thiết phải hoàn tất trước khi trả response cho client</b>, và/hoặc tốn thời gian đáng kể / phụ thuộc hệ thống bên ngoài không ổn định, thì đó là ứng viên tốt để tách ra chạy nền.</p>
+
+      <h3 class="sub">10.3 — Các case study thực tế hay dùng Background Job</h3>
+      <div class="grid-2">
+        <div class="case-card">
+          <h5>Gửi email / SMS / notification</h5>
+          <ul>
+            <li>Email chào mừng, email hoá đơn, OTP, thông báo đẩy</li>
+            <li>Phụ thuộc SMTP/SMS gateway bên thứ 3, độ trễ không kiểm soát được</li>
+          </ul>
+        </div>
+        <div class="case-card">
+          <h5>Xử lý file nặng</h5>
+          <ul>
+            <li>Resize/convert ảnh, video sau khi upload</li>
+            <li>Xuất báo cáo Excel/PDF hàng nghìn dòng</li>
+            <li>Import dữ liệu hàng loạt từ file CSV</li>
+          </ul>
+        </div>
+        <div class="case-card">
+          <h5>Đồng bộ dữ liệu / gọi hệ thống ngoài</h5>
+          <ul>
+            <li>Đồng bộ đơn hàng sang hệ thống kế toán, CRM bên thứ 3</li>
+            <li>Gọi webhook thông báo cho đối tác</li>
+            <li>Đồng bộ tồn kho giữa nhiều kênh bán (sàn TMĐT, cửa hàng)</li>
+          </ul>
+        </div>
+        <div class="case-card">
+          <h5>Tác vụ định kỳ (scheduled / cron job)</h5>
+          <ul>
+            <li>Tính lãi suất, đối soát giao dịch cuối ngày</li>
+            <li>Dọn dữ liệu hết hạn (session, cache, file tạm)</li>
+            <li>Archive dữ liệu cũ (xem lại mục 6.3)</li>
+            <li>Gửi báo cáo tổng hợp định kỳ (daily/weekly report)</li>
+          </ul>
+        </div>
+        <div class="case-card">
+          <h5>Tính toán nặng / AI-ML</h5>
+          <ul>
+            <li>Training/inference model mất nhiều phút</li>
+            <li>Tính toán gợi ý (recommendation), phân tích dữ liệu lớn</li>
+            <li>Gắn tag/nhận diện nội dung ảnh, video sau khi upload</li>
+          </ul>
+        </div>
+        <div class="case-card">
+          <h5>Retry & xử lý lỗi bền bỉ</h5>
+          <ul>
+            <li>Gọi lại payment gateway khi lần đầu timeout</li>
+            <li>Đảm bảo webhook được gửi thành công dù bên nhận tạm thời down</li>
+            <li>Outbox pattern (xem lại mục 3.3) — 1 job riêng đọc bảng outbox rồi publish event</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3 class="sub">10.4 — Công cụ thường dùng để chạy Background Job</h3>
+      <table>
+        <thead><tr><th>Loại</th><th>Công cụ phổ biến</th><th>Phù hợp khi</th></tr></thead>
+        <tbody>
+          <tr><td>Message Queue</td><td>Kafka, RabbitMQ, AWS SQS, BullMQ (Node.js)</td><td>Job phát sinh theo sự kiện, cần đảm bảo không mất job, có thể cần thứ tự (xem lại Câu 4)</td></tr>
+          <tr><td>Cron / Scheduler</td><td>node-cron, Quartz Scheduler (Java), Celery Beat (Python), Kubernetes CronJob</td><td>Job chạy định kỳ theo lịch cố định (mỗi giờ, mỗi ngày lúc 0h...)</td></tr>
+          <tr><td>Task Queue framework</td><td>Celery (Python), Sidekiq (Ruby), Bull/BullMQ (Node.js)</td><td>Cần retry tự động, xem tiến độ job, giới hạn số worker chạy song song</td></tr>
+        </tbody>
+      </table>
+
+      <div class="interview-line">
+        <span class="callout-label">Trả lời mẫu khi phỏng vấn</span>
+        <p>"Background job là cách tách phần việc không cần hoàn tất ngay ra khỏi vòng đời request-response, để client không phải chờ những việc chậm hoặc phụ thuộc hệ thống ngoài không ổn định — ví dụ gửi email, xử lý file, đồng bộ dữ liệu sang hệ thống thứ 3, hay các job chạy định kỳ như đối soát cuối ngày. Nguyên tắc em áp dụng: nếu 1 tác vụ không ảnh hưởng tới kết quả chính mà client đang chờ, và có khả năng chậm hoặc lỗi vặt, em sẽ đẩy nó ra background job thay vì xử lý đồng bộ trong request, đúng tinh thần giống bài toán queue ở Câu 4 nhưng áp dụng rộng hơn, không chỉ riêng cho payment."</p>
+      </div>
+    </section>
+
+    <!-- ============ Q11 ============ -->
+    <section class="qa" id="q11">
+      <div class="q-tag"><span class="n">11</span> Câu hỏi ứng dụng thường gặp</div>
+      <h2 class="q-title">"Multi-tenant là gì, khi nào cần dùng, thiết kế sao cho đúng?"</h2>
+
+      <h3 class="sub">11.1 — Multi-tenant là gì</h3>
+      <p>Multi-tenant (đa khách thuê) là mô hình kiến trúc trong đó <b>1 hệ thống phần mềm duy nhất phục vụ nhiều khách hàng (tenant) khác nhau</b>, mỗi khách hàng có dữ liệu riêng, cấu hình riêng, nhưng đều dùng chung <b>1 codebase, 1 hạ tầng triển khai</b> — thay vì phải dựng riêng 1 bản cài đặt (instance) hoàn toàn tách biệt cho mỗi khách hàng.</p>
+      <p>Đây chính là mô hình đứng sau hầu hết các sản phẩm SaaS (Software as a Service) — ví dụ Slack, Shopify, hay 1 hệ thống quản lý nhân sự bán cho nhiều công ty khác nhau: mỗi công ty là 1 "tenant", đăng nhập vào cùng 1 hệ thống nhưng chỉ nhìn thấy dữ liệu của chính công ty mình, hoàn toàn không thấy được dữ liệu của công ty khác.</p>
+
+      <h3 class="sub">11.2 — Khi nào cần dùng multi-tenant</h3>
+      <ul>
+        <li>Xây dựng sản phẩm <b>SaaS bán cho nhiều khách hàng doanh nghiệp</b> (B2B) — mỗi khách hàng là 1 tổ chức riêng biệt, cần cách ly dữ liệu rõ ràng.</li>
+        <li>Muốn <b>tiết kiệm chi phí vận hành</b> — quản lý 1 hệ thống chung dễ hơn nhiều so với dựng và bảo trì hàng trăm bản cài đặt riêng lẻ cho từng khách hàng.</li>
+        <li>Cần <b>deploy tính năng mới đồng loạt</b> cho mọi khách hàng cùng lúc, thay vì phải cập nhật thủ công từng instance riêng.</li>
+        <li><b>Không nên</b> dùng multi-tenant nếu khách hàng yêu cầu cách ly tuyệt đối ở tầng hạ tầng vật lý (ví dụ ngành ngân hàng, y tế có quy định pháp lý bắt buộc dữ liệu phải nằm trên hạ tầng riêng hoàn toàn) — lúc đó vẫn phải cân nhắc single-tenant (mỗi khách 1 instance riêng) dù tốn chi phí vận hành hơn.</li>
+      </ul>
+
+      <h3 class="sub">11.3 — 3 mô hình kiến trúc multi-tenant phổ biến</h3>
+      <table>
+        <thead><tr><th>Mô hình</th><th>Cách hoạt động</th><th>Ưu điểm</th><th>Nhược điểm</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><b>Database per tenant</b><br>(Silo model)</td>
+            <td>Mỗi tenant có 1 database riêng biệt hoàn toàn, cùng chung code ứng dụng</td>
+            <td>Cách ly dữ liệu mạnh nhất, dễ backup/restore riêng từng khách, dễ đáp ứng yêu cầu compliance</td>
+            <td>Tốn chi phí hạ tầng (N tenant = N database), khó quản lý migration đồng loạt (phải chạy trên từng DB)</td>
+          </tr>
+          <tr>
+            <td><b>Schema per tenant</b><br>(Bridge model)</td>
+            <td>Chung 1 database, nhưng mỗi tenant có 1 schema riêng (PostgreSQL hỗ trợ tốt mô hình này)</td>
+            <td>Cân bằng giữa cách ly và tiết kiệm chi phí — vẫn tách bảng riêng nhưng chung 1 connection pool, 1 server DB</td>
+            <td>Vẫn giới hạn số lượng tenant tối đa 1 DB có thể chứa nổi (hàng nghìn schema có thể làm chậm DB), migration vẫn phải chạy trên từng schema</td>
+          </tr>
+          <tr>
+            <td><b>Shared database, shared schema</b><br>(Pool model)</td>
+            <td>Tất cả tenant dùng chung 1 database, 1 schema, 1 bộ bảng — phân biệt dữ liệu bằng 1 cột <code>tenant_id</code> trên mỗi bảng</td>
+            <td>Tiết kiệm chi phí nhất, dễ scale số lượng tenant lên rất lớn, migration chạy 1 lần cho tất cả</td>
+            <td>Rủi ro cao nhất nếu code quên lọc <code>tenant_id</code> — dễ rò rỉ dữ liệu chéo giữa các tenant nếu lập trình viên sơ suất</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 class="sub">11.4 — Ví dụ 1 dự án cụ thể: hệ thống giám sát nhân sự bán cho nhiều công ty</h3>
+      <p>Giả sử xây dựng 1 sản phẩm SaaS theo dõi giờ làm việc, chấm công, năng suất nhân viên — bán cho nhiều công ty khách hàng khác nhau (công ty A, công ty B, công ty C...). Mỗi công ty là 1 tenant, có nhân viên riêng, báo cáo riêng, cấu hình quy tắc chấm công riêng (ví dụ công ty A tính giờ làm theo ca, công ty B tính theo giờ hành chính cố định).</p>
+      <p>Chọn mô hình <b>Shared database + <code>tenant_id</code></b> (Pool model) vì số lượng khách hàng có thể lên tới hàng trăm, hàng nghìn công ty nhỏ — dựng riêng DB cho từng công ty sẽ quá tốn kém và khó vận hành:</p>
+      <pre><code>-- Mọi bảng nghiệp vụ đều có thêm cột tenant_id
+CREATE TABLE employees (
+  id BIGINT PRIMARY KEY,
+  tenant_id BIGINT NOT NULL,   -- xác định thuộc công ty nào
+  name VARCHAR(255),
+  email VARCHAR(255)
+);
+
+CREATE TABLE attendance_logs (
+  id BIGINT PRIMARY KEY,
+  tenant_id BIGINT NOT NULL,
+  employee_id BIGINT,
+  check_in_time TIMESTAMP,
+  check_out_time TIMESTAMP
+);
+
+-- Composite index luôn đặt tenant_id làm cột đầu (xem lại mục 9.2)
+CREATE INDEX idx_tenant_employee ON attendance_logs (tenant_id, employee_id, check_in_time);</code></pre>
+      <p><b>Mọi query đều bắt buộc lọc theo <code>tenant_id</code></b>, không có ngoại lệ:</p>
+      <pre class="bad"><code>-- SAI — quên lọc tenant_id, sẽ trả về dữ liệu của TẤT CẢ công ty trộn lẫn
+SELECT * FROM employees WHERE id = 105;</code></pre>
+      <pre class="good"><code>-- ĐÚNG — luôn kèm tenant_id trong mọi câu query
+SELECT * FROM employees WHERE id = 105 AND tenant_id = 42;</code></pre>
+
+      <h4 class="subsub">Xác định tenant nào đang gọi request — resolve tenant_id ở đâu</h4>
+      <p>Thường xác định tenant qua 1 trong các cách: subdomain riêng cho từng công ty (<code>company-a.example.com</code>), header riêng (<code>X-Tenant-ID</code>), hoặc lấy từ thông tin user đã đăng nhập (JWT payload có sẵn <code>tenant_id</code>). Cách phổ biến và an toàn nhất là lấy từ JWT sau khi xác thực — tránh để FE tự gửi <code>tenant_id</code> trong query param (dễ bị giả mạo, gửi sai tenant_id của công ty khác).</p>
+      <pre><code>// NestJS — Guard hoặc Middleware trích tenant_id từ JWT đã xác thực
+@Injectable()
+export class TenantMiddleware implements NestMiddleware {
+  use(req: Request, res: Response, next: NextFunction) {
+    const payload = req['user']; // đã được set bởi JwtAuthGuard chạy trước đó
+    req['tenantId'] = payload.tenantId; // gắn tenantId vào request, dùng xuyên suốt
+    next();
+  }
+}
+
+// employee.service.ts — LUÔN nhận tenantId, không bao giờ query thiếu điều kiện này
+async findEmployeeById(tenantId: number, employeeId: number) {
+  return this.employeeRepo.findOne({
+    where: { id: employeeId, tenantId },   // bắt buộc luôn có tenantId trong where
+  });
+}</code></pre>
+      <div class="callout">
+        <span class="callout-label">Rủi ro lớn nhất của Pool model — và cách phòng ngừa</span>
+        <p>Chỉ cần 1 chỗ trong code quên thêm điều kiện <code>tenant_id</code>, dữ liệu của công ty này có thể lộ sang công ty khác — hậu quả nghiêm trọng cho 1 SaaS B2B. Cách phòng ngừa thực tế: dùng <b>Row-Level Security (RLS)</b> của PostgreSQL để DB tự động lọc theo <code>tenant_id</code> ở tầng database, không phụ thuộc hoàn toàn vào việc lập trình viên nhớ thêm điều kiện ở tầng code; hoặc dùng 1 base repository/base query builder dùng chung, tự động inject <code>tenant_id</code> vào mọi query, tránh lặp lại thủ công dễ sót ở từng chỗ gọi.</p>
+      </div>
+
+      <div class="interview-line">
+        <span class="callout-label">Trả lời mẫu khi phỏng vấn</span>
+        <p>"Multi-tenant là kiến trúc 1 hệ thống phục vụ nhiều khách hàng khác nhau nhưng dùng chung codebase và hạ tầng, mỗi khách hàng là 1 tenant với dữ liệu tách biệt. Em chọn giữa 3 mô hình tuỳ quy mô: database riêng cho từng tenant nếu cần cách ly mạnh và số lượng khách ít, schema riêng nếu cần cân bằng, hoặc shared schema với cột tenant_id nếu cần scale số lượng tenant lớn và tiết kiệm chi phí. Với shared schema, rủi ro lớn nhất là quên lọc tenant_id gây rò rỉ dữ liệu chéo, nên em luôn xác định tenant từ JWT đã xác thực chứ không tin dữ liệu FE tự gửi lên, và cân nhắc dùng Row-Level Security ở tầng DB làm lớp bảo vệ thứ 2 phòng khi code có sai sót."</p>
+      </div>
+    </section>
+
+    <!-- ============ Q12 ============ -->
+    <section class="qa" id="q12">
+      <div class="q-tag"><span class="n">12</span> Câu hỏi ứng dụng thường gặp</div>
+      <h2 class="q-title">"Thiết kế API sao cho đúng chuẩn — REST, GraphQL, versioning, idempotent method là gì?"</h2>
+
+      <h3 class="sub">12.1 — REST vs GraphQL vs gRPC — khi nào chọn cái nào</h3>
+      <table>
+        <thead><tr><th></th><th>REST</th><th>GraphQL</th><th>gRPC</th></tr></thead>
+        <tbody>
+          <tr><td>Cách hoạt động</td><td>Nhiều endpoint cố định, mỗi endpoint trả về 1 cấu trúc dữ liệu định sẵn</td><td>1 endpoint duy nhất, client tự chọn chính xác field nào cần lấy</td><td>Giao tiếp nhị phân (Protocol Buffers), tốc độ cao, định nghĩa contract rõ ràng qua file <code>.proto</code></td></tr>
+          <tr><td>Ưu điểm</td><td>Đơn giản, dễ cache (HTTP cache chuẩn), dễ debug (đọc được bằng mắt), hệ sinh thái tool lớn</td><td>Tránh over-fetching/under-fetching — FE không phải gọi nhiều lần hay nhận dư field không cần</td><td>Nhanh hơn REST/GraphQL nhiều lần (nhị phân, HTTP/2), phù hợp giao tiếp nội bộ tốc độ cao</td></tr>
+          <tr><td>Nhược điểm</td><td>Dễ bị over-fetching (trả dư field) hoặc phải tạo nhiều endpoint riêng cho từng nhu cầu FE</td><td>Khó cache hơn REST, dễ bị lạm dụng gây query quá nặng (N+1 ở tầng GraphQL resolver), phức tạp hơn khi setup</td><td>Không đọc được trực tiếp bằng trình duyệt/Postman như REST, cần tool riêng để test, không phù hợp gọi trực tiếp từ web browser</td></tr>
+          <tr><td>Phù hợp khi</td><td>API công khai, CRUD đơn giản, cần dễ tích hợp cho nhiều loại client khác nhau</td><td>FE phức tạp, nhiều loại client (web, mobile) cần lấy dữ liệu khác nhau từ cùng nguồn</td><td>Giao tiếp <b>giữa các service nội bộ</b> trong hệ thống microservices, cần độ trễ thấp</td></tr>
+        </tbody>
+      </table>
+
+      <h3 class="sub">12.2 — Idempotent HTTP methods — method nào được phép gọi lại nhiều lần an toàn</h3>
+      <p>"Idempotent" ở đây nghĩa là: gọi 1 lần hay gọi lại nhiều lần với cùng 1 request, kết quả cuối cùng trên server vẫn giống nhau — không tạo thêm tác dụng phụ nếu gọi lặp. Đây là khái niệm liên hệ trực tiếp với <b>idempotency key</b> đã học ở Câu 2, nhưng ở đây là tính chất <b>mặc định</b> của từng HTTP method theo chuẩn, không cần thêm cơ chế gì.</p>
+      <table>
+        <thead><tr><th>Method</th><th>Idempotent?</th><th>Ý nghĩa</th></tr></thead>
+        <tbody>
+          <tr><td><code>GET</code></td><td>Có</td><td>Chỉ đọc dữ liệu, gọi bao nhiêu lần cũng không thay đổi gì trên server</td></tr>
+          <tr><td><code>PUT</code></td><td>Có</td><td>Ghi đè toàn bộ resource bằng đúng dữ liệu gửi lên — gọi lại nhiều lần, resource vẫn ở đúng trạng thái đó, không đổi thêm</td></tr>
+          <tr><td><code>DELETE</code></td><td>Có</td><td>Xoá 1 resource — gọi lại lần 2 dù resource đã bị xoá từ lần 1, kết quả cuối cùng vẫn là "resource không tồn tại", không gây lỗi thêm</td></tr>
+          <tr><td><code>PATCH</code></td><td>Tuỳ cách viết</td><td>Nếu patch kiểu "set field X = giá trị Y" thì idempotent; nếu patch kiểu "tăng field X thêm 1" thì KHÔNG idempotent (gọi 2 lần sẽ tăng 2 lần)</td></tr>
+          <tr><td><code>POST</code></td><td><b>Không</b></td><td>Thường dùng để tạo mới resource — gọi lại nhiều lần sẽ tạo ra nhiều resource trùng lặp (chính là bài toán double-submit ở Câu 2, cần idempotency key để bù đắp cho việc POST vốn dĩ không idempotent)</td></tr>
+        </tbody>
+      </table>
+      <p>Ý nghĩa thực tế: vì <code>POST</code> không idempotent theo bản chất, nên với các API tạo giao dịch quan trọng (đặt hàng, thanh toán) luôn cần bổ sung thêm <b>idempotency key</b> ở tầng ứng dụng (Câu 2) để bù đắp cho tính chất này — đây là lý do 2 kiến thức này luôn đi kèm nhau khi phỏng vấn.</p>
+
+      <h3 class="sub">12.3 — API Versioning — vì sao cần và các cách phổ biến</h3>
+      <p>Khi API đã có client đang dùng (mobile app cũ chưa update, đối tác đã tích hợp), không thể tự ý đổi cấu trúc response hay behavior của API cũ — sẽ làm hỏng những client đang phụ thuộc vào nó. Versioning cho phép vừa giữ API cũ hoạt động, vừa phát triển API mới song song.</p>
+      <table>
+        <thead><tr><th>Cách versioning</th><th>Ví dụ</th><th>Ưu / nhược</th></tr></thead>
+        <tbody>
+          <tr><td>URI Path</td><td><code>/v1/orders</code>, <code>/v2/orders</code></td><td>Dễ thấy, dễ debug, dễ route ở Gateway — cách phổ biến nhất</td></tr>
+          <tr><td>Header</td><td><code>Accept: application/vnd.company.v2+json</code></td><td>URL sạch hơn nhưng khó test nhanh bằng trình duyệt, dễ bị quên set header</td></tr>
+          <tr><td>Query Param</td><td><code>/orders?version=2</code></td><td>Dễ làm nhưng dễ bị quên truyền, không phải chuẩn phổ biến</td></tr>
+        </tbody>
+      </table>
+      <p><b>Khi nào cần bump version:</b> chỉ cần khi có <b>breaking change</b> — đổi cấu trúc response, xoá field cũ, đổi ý nghĩa 1 field. Thêm field mới (optional) hoặc thêm endpoint mới thường <b>không cần</b> bump version, vì không phá vỡ client cũ đang dùng.</p>
+
+      <h3 class="sub">12.4 — Chuẩn hoá format response và lỗi trong dự án</h3>
+      <p>Một API design tốt cần format response <b>nhất quán</b> giữa mọi endpoint, để FE xử lý dễ dàng mà không cần biết trước cấu trúc riêng của từng API.</p>
+      <pre><code>// Response thành công — bọc trong 1 envelope chung
+{
+  "success": true,
+  "data": { "id": 1, "name": "..." },
+  "meta": { "page": 1, "totalPages": 10 }   // nếu có phân trang
+}
+
+// Response lỗi — format thống nhất cho MỌI lỗi, dù lỗi 400, 404, hay 500
+{
+  "success": false,
+  "error": {
+    "code": "INSUFFICIENT_BALANCE",     // mã lỗi máy đọc được, để FE switch-case xử lý
+    "message": "Số dư không đủ để thực hiện giao dịch",  // message người đọc được
+    "details": { "currentBalance": 2000000, "requiredAmount": 5000000 }
+  }
+}</code></pre>
+      <p>Lợi ích của format lỗi có <code>code</code> riêng biệt: FE có thể xử lý logic khác nhau dựa vào <code>code</code> (ví dụ hiện popup nạp tiền khi gặp <code>INSUFFICIENT_BALANCE</code>) mà không cần so sánh chuỗi <code>message</code> (dễ vỡ nếu đổi ngôn ngữ hiển thị hoặc chỉnh sửa câu chữ).</p>
+
+      <div class="interview-line">
+        <span class="callout-label">Trả lời mẫu khi phỏng vấn</span>
+        <p>"Em chọn REST cho hầu hết API CRUD thông thường vì dễ tích hợp và cache, chỉ cân nhắc GraphQL khi FE cần linh hoạt lấy dữ liệu từ nhiều nguồn khác nhau, và gRPC cho giao tiếp nội bộ giữa các service cần tốc độ cao. Về versioning em dùng URI path vì dễ debug và route ở Gateway, chỉ bump version khi có breaking change thật sự. Em luôn chuẩn hoá format response và lỗi thống nhất giữa các endpoint, đặc biệt lỗi luôn có mã code riêng để FE xử lý logic theo code thay vì so sánh message, tránh vỡ khi đổi ngôn ngữ hiển thị."</p>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<footer>
+  Tổng hợp từ buổi trao đổi kỹ thuật — dùng cho ôn tập phỏng vấn Backend / Payment System. Ưu tiên trả lời theo cấu trúc: vấn đề → giải pháp → vì sao chọn cách này thay vì cách khác.
+</footer>
+
+<script>
+  // mobile nav toggle
+  const toggle = document.getElementById('navToggle');
+  const sidebar = document.getElementById('sidebar');
+  if (toggle) {
+    toggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+  }
+
+  // active link highlight on scroll
+  const sections = document.querySelectorAll('section.qa');
+  const links = document.querySelectorAll('.nav-list a');
+  const map = {};
+  links.forEach(l => map[l.getAttribute('href').slice(1)] = l);
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      const link = map[entry.target.id];
+      if (!link) return;
+      if (entry.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-15% 0px -70% 0px', threshold: 0 });
+
+  sections.forEach(s => observer.observe(s));
+
+  // close mobile sidebar after clicking a link
+  links.forEach(l => l.addEventListener('click', () => {
+    if (window.innerWidth <= 900) sidebar.classList.remove('open');
+  }));
+</script>
+
+</body>
+</html>

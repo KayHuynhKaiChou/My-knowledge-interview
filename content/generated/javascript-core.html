@@ -1,0 +1,360 @@
+    <section class="qa" id="throttle" data-nav="Throttle">
+      <div class="q-tag"><span class="n">1</span> Kiến thức nền</div>
+      <h2 class="q-title">Throttle</h2>
+      <p>là 1 kỹ thuật giúp bạn kiểm soát đc tầng suất gọi hàm , đảm bảo hàm chỉ đc gọi 1 lần sau 1 khoảng time chờ nhất định . Limits the rate at which a function can be called.</p>
+    </section>
+
+    <section class="qa" id="debounce" data-nav="Debounce">
+      <div class="q-tag"><span class="n">1</span> Kiến thức nền</div>
+      <h2 class="q-title">Debounce</h2>
+      <p>là 1 kỹ thuật đảm bảo rằng 1 hàm sẽ ko đc thực thi cho đến khi 1 khoảng thời gian nhất định trôi qua kể từ lần gọi hàm cuối cùng, if hàm đc gọi lại trong khoảng time đó thì bộ đếm time sẽ đc đặt lại . Delays the execution of a function until a certain period of time has passed since the last event trigger.</p>
+    </section>
+
+    <section class="qa" id="event-delegation" data-nav="Event delegation">
+      <div class="q-tag"><span class="n">1</span> Kiến thức nền</div>
+      <h2 class="q-title">Event delegation</h2>
+      <p>là kỹ thuật gắn sự kiện vào một phần tử cha và sau đó sử dụng bubbling để xác định mục tiêu thực sự của sự kiện. Thay vì gắn sự kiện trực tiếp vào từng phần tử con, chúng ta chỉ cần gắn vào phần tử cha duy nhất. Điều này giúp giảm thiểu số lượng sự kiện và cải thiện hiệu suất.</p>
+      <p>Khi em dùng javascript với các module bundler như webpack, rollup, vite,... thì sẽ đc tích hợp sẵn<b> tree shaking</b> giúp tối ưu các bản build nha</p>
+    </section>
+
+    <section class="qa" id="async-va-defer-trong-lt-script-gt" data-nav="async và defer trong &lt;script&gt;">
+      <div class="q-tag"><span class="n">1</span> Kiến thức nền</div>
+      <h2 class="q-title">async và defer trong &lt;script&gt;</h2>
+      <p>là các đoạn mã cung cấp chức năng mà trình duyệt ko hỗ trợ</p>
+    </section>
+
+    <section class="qa" id="closure" data-nav="closure">
+      <div class="q-tag"><span class="n">1</span> Kiến thức nền</div>
+      <h2 class="q-title">closure</h2>
+      <ul>
+        <li>là một hàm có thể truy cập và sử dụng các biến từ phạm vi bên ngoài của hàm cha, ngay cả khi hàm cha đó đã được thực thi xong. Dấu hiệu nhận biết : 1 func return func</li>
+        <li>Tại sao closure lại xảy ra?</li>
+        <li><b>Môi trường thực thi (execution context):</b> Mỗi khi một hàm được gọi, một môi trường thực thi mới được tạo ra. Môi trường này chứa các biến và tham số của hàm đó.</li>
+        <li><b>Scope chain:</b> Các môi trường thực thi được liên kết với nhau thành một chuỗi, gọi là scope chain. Khi một hàm tìm kiếm một biến, nó sẽ lần lượt tìm trong scope của chính nó, sau đó là scope của hàm cha, và cứ thế cho đến khi tìm thấy hoặc đến scope toàn cục.</li>
+      </ul>
+      <figure class="doc-figure"><img src="../assets/img/javascript-core-closure-01.png" alt="Minh hoạ" loading="lazy"></figure>
+      <p><b>Closure:</b> Khi một hàm bên trong (inner function) được trả về từ một hàm bên ngoài (outer function), hàm bên trong này sẽ giữ lại một tham chiếu đến môi trường thực thi của hàm bên ngoài. Điều này tạo ra một closure.</p>
+    </section>
+
+    <section class="qa" id="hoisting" data-nav="Hoisting">
+      <div class="q-tag"><span class="n">1</span> Kiến thức nền</div>
+      <h2 class="q-title">Hoisting</h2>
+      <p>là một khái niệm quan trọng trong JavaScript, mô tả cách trình biên dịch JavaScript xử lý các khai báo biến và hàm trước khi thực thi mã. Nói một cách đơn giản, hoisting là việc "nâng" các khai báo lên đầu phạm vi hiện tại.</p>
+    </section>
+
+    <section class="qa" id="iife" data-nav="IIFE">
+      <div class="q-tag"><span class="n">1</span> Kiến thức nền</div>
+      <h2 class="q-title">IIFE</h2>
+      <p>là function expression được gọi ngay lập tức. Ví dụ:</p>
+      <pre><code>(function() {// call api})()</code></pre>
+    </section>
+
+    <section class="qa" id="cac-cach-goi-ham-trong-js" data-nav="Các cách gọi hàm trong JS">
+      <div class="q-tag"><span class="n">1</span> Kiến thức nền</div>
+      <h2 class="q-title">Các cách gọi hàm trong JS</h2>
+      <p>// logic show</p>
+      <pre><code>}
+show();
+new show;
+show``</code></pre>
+      <p><b>in và hasOwnProperty()</b></p>
+      <p><b>in : </b>được sử dụng để kiểm tra xem một thuộc tính có tồn tại trong một đối tượng hay không. Nó trả về một giá trị boolean (true hoặc false)</p>
+      <p>kiểm tra cả các thuộc tính được định nghĩa trực tiếp trong đối tượng và các thuộc tính được kế thừa từ prototype.</p>
+      <p>được sử dụng với các kiểu dữ liệu khác như array, string</p>
+      <p>vd:</p>
+      <pre><code>const person = { firstName: "John", lastName: "Doe", age: 30 }; console.log("firstName" in person); // Output: true</code></pre>
+      <p>const myArray = ['apple', 'banana', 'orange']; console.log(0 in myArray); // Output: true (vì có phần tử tại index 0)</p>
+      <p><b>hasOwnProperty : </b>chỉ kiểm tra các thuộc tính được định nghĩa trực tiếp trong đối tượng, không bao gồm các thuộc tính kế thừa.</p>
+    </section>
+
+    <section class="qa" id="tham-so-va-doi-so" data-nav="Tham số và đối số">
+      <div class="q-tag"><span class="n">1</span> Kiến thức nền</div>
+      <h2 class="q-title">Tham số và đối số</h2>
+      <figure class="doc-figure"><img src="../assets/img/javascript-core-tham-so-va-doi-so-01.png" alt="Minh hoạ" loading="lazy"></figure>
+    </section>
+
+    <section class="qa" id="var-let-va-const" data-nav="var, let và const">
+      <div class="q-tag"><span class="n">1</span> Kiến thức nền</div>
+      <h2 class="q-title">var, let và const</h2>
+      <p><a href="https://www.freecodecamp.org/news/var-let-and-const-whats-the-difference/" target="_blank" rel="noopener">https://www.freecodecamp.org/news/var-let-and-const-whats-the-difference/</a></p>
+      <p>hoặc</p>
+      <p>https://anonystick.com/blog-developer/troi-sinh-ra-var-sao-con-sinh-ra-let-va-const-javascript-2019122884060190.jsx</p>
+    </section>
+
+    <section class="qa" id="context" data-nav="context">
+      <div class="q-tag"><span class="n">1</span> Kiến thức nền</div>
+      <h2 class="q-title">context</h2>
+      <p>context js la this keyword đề cập (tham chiếu) đến đối tượng mà nó thuộc về- Với method: this là obj chứa method này- Với function: + this là global object (là an object which represents the global scope.)</p>
+      <figure class="doc-figure"><img src="../assets/img/javascript-core-context-01.png" alt="Minh hoạ" loading="lazy"></figure>
+      <p>nếu function là 1 func constructor thì this là obj với func constructor đó, và 1 func là func constructor khi ta dùng : var a = new func(truyền param nếu có);</p>
+      <figure class="doc-figure"><img src="../assets/img/javascript-core-context-02.png" alt="Minh hoạ" loading="lazy"></figure>
+      <figure class="doc-figure"><img src="../assets/img/javascript-core-context-03.png" alt="Minh hoạ" loading="lazy"></figure>
+      <p>arrow func ko thể dùng this bởi vì nó ko là 1 func constructor khi dùng từ khóa new</p>
+      <figure class="doc-figure"><img src="../assets/img/javascript-core-context-04.png" alt="Minh hoạ" loading="lazy"></figure>
+    </section>
+
+    <section class="qa" id="rest-parameter-spread-operator-destructuring" data-nav="Rest parameter, Spread operator, Destructuring">
+      <div class="q-tag"><span class="n">1</span> Kiến thức nền</div>
+      <h2 class="q-title">Rest parameter, Spread operator, Destructuring</h2>
+      <p><a href="https://anonystick.com/blog-developer/giai-thich-ve-destructuring-rest-parameters-va-spread-syntax-trong-javascript-2020051980035339" target="_blank" rel="noopener">Bài tham khảo ↗</a></p>
+    </section>
+
+    <section class="qa" id="call-stack-micro-task-queue" data-nav="Call stack , Micro(Task) Queue">
+      <div class="q-tag"><span class="n">1</span> Kiến thức nền</div>
+      <h2 class="q-title">Call stack , Micro(Task) Queue</h2>
+      <figure class="doc-figure"><img src="../assets/img/javascript-core-call-stack-micro-task-queue-01.png" alt="Minh hoạ" loading="lazy"></figure>
+      <figure class="doc-figure"><img src="../assets/img/javascript-core-call-stack-micro-task-queue-02.png" alt="Minh hoạ" loading="lazy"></figure>
+      <figure class="doc-figure"><img src="../assets/img/javascript-core-call-stack-micro-task-queue-03.png" alt="Minh hoạ" loading="lazy"></figure>
+      <figure class="doc-figure"><img src="../assets/img/javascript-core-call-stack-micro-task-queue-04.png" alt="Minh hoạ" loading="lazy"></figure>
+      <figure class="doc-figure"><img src="../assets/img/javascript-core-call-stack-micro-task-queue-05.png" alt="Minh hoạ" loading="lazy"></figure>
+    </section>
+
+    <section class="qa" id="modules" data-nav="Modules">
+      <div class="q-tag"><span class="n">1</span> Kiến thức nền</div>
+      <h2 class="q-title">Modules</h2>
+      <ul>
+        <li>là cách tổ chức mã nguồn bằng cách chia nhỏ thành các file riêng biệt (mỗi file là 1 module), với mỗi module có một chức năng riêng biệt.</li>
+        <li>Trong một module, bạn có thể sử dụng<b> từ khoá export </b>để export bất kỳ kiểu dữ liệu nào như: biến số với var, let hay const, class, function,... Sau đó, bạn sử dụng <b>từ khoá import</b> để sử dụng chúng ở một file khác.</li>
+        <li>Sử dụng ES Modules có một số lợi ích như:</li>
+        <li>Giúp module hoá chương trình. Qua đó, việc xây dựng, kiểm thử và bảo trì code sẽ tốt hơn.</li>
+        <li>Hỗ trợ dynamic import() giúp download modules khi cần thiết. Nhờ vậy, thời gian load trang sẽ giảm xuống.</li>
+      </ul>
+      <p>có default: chỉ xuất hiện 1 lần trong 1 file</p>
+      <p>export default getProduct; =&gt; import getProduct from ‘../product.js’</p>
+      <p>ko có default: xuất hiện nhiều lần trong 1 file, import 1 destructuring</p>
+      <p>export const TYPE_SUCCESS = ‘success’</p>
+      <p>export const TYPE_ERROR = ‘error’=&gt; import { TYPE_SUCCESS, TYPE_ERROR } from ‘../constants.js’</p>
+      <p>hoặc import * as constants from ‘../<a href="http://constants.js" target="_blank" rel="noopener">constants.js</a>’</p>
+    </section>
+
+    <section class="qa" id="currying" data-nav="Currying">
+      <div class="q-tag"><span class="n">1</span> Kiến thức nền</div>
+      <h2 class="q-title">Currying</h2>
+      <p><b>currying</b></p>
+      <p>là một kỹ thuật mà cho phép ta thay vì sử dụng một function có nhiều tham số truyền vào dài dòng thì ta có thể chuyển đổi thành những function liên tiếp có một tham số truyền vào thôi.</p>
+      <figure class="doc-figure"><img src="../assets/img/javascript-core-currying-01.png" alt="Minh hoạ" loading="lazy"></figure>
+    </section>
+
+    <section class="qa" id="distinguish-interface-and-type" data-nav="distinguish interface and type">
+      <div class="q-tag"><span class="n">1</span> Kiến thức nền</div>
+      <h2 class="q-title">distinguish interface and type</h2>
+      <ul>
+        <li>interface thường dùng để mô tả hình dạng đối tượng, định nghĩa cấu trúc của object</li>
+        <li>type linh hoạt hơn, không chỉ dùng cho object mà còn có thể alias cho kiểu nguyên thủy, union ( | ), intersection ( &amp; ), tuple [T1, T2, ...], function types, v.v.</li>
+        <li><b>Interface</b> cho phép sử dụng từ khóa <code>extends</code> để mở rộng từ interface hoặc type alias khác, và có thể áp dụng cho lập trình hướng đối tượng</li>
+        <li><b>Type alias</b> để mở rộng từ các type khác bằng cách dùng toán tử giao hợp như union, …</li>
+      </ul>
+      <p><code>-</code>Interface hỗ trợ declaration merging: nếu khai báo interface cùng tên nhiều lần, TypeScript sẽ tự động gộp thành một interface chung</p>
+      <p><b>Type alias</b> không hỗ trợ việc này — khai báo trùng tên sẽ gây lỗi</p>
+    </section>
+
+    <section class="qa" id="any-type" data-nav="any type">
+      <div class="q-tag"><span class="n">1</span> Kiến thức nền</div>
+      <h2 class="q-title">any type</h2>
+      <ul>
+        <li>cho phép bạn gán bất kỳ giá trị nào và thực hiện bất cứ thao tác nào mà TypeScript cũng không cảnh báo. Nói cách khác, bạn <b>chuyển sang JavaScript thuần túy</b></li>
+        <li>Khi nào dùng: chỉ nên sử dụng khi đang chuyển từ JS sang TS, hoặc làm việc với thư viện không có kiểu rõ ràng. Càng hạn chế càng tốt.</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="unknown-type" data-nav="unknown type">
+      <div class="q-tag"><span class="n">1</span> Kiến thức nền</div>
+      <h2 class="q-title">unknown type</h2>
+      <ul>
+        <li>là kiểu "an toàn" hơn any. Bạn có thể gán bất cứ giá trị nào cho unknown, nhưng không được phép thao tác gì lên chúng nếu không thực hiện narrowing (kiểm tra kiểu cụ thể) trước đó.</li>
+        <li><b>Khi nào dùng</b>: phù hợp để xử lý dữ liệu đầu vào không rõ kiểu (như JSON từ API hay input người dùng)</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="keyof" data-nav="keyof">
+      <div class="q-tag"><span class="n">1</span> Kiến thức nền</div>
+      <h2 class="q-title">keyof</h2>
+      <p>is used to creates a union of the keys of an object type.</p>
+      <figure class="doc-figure"><img src="../assets/img/javascript-core-keyof-01.png" alt="Minh hoạ" loading="lazy"></figure>
+    </section>
+
+    <section class="qa" id="es6" data-nav="ES6">
+      <div class="q-tag"><span class="n">1</span> JS · React · Git</div>
+      <h2 class="q-title">ES6</h2>
+      <p>ES6 (viết tắt của <b>ECMAScript 6</b>, còn gọi là <b>ECMAScript 2015</b>) là một bản cập nhật lớn của ngôn ngữ JavaScript, được công bố vào năm 2015. ES6 mang đến nhiều tính năng mới giúp viết mã JavaScript rõ ràng, ngắn gọn và mạnh mẽ hơn.</p>
+    </section>
+
+    <section class="qa" id="arrow-function" data-nav="Arrow function">
+      <div class="q-tag"><span class="n">1</span> JS · React · Git</div>
+      <h2 class="q-title">Arrow function</h2>
+      <p>là cách viết hàm ngắn gọn hơn được giới thiệu trong <b>ES6</b>. Ngoài cú pháp ngắn, arrow function ko thể dùng this</p>
+      <figure class="doc-figure"><img src="../assets/img/javascript-core-arrow-function-01.png" alt="Minh hoạ" loading="lazy"></figure>
+    </section>
+
+    <section class="qa" id="template-literals" data-nav="Template literals">
+      <div class="q-tag"><span class="n">1</span> JS · React · Git</div>
+      <h2 class="q-title">Template literals</h2>
+      <p>là cách viết chuỗi mới trong JavaScript được giới thiệu từ <b>ES6</b></p>
+      <figure class="doc-figure"><img src="../assets/img/javascript-core-template-literals-01.png" alt="Minh hoạ" loading="lazy"></figure>
+    </section>
+
+    <section class="qa" id="modules-2" data-nav="Modules">
+      <div class="q-tag"><span class="n">1</span> JS · React · Git</div>
+      <h2 class="q-title">Modules</h2>
+      <ul>
+        <li>là cách tổ chức mã nguồn bằng cách chia nhỏ thành các file riêng biệt (mỗi file là 1 module), với mỗi module có một chức năng riêng biệt.</li>
+        <li>Trong một module, bạn có thể sử dụng từ khoá<b> export </b>để export bất kỳ kiểu dữ liệu nào như: biến số với var, let hay const, class, function,... Sau đó, bạn sử dụng từ khoá<b> import</b> để sử dụng chúng ở một file khác.</li>
+        <li>Sử dụng ES Modules có một số lợi ích như:</li>
+        <li>Giúp module hoá chương trình. Qua đó, việc xây dựng, kiểm thử và bảo trì code sẽ tốt hơn.</li>
+        <li>Hỗ trợ dynamic import() giúp download modules khi cần thiết. Nhờ vậy, thời gian load trang sẽ giảm xuống.</li>
+      </ul>
+      <p>có default: chỉ xuất hiện 1 lần trong 1 file</p>
+      <p>export default getProduct; =&gt; import getProduct from ‘../product.js’</p>
+      <p>ko có default: xuất hiện nhiều lần trong 1 file, import 1 destructuring</p>
+      <p>export const TYPE_SUCCESS = ‘success’</p>
+      <p>export const TYPE_ERROR = ‘error’=&gt; import { TYPE_SUCCESS, TYPE_ERROR } from ‘../constants.js’</p>
+      <p>hoặc import * as constants from ‘../constants.js’</p>
+    </section>
+
+    <section class="qa" id="destructuring" data-nav="Destructuring">
+      <div class="q-tag"><span class="n">1</span> JS · React · Git</div>
+      <h2 class="q-title">Destructuring</h2>
+      <ul>
+        <li>Gồm có destructuring object và destructuring array</li>
+        <li>Destructuring Object cho phép bạn tạo ra một hay nhiều  new variables  sử dụng những property của một Object.</li>
+      </ul>
+      <figure class="doc-figure"><img src="../assets/img/javascript-core-destructuring-01.png" alt="Minh hoạ" loading="lazy"></figure>
+      <p>Array destructuring cho phép bạn tạo ra một new variables bằng cách sử dụng giá trị mỗi index của Array.</p>
+    </section>
+
+    <section class="qa" id="bat-dong-bo" data-nav="Bất đồng bộ">
+      <div class="q-tag"><span class="n">1</span> JS · React · Git</div>
+      <h2 class="q-title">Bất đồng bộ</h2>
+      <p>là cách thực thi các tác vụ mà không cần chờ tác vụ trước đó hoàn thành, cho phép các lệnh chạy song song và cải thiện hiệu suất</p>
+    </section>
+
+    <section class="qa" id="async-await" data-nav="Async/ Await">
+      <div class="q-tag"><span class="n">1</span> JS · React · Git</div>
+      <h2 class="q-title">Async/ Await</h2>
+      <ul>
+        <li>là cú pháp của JavaScript ES2017 (ES8) giúp bạn viết code bất đồng bộ (asynchronous) một cách dễ đọc như code đồng bộ (synchronous).</li>
+        <li>được hình thành để giải quyết Promise chain (.then().then() )</li>
+        <li>Async: là từ khóa được đặt trước một hàm khiến hàm trả về một promise</li>
+        <li>Await: là từ khóa được dùng trong 1 async function</li>
+      </ul>
+      <figure class="doc-figure"><img src="../assets/img/javascript-core-async-await-01.png" alt="Minh hoạ" loading="lazy"></figure>
+    </section>
+
+    <section class="qa" id="callback" data-nav="Callback">
+      <div class="q-tag"><span class="n">1</span> JS · React · Git</div>
+      <h2 class="q-title">Callback</h2>
+      <ul>
+        <li>là một hàm được truyền như đối số cho một hàm khác</li>
+        <li>vd:</li>
+      </ul>
+      <pre><code>listProducts.map(p =&gt; p.name)</code></pre>
+      <p>=&gt; arrow function p =&gt; <a href="http://p.name" target="_blank" rel="noopener">p.name</a> là 1 callback function của hàm map</p>
+    </section>
+
+    <section class="qa" id="promise" data-nav="Promise">
+      <div class="q-tag"><span class="n">1</span> JS · React · Git</div>
+      <h2 class="q-title">Promise</h2>
+      <ul>
+        <li>là một đối tượng đại diện cho kết quả của một tác vụ bất đồng bộ</li>
+        <li>giải quyết vấn đề callback hell (gọi callback function lồng nhiều tầng)</li>
+        <li>gồm 3 trạng thái chính :</li>
+        <li>pending: khi chưa gọi resolve hoặc reject</li>
+        <li>fulfilled: khi đã gọi resolve</li>
+        <li>reject: khi đã gọi reject</li>
+        <li>Constructor Promise nhận 1 param là 1 callback function (function executor) gồm 2 params là callback function resolve và reject</li>
+      </ul>
+      <figure class="doc-figure"><img src="../assets/img/javascript-core-promise-01.png" alt="Minh hoạ" loading="lazy"></figure>
+      <p>try catch ko thể bắt error ở catch nếu try chứa Promise , bởi vì try catch chỉ bắt lỗi với các câu lệnh (dòng code) đồng bộ</p>
+    </section>
+
+    <section class="qa" id="promise-chain" data-nav="Promise chain">
+      <div class="q-tag"><span class="n">1</span> JS · React · Git</div>
+      <h2 class="q-title">Promise chain</h2>
+      <ul>
+        <li>là kỹ thuật nối tiếp nhiều thao tác bất đồng bộ bằng cách dùng .then() liên tiếp.</li>
+        <li>kết quả return của callback func ở then trước sẽ là đối số của callback func của then kế tiếp. Tuy nhiên nếu callback func của then trước không return thì callback func của then kế tiếp nhận undefined</li>
+      </ul>
+      <figure class="doc-figure"><img src="../assets/img/javascript-core-promise-chain-01.png" alt="Minh hoạ" loading="lazy"></figure>
+    </section>
+
+    <section class="qa" id="promise-all" data-nav="Promise.all()">
+      <div class="q-tag"><span class="n">1</span> JS · React · Git</div>
+      <h2 class="q-title">Promise.all()</h2>
+      <ul>
+        <li>một phương thức giúp bạn chạy nhiều Promise song song, và chờ tất cả cùng hoàn thành</li>
+        <li>Trong quá trình thực thi các Promise song song , nếu có 1 Promise bị lỗi thì Promise reject và các Promise còn lại vẫn tiếp tục chạy ngầm, chỉ là kết quả của chúng không được dùng nữa</li>
+      </ul>
+      <figure class="doc-figure"><img src="../assets/img/javascript-core-promise-all-01.png" alt="Minh hoạ" loading="lazy"></figure>
+    </section>
+
+    <section class="qa" id="promise-allsettled" data-nav="Promise.allSettled()">
+      <div class="q-tag"><span class="n">1</span> JS · React · Git</div>
+      <h2 class="q-title">Promise.allSettled()</h2>
+      <p>là một method được dùng để chạy song song nhiều Promise, và chờ tất cả chúng "kết thúc", bất kể là thành công (fulfilled) hay thất bại (rejected).</p>
+    </section>
+
+    <section class="qa" id="array-prototype" data-nav="Array.prototype">
+      <div class="q-tag"><span class="n">1</span> JS · React · Git</div>
+      <h2 class="q-title">Array.prototype</h2>
+      <ul>
+        <li>là đối tượng nguyên mẫu (prototype) của tất cả các mảng. Nó chứa các phương thức có sẵn mà mọi mảng đều kế thừa, ví du: map(), filter()</li>
+        <li>bên cạnh đó , chúng ta có thể tự định nghĩa 1 method mà Array.prototype chưa hỗ trợ</li>
+      </ul>
+      <figure class="doc-figure"><img src="../assets/img/javascript-core-array-prototype-01.png" alt="Minh hoạ" loading="lazy"></figure>
+    </section>
+
+    <section class="qa" id="string-prototype" data-nav="String.prototype">
+      <div class="q-tag"><span class="n">1</span> JS · React · Git</div>
+      <h2 class="q-title">String.prototype</h2>
+      <ul>
+        <li>là đối tượng nguyên mẫu (prototype) của tất cả các chuỗi trong JavaScript. Nó chứa các phương thức có sẵn mà mọi chuỗi kế thừa, ví dụ: length(), charAt(), …</li>
+        <li>bên cạnh đó , chúng ta có thể tự định nghĩa 1 method mà Array.prototype chưa hỗ trợ</li>
+      </ul>
+      <figure class="doc-figure"><img src="../assets/img/javascript-core-string-prototype-01.png" alt="Minh hoạ" loading="lazy"></figure>
+    </section>
+
+    <section class="qa" id="preventdefault" data-nav="preventDefault">
+      <div class="q-tag"><span class="n">1</span> JS · React · Git</div>
+      <h2 class="q-title">preventDefault</h2>
+      <p>Ngăn hành vi mặc định của element (thẻ a, thẻ form, …)</p>
+    </section>
+
+    <section class="qa" id="stopprobagation" data-nav="stopProbagation">
+      <div class="q-tag"><span class="n">1</span> JS · React · Git</div>
+      <h2 class="q-title">stopProbagation</h2>
+      <p>Ngăn hiện tượng BUBBLING event</p>
+    </section>
+
+    <section class="qa" id="fetch" data-nav="Fetch">
+      <div class="q-tag"><span class="n">1</span> JS · React · Git</div>
+      <h2 class="q-title">Fetch</h2>
+      <p>là 1 API tích hợp sẵn trong trình duyệt để gửi HTTP request (GET, POST, PUT, DELETE,...) một cách đơn giản và hiện đại, thay thế cho XMLHttpRequest.</p>
+      <figure class="doc-figure"><img src="../assets/img/javascript-core-fetch-01.png" alt="Minh hoạ" loading="lazy"></figure>
+    </section>
+
+    <section class="qa" id="axios" data-nav="Axios">
+      <div class="q-tag"><span class="n">1</span> JS · React · Git</div>
+      <h2 class="q-title">Axios</h2>
+      <ul>
+        <li>là một <b>thư viện HTTP client</b> dùng để gửi các request như <code>GET</code>, <code>POST</code>, <code>PUT</code>, <code>DELETE</code>,... từ trình duyệt hoặc <a href="http://node.js" target="_blank" rel="noopener">Node.js</a>.</li>
+        <li>một thay thế phổ biến cho fetch, với cú pháp ngắn gọn, dễ dùng hơn, và có nhiều tính năng tiện lợi như: tự động biến đổi JSON, hỗ trợ interceptors, timeout, upload progress</li>
+        <li>Cách triển khai:</li>
+        <li>dùng creat() tạo ra một instance của Axios với cấu hình mặc định riêng (baseURL, headers, timeout,...)</li>
+      </ul>
+      <figure class="doc-figure"><img src="../assets/img/javascript-core-axios-01.png" alt="Minh hoạ" loading="lazy"></figure>
+      <p>Dùng axios instance vừa mới define với các method GET, POST , …</p>
+      <figure class="doc-figure"><img src="../assets/img/javascript-core-axios-02.png" alt="Minh hoạ" loading="lazy"></figure>
+    </section>
+
+    <section class="qa" id="interceptor-trong-axios" data-nav="Interceptor trong Axios">
+      <div class="q-tag"><span class="n">1</span> JS · React · Git</div>
+      <h2 class="q-title">Interceptor trong Axios</h2>
+      <p>là một cơ chế cho phép can thiệp vào request trước khi đc gửi tới server hoặc response trước khi được phản hồi về client</p>
+      <ul>
+        <li>Vd:</li>
+        <li>Thêm Bearer Token vào tất cả request</li>
+      </ul>
+      <figure class="doc-figure"><img src="../assets/img/javascript-core-interceptor-trong-axios-01.png" alt="Minh hoạ" loading="lazy"></figure>
+      <p>Hết hạn token</p>
+      <figure class="doc-figure"><img src="../assets/img/javascript-core-interceptor-trong-axios-02.png" alt="Minh hoạ" loading="lazy"></figure>
+    </section>

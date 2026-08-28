@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Flash sale, idempotency, import/export triệu dòng, chống spam OTP, caching bảng xếp hạng, thu hồi JWT.">
+<title>Case studies thực chiến — Interview Knowledge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body data-root="../">
+
+<header class="topbar">
+  <a class="topbar-brand" href="../index.html" aria-label="Interview Knowledge — trang chủ">
+    <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true">
+      <defs><linearGradient id="ikBadge" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#f0b355"/><stop offset="1" stop-color="#b9752a"/>
+      </linearGradient></defs>
+      <rect x="2" y="2" width="60" height="60" rx="15" fill="url(#ikBadge)"/>
+      <path d="M21 21 L33 32 L21 43" fill="none" stroke="#0b0e13" stroke-width="7"
+            stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M37 43 H46" stroke="#0b0e13" stroke-width="7" stroke-linecap="round"/>
+    </svg>
+    <span class="brand-text">Interview Knowledge</span>
+  </a>
+  <nav class="topbar-nav">
+    <details class="nav-group has-active">
+      <summary>Backend</summary>
+      <div class="nav-dropdown">
+        <a href="../advanced-backend/index.html">Advanced Backend</a>
+        <a href="../backend-dotnet-nestjs/index.html">.NET &amp; NestJS</a>
+        <a href="../database-sql/index.html">Database &amp; SQL</a>
+        <a href="../backend-infrastructure/index.html">Hạ tầng</a>
+        <a href="../realtime-socket/index.html">Realtime &amp; Socket</a>
+        <a href="../case-studies/index.html" class="active">Case studies</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Frontend</summary>
+      <div class="nav-dropdown">
+        <a href="../javascript-core/index.html">JavaScript &amp; TS</a>
+        <a href="../react/index.html">React &amp; State</a>
+        <a href="../nextjs/index.html">Next.js</a>
+        <a href="../css-html/index.html">CSS &amp; HTML</a>
+        <a href="../browser-web-api/index.html">Browser &amp; Web API</a>
+        <a href="../react-native/index.html">React Native</a>
+        <a href="../frontend-tooling/index.html">Frontend Tooling</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Quy trình &amp; Nền tảng</summary>
+      <div class="nav-dropdown">
+        <a href="../git/index.html">Git</a>
+        <a href="../testing-environments/index.html">Testing</a>
+        <a href="../saas-platforms/index.html">SaaS &amp; Nền tảng</a>
+        <a href="../auth-blockchain/index.html">Auth &amp; Blockchain</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Khác</summary>
+      <div class="nav-dropdown">
+        <a href="../interview-intro/index.html">Giới thiệu &amp; English</a>
+        <a href="../project-notes/index.html">Ghi chú dự án</a>
+      </div>
+    </details>
+  </nav>
+  <button class="search-trigger" id="searchTrigger" aria-label="Tìm kiếm nội dung">
+    <span class="search-icon" aria-hidden="true">⌕</span>
+    <span class="search-label">Tìm kiếm</span>
+    <kbd>/</kbd>
+  </button>
+</header>
+
+<div class="search-overlay" id="searchOverlay" hidden>
+  <div class="search-box" role="dialog" aria-label="Tìm kiếm nội dung">
+    <input type="search" id="searchInput" autocomplete="off" spellcheck="false"
+           placeholder="Tìm trong toàn bộ nội dung — closure, saga, index, rebase…">
+    <div class="search-results" id="searchResults"></div>
+    <div class="search-hint">Enter mở mục · ↑↓ chọn · Esc đóng</div>
+  </div>
+</div>
+
+<div class="shell">
+  <button class="mobile-toggle" id="navToggle" aria-label="Mở mục lục">☰ Mục lục</button>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">Case studies thực chiến</div>
+    <div class="brand-sub">6 mục &middot; sổ tay ôn phỏng vấn</div>
+
+    <div class="nav-block">
+      <p class="nav-label">Nội dung</p>
+      <ul class="nav-list">
+        <li><a href="#1-mua-hang-flash-sale-dat-ve-xu-ly-race-condition"><span class="nav-num">01</span><span class="nav-text">1. Mua hàng Flash Sale / Đặt vé (Xử lý Race…</span></a></li>
+        <li><a href="#2-thanh-toan-tru-tien-tinh-luy-dang-idempotency"><span class="nav-num">02</span><span class="nav-text">2. Thanh toán / Trừ tiền (Tính Lũy Đẳng - Id…</span></a></li>
+        <li><a href="#3-import-export-file-excel-csv-hang-trieu-dong-memory-manage"><span class="nav-num">03</span><span class="nav-text">3. Import / Export file Excel, CSV hàng triệ…</span></a></li>
+        <li><a href="#4-gui-ma-otp-login-chong-spam-amp-rate-limiting"><span class="nav-num">04</span><span class="nav-text">4. Gửi mã OTP / Login (Chống Spam &amp; Rate…</span></a></li>
+        <li><a href="#5-danh-sach-san-pham-hot-bang-xep-hang-caching-nang-cao"><span class="nav-num">05</span><span class="nav-text">5. Danh sách sản phẩm Hot / Bảng xếp hạng (C…</span></a></li>
+        <li><a href="#6-tinh-nang-dang-xuat-moi-thiet-bi-quan-ly-jwt"><span class="nav-num">06</span><span class="nav-text">6. Tính năng Đăng xuất mọi thiết bị (Quản lý…</span></a></li>
+      </ul>
+    </div>
+  </aside>
+  <main>
+    <div class="hero">
+      <div class="hero-kicker">Interview prep · Bài toán hệ thống</div>
+      <h1>Case studies thực chiến</h1>
+      <p class="lede">Sáu bài toán kinh điển được hỏi dưới dạng tình huống: flash sale, trừ tiền lũy đẳng, import/export file triệu dòng, chống spam OTP, bảng xếp hạng và đăng xuất mọi thiết bị.</p>
+    </div>
+
+<section class="qa" id="1-mua-hang-flash-sale-dat-ve-xu-ly-race-condition" data-nav="1. Mua hàng Flash Sale / Đặt vé (Xử lý Race…">
+      <div class="q-tag"><span class="n">1</span> SQL</div>
+      <h2 class="q-title">1. Mua hàng Flash Sale / Đặt vé (Xử lý Race Condition)</h2>
+      <p><b>Tình huống:</b> Giả sử hệ thống chỉ còn đúng 1 vé xem phim hoặc 1 đôi giày giới hạn. Có 1000 người cùng bấm "Mua" vào cùng 1 mili-giây.</p>
+      <ul>
+        <li><b>Cách xử lý thông thường (Dễ gây lỗi):</b> Query kiểm tra số lượng tồn kho, nếu lớn hơn 0 thì thực hiện cập nhật trừ đi 1. Kết quả là cả 1000 request đều đọc được số lượng là 1 và hệ thống bán ra 1000 đôi giày, dẫn đến tình trạng "âm kho".</li>
+        <li><b>Cách xử lý tối ưu (Best Practice):</b></li>
+        <li><b>Sử dụng Database Lock:</b> Áp dụng <code>Pessimistic Lock</code> (Khóa bi quan: <code>SELECT ... FOR UPDATE</code> để khóa dòng dữ liệu, người này xử lý xong người kia mới được vào) hoặc <code>Optimistic Lock</code> (Khóa lạc quan: thêm trường <code>version</code> vào bảng, update chỉ thành công nếu version khớp).</li>
+        <li><b>Sử dụng Redis (Khuyên dùng):</b> Đưa số lượng tồn kho lên Redis. Sử dụng lệnh <code>DECR</code> (giảm số) vì Redis chạy đơn luồng (Single-thread), đảm bảo tuyệt đối không bao giờ bị trừ lố, đồng thời tốc độ cực nhanh so với thao tác trực tiếp trên Database.</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="2-thanh-toan-tru-tien-tinh-luy-dang-idempotency" data-nav="2. Thanh toán / Trừ tiền (Tính Lũy Đẳng - Id…">
+      <div class="q-tag"><span class="n">2</span> SQL</div>
+      <h2 class="q-title">2. Thanh toán / Trừ tiền (Tính Lũy Đẳng - Idempotency)</h2>
+      <p><b>Tình huống:</b> Người dùng bấm nút "Thanh toán", nhưng do mạng chậm nên họ bấm thêm 2-3 lần nữa. Hoặc khi hệ thống gọi API sang cổng thanh toán (Momo/VNPay) bị timeout và tự động gọi lại (Retry). Vấn đề là làm sao để khách hàng không bị trừ tiền nhiều lần.</p>
+      <ul>
+        <li><b>Cách xử lý thông thường:</b> Cứ có request đến là tạo giao dịch và gọi lệnh trừ tiền.</li>
+        <li><b>Cách xử lý tối ưu (Best Practice):</b></li>
+        <li>Thiết kế API theo chuẩn <b>Idempotency</b> (Tính lũy đẳng - thực hiện 1 lần hay 100 lần thì kết quả vẫn không thay đổi).</li>
+        <li>Yêu cầu Frontend gửi kèm một mã <code>Idempotency-Key</code> (thường là UUID sinh ra lúc render màn hình thanh toán) trên Header của API.</li>
+        <li>Backend nhận được key này sẽ lưu vào Redis hoặc Database. Nếu request thứ 2 bay tới mang cùng Key, hệ thống phát hiện ra đây là request lặp và trả về kết quả của lần 1, bỏ qua bước trừ tiền.</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="3-import-export-file-excel-csv-hang-trieu-dong-memory-manage" data-nav="3. Import / Export file Excel, CSV hàng triệ…">
+      <div class="q-tag"><span class="n">3</span> SQL</div>
+      <h2 class="q-title">3. Import / Export file Excel, CSV hàng triệu dòng (Memory Management)</h2>
+      <p><b>Tình huống:</b> Hệ thống yêu cầu người dùng upload file danh sách khách hàng có 1 triệu dòng, hoặc tính năng xuất báo cáo giao dịch trong 5 năm của công ty.</p>
+      <ul>
+        <li><b>Cách xử lý thông thường:</b> Đọc toàn bộ nội dung file vào biến trong RAM để xử lý, hoặc query toàn bộ dữ liệu từ Database rồi ghi ra file. Việc này sẽ gây ra lỗi <b>OOM (Out Of Memory)</b>, làm sập toàn bộ server.</li>
+        <li><b>Cách xử lý tối ưu (Best Practice):</b></li>
+        <li><b>Sử dụng Stream:</b> Xử lý dữ liệu theo dạng dòng chảy (chunk). Đọc lên 1000 dòng, lưu vào Database, giải phóng RAM, rồi mới đọc tiếp 1000 dòng tiếp theo.</li>
+        <li><b>Xử lý bất đồng bộ (Background Job):</b> Không bắt người dùng đứng đợi API phản hồi file. Trả về ngay thông báo: "Hệ thống đang xử lý, sẽ gửi thông báo sau". Sau đó đẩy tác vụ này vào Message Queue (RabbitMQ / BullMQ / Kafka) để các Worker xử lý ngầm. Khi hoàn tất, thông báo cho người dùng qua WebSocket hoặc Email.</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="4-gui-ma-otp-login-chong-spam-amp-rate-limiting" data-nav="4. Gửi mã OTP / Login (Chống Spam &amp; Rate…">
+      <div class="q-tag"><span class="n">4</span> SQL</div>
+      <h2 class="q-title">4. Gửi mã OTP / Login (Chống Spam &amp; Rate Limiting)</h2>
+      <p><b>Tình huống:</b> Kẻ gian sử dụng tool tự động gọi API <code>/send-otp</code> hàng trăm ngàn lần vào một số điện thoại, khiến công ty thiệt hại nặng chi phí SMS hoặc dùng tool để dò tìm mật khẩu (Brute Force).</p>
+      <ul>
+        <li><b>Cách xử lý thông thường:</b> Người dùng gọi API bao nhiêu lần thì hệ thống gửi đi bấy nhiêu tin nhắn.</li>
+        <li><b>Cách xử lý tối ưu (Best Practice):</b></li>
+        <li>Áp dụng <b>Rate Limiting</b> ở tầng API Gateway (Nginx/Kong) hoặc dùng Redis để đếm số lượng request.</li>
+        <li>Sử dụng các thuật toán chuẩn như <b>Token Bucket</b> hoặc <b>Sliding Window</b>.</li>
+        <li>Thiết lập giới hạn đa tầng: Ví dụ 1 IP tối đa 5 request/giây; 1 Số điện thoại tối đa nhận 3 SMS/ngày. Nếu vượt ngưỡng sẽ chặn (ban) IP đó tạm thời.</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="5-danh-sach-san-pham-hot-bang-xep-hang-caching-nang-cao" data-nav="5. Danh sách sản phẩm Hot / Bảng xếp hạng (C…">
+      <div class="q-tag"><span class="n">5</span> SQL</div>
+      <h2 class="q-title">5. Danh sách sản phẩm Hot / Bảng xếp hạng (Caching nâng cao)</h2>
+      <p><b>Tình huống:</b> Trang chủ cần hiển thị Top 10 sản phẩm bán chạy nhất. Để giảm tải Database, dữ liệu này được lưu vào Redis (Cache) với thời gian hết hạn (TTL) là 1 tiếng. Vấn đề phát sinh khi đúng khoảnh khắc Cache hết hạn, có 10.000 người dùng đang truy cập trang chủ cùng lúc.</p>
+      <ul>
+        <li><b>Cách xử lý thông thường:</b> Khi thấy Cache không có dữ liệu, hệ thống cho phép cả 10.000 request chọc thẳng vào Database để tính toán lại Top 10. Việc này làm CPU Database nhảy lên 100% và sập hệ thống (Lỗi này gọi là <b>Cache Stampede</b> hay <b>Cache Breakdown</b>).</li>
+        <li><b>Cách xử lý tối ưu (Best Practice):</b></li>
+        <li>Sử dụng <b>Mutex Lock (Khóa phân tán)</b> trên Redis. Khi Cache hết hạn, chỉ cho phép duy nhất <b>1 request</b> đi thẳng vào Database để tính toán và cập nhật lại Cache. 9999 request còn lại phải đứng đợi vài mili-giây, khi có Cache mới thì lấy ra trả về luôn.</li>
+        <li>Tránh hiện tượng <b>Cache Avalanche</b> (Hàng loạt Cache hết hạn cùng lúc) bằng cách cộng thêm một khoảng thời gian ngẫu nhiên vào TTL (Ví dụ: 60 phút + random từ 1 đến 5 phút).</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="6-tinh-nang-dang-xuat-moi-thiet-bi-quan-ly-jwt" data-nav="6. Tính năng Đăng xuất mọi thiết bị (Quản lý…">
+      <div class="q-tag"><span class="n">6</span> SQL</div>
+      <h2 class="q-title">6. Tính năng Đăng xuất mọi thiết bị (Quản lý JWT)</h2>
+      <p><b>Tình huống:</b> Hầu hết các hệ thống hiện nay dùng JWT (JSON Web Token) vì đặc tính "Stateless" (Không cần lưu session trong Database). Tuy nhiên, nhược điểm chí mạng của JWT là Backend <b>không thể thu hồi nó</b> trước khi nó tự hết hạn. Vậy làm sao để xử lý chức năng "Đăng xuất khỏi thiết bị khác" hoặc "Khóa tài khoản khẩn cấp"?</p>
+      <ul>
+        <li><b>Cách xử lý tối ưu (Best Practice):</b></li>
+        <li>Thiết lập JWT (Access Token) có thời hạn rất ngắn (ví dụ: 15 phút), kết hợp với <code>Refresh Token</code> lưu ở Database có thời hạn dài (ví dụ: 7 ngày).</li>
+        <li>Sử dụng cơ chế <b>Blacklist (Danh sách đen)</b> lưu trên Redis: Khi người dùng bấm đăng xuất hoặc đổi mật khẩu, đưa JWT đó (hoặc id của JWT) vào danh sách Blacklist trên Redis. Mọi request sử dụng token trong danh sách này đều bị Middleware từ chối ngay lập tức.</li>
+        <li><b>Cách thay thế (Token Versioning):</b> Lưu một trường <code>token_version</code> (số nguyên) trong bảng User. Trong payload của JWT cũng chứa mã version này. Cứ mỗi lần thực hiện Force Logout, hệ thống tăng số <code>token_version</code> trong Database lên 1. Middleware sẽ kiểm tra version trong token, nếu thấp hơn version trong Database thì từ chối truy cập.</li>
+      </ul>
+    </section>
+  </main>
+</div>
+
+<footer>
+  Interview Knowledge — sổ tay ôn phỏng vấn tổng hợp từ ghi chép cá nhân.
+  Ưu tiên trả lời theo cấu trúc: vấn đề → giải pháp → vì sao chọn cách này thay vì cách khác.
+</footer>
+
+<script src="../assets/search-index.js" defer></script>
+<script src="../assets/js/main.js" defer></script>
+</body>
+</html>

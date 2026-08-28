@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Bảng transaction log hàng chục triệu row, query theo account_id ngày càng chậm — tối ưu sao?">
+<title>06. Tối ưu Database & Query — Advanced Backend</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body data-root="../">
+
+<header class="topbar">
+  <a class="topbar-brand" href="../index.html" aria-label="Interview Knowledge — trang chủ">
+    <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true">
+      <defs><linearGradient id="ikBadge" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#f0b355"/><stop offset="1" stop-color="#b9752a"/>
+      </linearGradient></defs>
+      <rect x="2" y="2" width="60" height="60" rx="15" fill="url(#ikBadge)"/>
+      <path d="M21 21 L33 32 L21 43" fill="none" stroke="#0b0e13" stroke-width="7"
+            stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M37 43 H46" stroke="#0b0e13" stroke-width="7" stroke-linecap="round"/>
+    </svg>
+    <span class="brand-text">Interview Knowledge</span>
+  </a>
+  <nav class="topbar-nav">
+    <details class="nav-group has-active">
+      <summary>Backend</summary>
+      <div class="nav-dropdown">
+        <a href="../advanced-backend/index.html" class="active">Advanced Backend</a>
+        <a href="../backend-dotnet-nestjs/index.html">.NET &amp; NestJS</a>
+        <a href="../database-sql/index.html">Database &amp; SQL</a>
+        <a href="../backend-infrastructure/index.html">Hạ tầng</a>
+        <a href="../realtime-socket/index.html">Realtime &amp; Socket</a>
+        <a href="../case-studies/index.html">Case studies</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Frontend</summary>
+      <div class="nav-dropdown">
+        <a href="../javascript-core/index.html">JavaScript &amp; TS</a>
+        <a href="../react/index.html">React &amp; State</a>
+        <a href="../nextjs/index.html">Next.js</a>
+        <a href="../css-html/index.html">CSS &amp; HTML</a>
+        <a href="../browser-web-api/index.html">Browser &amp; Web API</a>
+        <a href="../react-native/index.html">React Native</a>
+        <a href="../frontend-tooling/index.html">Frontend Tooling</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Quy trình &amp; Nền tảng</summary>
+      <div class="nav-dropdown">
+        <a href="../git/index.html">Git</a>
+        <a href="../testing-environments/index.html">Testing</a>
+        <a href="../saas-platforms/index.html">SaaS &amp; Nền tảng</a>
+        <a href="../auth-blockchain/index.html">Auth &amp; Blockchain</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Khác</summary>
+      <div class="nav-dropdown">
+        <a href="../interview-intro/index.html">Giới thiệu &amp; English</a>
+        <a href="../project-notes/index.html">Ghi chú dự án</a>
+      </div>
+    </details>
+  </nav>
+  <button class="search-trigger" id="searchTrigger" aria-label="Tìm kiếm nội dung">
+    <span class="search-icon" aria-hidden="true">⌕</span>
+    <span class="search-label">Tìm kiếm</span>
+    <kbd>/</kbd>
+  </button>
+</header>
+
+<div class="search-overlay" id="searchOverlay" hidden>
+  <div class="search-box" role="dialog" aria-label="Tìm kiếm nội dung">
+    <input type="search" id="searchInput" autocomplete="off" spellcheck="false"
+           placeholder="Tìm trong toàn bộ nội dung — closure, saga, index, rebase…">
+    <div class="search-results" id="searchResults"></div>
+    <div class="search-hint">Enter mở mục · ↑↓ chọn · Esc đóng</div>
+  </div>
+</div>
+
+<div class="shell">
+  <button class="mobile-toggle" id="navToggle" aria-label="Mở mục lục">☰ Mục lục</button>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">Advanced Backend</div>
+    <div class="brand-sub">12 mục &middot; sổ tay ôn phỏng vấn</div>
+
+    <div class="nav-block">
+      <p class="nav-label">Nội dung</p>
+      <ul class="nav-list">
+        <li><a href="01-race-condition-lock-deadlock.html"><span class="nav-num">01</span><span class="nav-text">Race Condition, Lock &amp; Deadlock</span></a></li>
+        <li><a href="02-idempotency.html"><span class="nav-num">02</span><span class="nav-text">Idempotency</span></a></li>
+        <li><a href="03-distributed-transaction-saga.html"><span class="nav-num">03</span><span class="nav-text">Transaction xuyên service</span></a></li>
+        <li><a href="04-queue-async-processing.html"><span class="nav-num">04</span><span class="nav-text">Queue &amp; Async Processing</span></a></li>
+        <li><a href="05-rate-limiting.html"><span class="nav-num">05</span><span class="nav-text">Rate Limiting</span></a></li>
+        <li><a href="06-database-query-optimization.html" class="active"><span class="nav-num">06</span><span class="nav-text">Tối ưu Database &amp; Query</span></a></li>
+        <li><a href="07-redis-caching.html"><span class="nav-num">07</span><span class="nav-text">Redis &mdash; khái niệm &amp; case study</span></a></li>
+        <li><a href="08-scalability-pagination.html"><span class="nav-num">08</span><span class="nav-text">Scalability &amp; Pagination</span></a></li>
+        <li><a href="09-database-index.html"><span class="nav-num">09</span><span class="nav-text">Index &mdash; cơ chế &amp; đánh đổi</span></a></li>
+        <li><a href="10-background-job.html"><span class="nav-num">10</span><span class="nav-text">Background Job</span></a></li>
+        <li><a href="11-multi-tenant.html"><span class="nav-num">11</span><span class="nav-text">Multi-tenant</span></a></li>
+        <li><a href="12-api-design.html"><span class="nav-num">12</span><span class="nav-text">API Design</span></a></li>
+      </ul>
+    </div>
+
+    <div class="nav-block">
+      <p class="nav-label">Trong trang này</p>
+      <div id="pageToc"></div>
+    </div>
+  </aside>
+  <main>
+    <div class="crumb">
+      <a href="index.html">Advanced Backend</a>
+      <span class="sep">/</span>
+      <span>Câu 06</span>
+    </div>
+
+    <section class="qa" id="q6">
+      <div class="q-tag"><span class="n">6</span> Câu hỏi ứng dụng thường gặp</div>
+      <h2 class="q-title">"Bảng transaction log hàng chục triệu row, query theo account_id ngày càng chậm — tối ưu sao?"</h2>
+
+      <h3 class="sub">6.1 — Composite Index: gộp nhiều cột vào 1 index</h3>
+      <p>Composite index (compound index) là gộp <b>2 hoặc nhiều cột</b> vào chung 1 index, thay vì tạo riêng từng index cho từng cột.</p>
+      <pre><code>CREATE TABLE transactions (
+  id BIGINT PRIMARY KEY,
+  account_id INT,
+  created_at TIMESTAMP,
+  amount DECIMAL,
+  status VARCHAR(20)
+);
+
+-- Query thường gặp: lấy lịch sử giao dịch của 1 account, mới nhất trước
+SELECT * FROM transactions
+WHERE account_id = 123
+ORDER BY created_at DESC
+LIMIT 20;</code></pre>
+      <p>Không có index → DB phải quét toàn bộ hàng chục triệu row để tìm <code>account_id = 123</code>, rồi mới sort — cực chậm.</p>
+      <div class="code-label good">Composite index đúng</div>
+      <pre class="good"><code>CREATE INDEX idx_account_created ON transactions (account_id, created_at);</code></pre>
+      <p><b>Thứ tự cột trong composite index rất quan trọng</b> — index này giúp nhanh khi:</p>
+      <pre><code>WHERE account_id = 123                                 -- ✅ dùng được index (cột đầu)
+WHERE account_id = 123 AND created_at > '2026-01-01'   -- ✅ dùng được cả 2 cột
+WHERE account_id = 123 ORDER BY created_at             -- ✅ index đã sort sẵn theo created_at
+                                                        --    trong phạm vi account_id đó, khỏi sort lại</code></pre>
+      <p>Nhưng <b>không</b> giúp gì nếu query chỉ lọc theo cột thứ 2 mà bỏ qua cột đầu:</p>
+      <pre class="bad"><code>WHERE created_at > '2026-01-01'   -- ❌ không tận dụng được index này,
+                                  --    vì index được sắp xếp theo account_id trước</code></pre>
+      <p>Nguyên tắc: composite index hoạt động giống mục lục sách theo "Chương → Trang" — muốn tra nhanh trang 50 của chương 3, phải biết chương trước; chỉ có "trang 50" mà không biết chương nào thì mục lục này vô dụng.</p>
+
+      <h3 class="sub">6.2 — Partition: chia nhỏ 1 bảng lớn thành nhiều "bảng con" vật lý</h3>
+      <p>Partition không phải là index — nó là cách <b>vật lý chia dữ liệu của 1 bảng ra thành nhiều phần riêng</b> dựa theo 1 cột (thường là thời gian), nhưng vẫn cho phép query như thể đó là 1 bảng duy nhất.</p>
+      <pre><code>-- Partition bảng transactions theo THÁNG dựa vào created_at
+CREATE TABLE transactions (
+  id BIGINT,
+  account_id INT,
+  created_at TIMESTAMP,
+  amount DECIMAL
+) PARTITION BY RANGE (created_at) (
+  PARTITION p_2026_06 VALUES LESS THAN ('2026-07-01'),
+  PARTITION p_2026_07 VALUES LESS THAN ('2026-08-01'),
+  PARTITION p_2026_08 VALUES LESS THAN ('2026-09-01')
+);</code></pre>
+      <p>Về mặt vật lý, dữ liệu tháng 6 nằm ở 1 file/phân vùng riêng, tháng 7 riêng, tháng 8 riêng — dù bạn vẫn <code>SELECT * FROM transactions</code> như 1 bảng bình thường.</p>
+      <pre class="good"><code>-- Query này chỉ cần quét PHÂN VÙNG tháng 8, bỏ qua hoàn toàn tháng 6, 7
+SELECT * FROM transactions
+WHERE created_at >= '2026-08-01' AND created_at < '2026-08-31';</code></pre>
+      <p>DB engine biết ngay chỉ cần đọc <code>p_2026_08</code>, không cần động vào 2 phân vùng kia — gọi là <b>partition pruning</b>. Khác index ở chỗ: index giúp tìm nhanh <b>trong 1 khối dữ liệu</b>, còn partition giúp <b>loại bỏ hẳn cả khối dữ liệu không liên quan</b> trước khi tìm kiếm — hiệu quả rất lớn khi bảng có hàng chục/trăm triệu row trải dài nhiều năm.</p>
+
+      <h3 class="sub">6.3 — Archive dữ liệu cũ: di chuyển dữ liệu ít dùng ra khỏi bảng chính</h3>
+      <p>Dữ liệu cũ (ví dụ giao dịch từ 2 năm trước) gần như không ai còn query hàng ngày nữa — nhưng vẫn nằm trong bảng chính, làm bảng phình to, làm chậm cả index lẫn query của dữ liệu <b>mới</b> (index cũng phải lớn theo, backup cũng lâu hơn).</p>
+      <pre><code>-- Bước 1: copy dữ liệu cũ (>2 năm) sang bảng archive (hoặc storage khác như S3)
+INSERT INTO transactions_archive
+SELECT * FROM transactions
+WHERE created_at < '2024-01-01';
+
+-- Bước 2: xoá khỏi bảng chính sau khi archive thành công
+DELETE FROM transactions WHERE created_at < '2024-01-01';</code></pre>
+      <p>Kết quả: bảng <code>transactions</code> (bảng chính, phục vụ giao dịch hàng ngày) giờ chỉ chứa dữ liệu gần đây, nhỏ gọn, index nhanh, insert/update mượt hơn. Cần tra lịch sử cũ (hiếm khi, thường là báo cáo/audit) thì query sang <code>transactions_archive</code> riêng — chấp nhận chậm hơn vì không phải hot path.</p>
+      <p><b>Kết hợp với partition:</b> thay vì <code>DELETE</code> từng dòng (chậm với bảng lớn), nếu bảng đã partition theo tháng, archive chỉ đơn giản là "gỡ hẳn 1 partition ra" — cực nhanh, không cần quét từng row.</p>
+
+      <h3 class="sub">6.4 — N+1 Query: lỗi rất hay gặp khi dùng ORM</h3>
+      <p>Thay vì lấy hết dữ liệu cần trong 1–2 câu query, code chạy <b>1 query lấy danh sách (N record), rồi thêm N query riêng lẻ</b> để lấy dữ liệu liên quan cho từng record — tổng cộng N+1 lần gọi DB.</p>
+      <div class="code-label bad">Sai — N+1 query</div>
+      <pre class="bad"><code>// Bước 1: 1 query lấy 20 đơn hàng
+const orders = await db.query("SELECT * FROM orders LIMIT 20");   // → 1 query
+
+// Bước 2: LẶP qua từng order, mỗi lần lại query riêng để lấy tên sản phẩm
+for (const order of orders) {
+  const product = await db.query(
+    "SELECT name FROM products WHERE id = ?", [order.product_id]
+  );
+  order.productName = product.name;
+}
+// → thêm 20 query nữa, mỗi order 1 lần
+
+// TỔNG: 1 (lấy orders) + 20 (lấy product từng cái) = 21 query cho có 20 record</code></pre>
+      <p>Với 20 record chưa thấy rõ, nhưng nếu trang danh sách có 1000 đơn hàng → <b>1001 lần gọi DB</b> cho 1 lần load trang, cực chậm dù mỗi query riêng lẻ đều nhanh.</p>
+      <div class="code-label good">Đúng — JOIN 1 lần</div>
+      <pre class="good"><code>SELECT orders.*, products.name AS product_name
+FROM orders
+JOIN products ON products.id = orders.product_id
+LIMIT 20;
+-- CHỈ 1 query duy nhất, lấy hết dữ liệu cần trong 1 lần</code></pre>
+      <div class="code-label good">Hoặc batch IN(...) nếu không tiện JOIN trực tiếp</div>
+      <pre class="good"><code>const orders = await db.query("SELECT * FROM orders LIMIT 20");     // query 1
+const productIds = orders.map(o => o.product_id);                    // gom hết id lại
+const products = await db.query(
+  "SELECT * FROM products WHERE id IN (?)", [productIds]
+);                                                                     // query 2 — LẤY HẾT 1 LẦN
+// rồi map product vào từng order ở tầng app (không cần query DB thêm nữa)</code></pre>
+      <p>Chỉ còn <b>2 query cố định</b>, dù danh sách orders có 20 hay 1000 record — điểm khác biệt cốt lõi: N+1 tăng tuyến tính theo số record, còn cách sửa giữ nguyên số query bất kể data lớn cỡ nào. Nhiều ORM có sẵn cú pháp để tự động hoá việc này (TypeORM: <code>relations</code>, Prisma: <code>include</code>, Sequelize: <code>include</code>) — bản chất bên dưới cũng chuyển thành JOIN hoặc batch <code>IN</code> như trên.</p>
+      <p>Phát hiện N+1 qua log SQL hoặc APM (New Relic, Datadog) đếm số query/request.</p>
+
+      <h3 class="sub">6.5 — Cache balance trong Redis — có nên dùng để check trước khi trừ?</h3>
+      <div class="verdict no">✕ Không dùng cache để check trước khi trừ tiền</div>
+      <p>Chỉ nên cache cho mục đích <b>đọc hiển thị</b> (dashboard). Trừ tiền luôn phải đọc từ DB (nguồn sự thật) với lock đúng cách, vì cache có độ trễ đồng bộ → dùng cache để check số dư trước khi trừ có thể trừ vượt quá thực tế.</p>
+    </section>
+
+    <nav class="pager">
+      <a class="prev" href="05-rate-limiting.html"><span class="pager-dir">← Câu trước</span><span class="pager-title">05. Rate Limiting</span></a>
+      <a class="next" href="07-redis-caching.html"><span class="pager-dir">Câu tiếp theo →</span><span class="pager-title">07. Redis &mdash; khái niệm &amp; case study</span></a>
+    </nav>
+  </main>
+</div>
+
+<footer>
+  Interview Knowledge — sổ tay ôn phỏng vấn tổng hợp từ ghi chép cá nhân.
+  Ưu tiên trả lời theo cấu trúc: vấn đề → giải pháp → vì sao chọn cách này thay vì cách khác.
+</footer>
+
+<script src="../assets/search-index.js" defer></script>
+<script src="../assets/js/main.js" defer></script>
+</body>
+</html>

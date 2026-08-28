@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="1000 request thanh toán đến cùng lúc — DB không chịu nổi nếu xử lý đồng bộ, thiết kế lại sao?">
+<title>04. Queue & Async Processing — Advanced Backend</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body data-root="../">
+
+<header class="topbar">
+  <a class="topbar-brand" href="../index.html" aria-label="Interview Knowledge — trang chủ">
+    <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true">
+      <defs><linearGradient id="ikBadge" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#f0b355"/><stop offset="1" stop-color="#b9752a"/>
+      </linearGradient></defs>
+      <rect x="2" y="2" width="60" height="60" rx="15" fill="url(#ikBadge)"/>
+      <path d="M21 21 L33 32 L21 43" fill="none" stroke="#0b0e13" stroke-width="7"
+            stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M37 43 H46" stroke="#0b0e13" stroke-width="7" stroke-linecap="round"/>
+    </svg>
+    <span class="brand-text">Interview Knowledge</span>
+  </a>
+  <nav class="topbar-nav">
+    <details class="nav-group has-active">
+      <summary>Backend</summary>
+      <div class="nav-dropdown">
+        <a href="../advanced-backend/index.html" class="active">Advanced Backend</a>
+        <a href="../backend-dotnet-nestjs/index.html">.NET &amp; NestJS</a>
+        <a href="../database-sql/index.html">Database &amp; SQL</a>
+        <a href="../backend-infrastructure/index.html">Hạ tầng</a>
+        <a href="../realtime-socket/index.html">Realtime &amp; Socket</a>
+        <a href="../case-studies/index.html">Case studies</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Frontend</summary>
+      <div class="nav-dropdown">
+        <a href="../javascript-core/index.html">JavaScript &amp; TS</a>
+        <a href="../react/index.html">React &amp; State</a>
+        <a href="../nextjs/index.html">Next.js</a>
+        <a href="../css-html/index.html">CSS &amp; HTML</a>
+        <a href="../browser-web-api/index.html">Browser &amp; Web API</a>
+        <a href="../react-native/index.html">React Native</a>
+        <a href="../frontend-tooling/index.html">Frontend Tooling</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Quy trình &amp; Nền tảng</summary>
+      <div class="nav-dropdown">
+        <a href="../git/index.html">Git</a>
+        <a href="../testing-environments/index.html">Testing</a>
+        <a href="../saas-platforms/index.html">SaaS &amp; Nền tảng</a>
+        <a href="../auth-blockchain/index.html">Auth &amp; Blockchain</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Khác</summary>
+      <div class="nav-dropdown">
+        <a href="../interview-intro/index.html">Giới thiệu &amp; English</a>
+        <a href="../project-notes/index.html">Ghi chú dự án</a>
+      </div>
+    </details>
+  </nav>
+  <button class="search-trigger" id="searchTrigger" aria-label="Tìm kiếm nội dung">
+    <span class="search-icon" aria-hidden="true">⌕</span>
+    <span class="search-label">Tìm kiếm</span>
+    <kbd>/</kbd>
+  </button>
+</header>
+
+<div class="search-overlay" id="searchOverlay" hidden>
+  <div class="search-box" role="dialog" aria-label="Tìm kiếm nội dung">
+    <input type="search" id="searchInput" autocomplete="off" spellcheck="false"
+           placeholder="Tìm trong toàn bộ nội dung — closure, saga, index, rebase…">
+    <div class="search-results" id="searchResults"></div>
+    <div class="search-hint">Enter mở mục · ↑↓ chọn · Esc đóng</div>
+  </div>
+</div>
+
+<div class="shell">
+  <button class="mobile-toggle" id="navToggle" aria-label="Mở mục lục">☰ Mục lục</button>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">Advanced Backend</div>
+    <div class="brand-sub">12 mục &middot; sổ tay ôn phỏng vấn</div>
+
+    <div class="nav-block">
+      <p class="nav-label">Nội dung</p>
+      <ul class="nav-list">
+        <li><a href="01-race-condition-lock-deadlock.html"><span class="nav-num">01</span><span class="nav-text">Race Condition, Lock &amp; Deadlock</span></a></li>
+        <li><a href="02-idempotency.html"><span class="nav-num">02</span><span class="nav-text">Idempotency</span></a></li>
+        <li><a href="03-distributed-transaction-saga.html"><span class="nav-num">03</span><span class="nav-text">Transaction xuyên service</span></a></li>
+        <li><a href="04-queue-async-processing.html" class="active"><span class="nav-num">04</span><span class="nav-text">Queue &amp; Async Processing</span></a></li>
+        <li><a href="05-rate-limiting.html"><span class="nav-num">05</span><span class="nav-text">Rate Limiting</span></a></li>
+        <li><a href="06-database-query-optimization.html"><span class="nav-num">06</span><span class="nav-text">Tối ưu Database &amp; Query</span></a></li>
+        <li><a href="07-redis-caching.html"><span class="nav-num">07</span><span class="nav-text">Redis &mdash; khái niệm &amp; case study</span></a></li>
+        <li><a href="08-scalability-pagination.html"><span class="nav-num">08</span><span class="nav-text">Scalability &amp; Pagination</span></a></li>
+        <li><a href="09-database-index.html"><span class="nav-num">09</span><span class="nav-text">Index &mdash; cơ chế &amp; đánh đổi</span></a></li>
+        <li><a href="10-background-job.html"><span class="nav-num">10</span><span class="nav-text">Background Job</span></a></li>
+        <li><a href="11-multi-tenant.html"><span class="nav-num">11</span><span class="nav-text">Multi-tenant</span></a></li>
+        <li><a href="12-api-design.html"><span class="nav-num">12</span><span class="nav-text">API Design</span></a></li>
+      </ul>
+    </div>
+
+    <div class="nav-block">
+      <p class="nav-label">Trong trang này</p>
+      <div id="pageToc"></div>
+    </div>
+  </aside>
+  <main>
+    <div class="crumb">
+      <a href="index.html">Advanced Backend</a>
+      <span class="sep">/</span>
+      <span>Câu 04</span>
+    </div>
+
+    <section class="qa" id="q4">
+      <div class="q-tag"><span class="n">4</span> Câu hỏi ứng dụng thường gặp</div>
+      <h2 class="q-title">"1000 request thanh toán đến cùng lúc — DB không chịu nổi nếu xử lý đồng bộ, thiết kế lại sao?"</h2>
+
+      <h3 class="sub">4.1 — Vấn đề gốc: vì sao xử lý đồng bộ (sync) lại sập khi traffic cao</h3>
+      <p><b>Xử lý đồng bộ</b> nghĩa là: client gửi request lên, server xử lý xong toàn bộ logic (validate, ghi DB, gọi cổng thanh toán...) rồi mới trả response về cho client. Trong lúc xử lý, connection giữa client-server và connection tới DB đều bị <b>giữ chiếm dụng</b> cho tới khi xong.</p>
+      <pre><code>Client gửi request → Server: validate → ghi DB → gọi payment gateway → trả response
+                      (toàn bộ quá trình có thể mất 200-500ms, thậm chí vài giây
+                       nếu payment gateway phản hồi chậm)</code></pre>
+      <p>Traffic thấp thì 1 request 300ms không vấn đề gì. Nhưng nếu <b>1000 request cùng lúc</b>, mỗi request đều cần 1 connection DB để chạy song song — trong khi connection pool của DB chỉ có giới hạn (ví dụ 100 connection, xem lại khái niệm ở mục 1.6). Kết quả: 900 request còn lại phải xếp hàng chờ, có request bị timeout, DB quá tải vì phải xử lý 1000 giao dịch ghi cùng lúc.</p>
+
+      <h3 class="sub">4.2 — Giải pháp: tách "nhận request" và "xử lý request" ra làm 2 việc riêng biệt</h3>
+      <p>Ý tưởng cốt lõi: <b>không bắt client chờ tới khi xử lý xong hoàn toàn mới trả lời</b> — server chỉ làm 1 việc cực nhẹ và nhanh: <b>ghi nhận yêu cầu vào 1 hàng đợi (queue)</b>, rồi trả lời ngay cho client "đã nhận được yêu cầu, sẽ xử lý sau".</p>
+      <pre class="good"><code>Client gửi request → Server: chỉ đẩy message vào QUEUE (thao tác cực nhanh, ~5-10ms)
+                      → trả về NGAY: "202 Accepted, transaction_id = abc123"
+                      (KHÔNG chờ xử lý xong, KHÔNG ghi DB ngay lúc này)
+
+Phía sau, độc lập:
+Worker (tiến trình riêng) → liên tục lấy message ra khỏi queue → xử lý từng cái
+                           (ghi DB, gọi payment gateway...) → cập nhật trạng thái</code></pre>
+      <div class="callout">
+        <span class="callout-label">Ý nghĩa mã 202 Accepted</span>
+        <p>Báo "yêu cầu của bạn đã được chấp nhận để xử lý, nhưng chưa xử lý xong" — khác với <code>200 OK</code> (đã xử lý xong hoàn toàn). Client nhận <code>transaction_id</code> để sau đó hỏi lại "giao dịch abc123 hiện đang ở trạng thái nào" (qua API riêng, hoặc WebSocket/push notification khi xử lý xong).</p>
+      </div>
+      <p>Vì sao cách này giải quyết được vấn đề tải: bước "đẩy vào queue" cực nhẹ và nhanh (không đụng DB, không gọi payment gateway), nên dù 1000 request cùng lúc, server vẫn đẩy hết vào queue trong tích tắc, không nghẽn connection pool DB. Việc xử lý thật sự (nặng, chậm) được <b>Worker xử lý dần theo khả năng thật của hệ thống</b>, không bị dồn ép xử lý 1000 cái cùng lúc.</p>
+
+      <h3 class="sub">4.3 — Giữ đúng thứ tự trên cùng 1 account mà vẫn parallel giữa các account khác</h3>
+      <p>Giả sử user A gửi 2 giao dịch liên tiếp: "rút 5 triệu" rồi ngay sau đó "rút 3 triệu". Nếu Worker xử lý 2 message này <b>không theo đúng thứ tự</b> (chạy song song ngẫu nhiên), có thể dẫn tới sai lệch số dư hoặc logic nghiệp vụ.</p>
+      <p><b>Partition theo <code>account_id</code></b> giải quyết đúng bài toán này: đảm bảo mọi message của cùng 1 account luôn đi vào cùng 1 "làn đường" riêng, được xử lý tuần tự bởi đúng 1 Worker, trong khi account khác thì đi làn khác, xử lý song song không liên quan tới nhau.</p>
+      <pre><code>Account A: rút 5tr (msg 1) → rút 3tr (msg 2)  ─┐
+                                                 ├─→ cùng vào Partition 1 → Worker 1 xử lý TUẦN TỰ
+Account A: msg khác nếu có                     ─┘   (đảm bảo đúng thứ tự cho A)
+
+Account B: chuyển khoản (msg 3)                ─┐
+                                                 ├─→ vào Partition 2 → Worker 2 xử lý
+                                                 ┘   (chạy SONG SONG với Worker 1, không đợi nhau)</code></pre>
+      <p>Kafka/SQS FIFO cho phép khai báo <code>account_id</code> làm "khoá phân vùng" — hệ thống tự đảm bảo message có cùng khoá này luôn vào cùng 1 partition, giữ đúng thứ tự gửi vào cũng là thứ tự xử lý.</p>
+
+      <h3 class="sub">4.4 — Worker crash giữa chừng, message có mất không?</h3>
+      <p>Giả sử Worker đang xử lý message "rút 5tr" của account A, ghi được nửa chừng vào DB thì server crash (mất điện, restart...). Message đó có bị mất luôn không?</p>
+      <p><b>Cơ chế <code>at-least-once delivery</code></b> trả lời câu này: message <b>không bao giờ bị coi là "đã xử lý xong"</b> cho tới khi Worker báo lại (<code>ack</code> — acknowledge) cho hệ thống queue rằng đã xử lý xong hoàn toàn. Nếu Worker crash <b>trước khi kịp ack</b>, hệ thống queue coi message đó "chưa xử lý xong", và sẽ tự động <b>gửi lại (redeliver)</b> message đó cho 1 Worker khác (hoặc chính Worker đó sau khi restart).</p>
+      <pre class="bad"><code>Worker nhận message → bắt đầu xử lý (ghi DB...) → [CRASH TRƯỚC KHI ACK]
+                                                     ↓
+Hệ thống queue: chưa nhận được ack → coi message "chưa xử lý xong"
+                                    → REDELIVER message này cho Worker khác</code></pre>
+      <div class="callout">
+        <span class="callout-label">Hệ quả: "at-least-once" không đảm bảo "đúng chính xác 1 lần"</span>
+        <p>Worker có thể đã <b>ghi DB xong rồi mới crash ngay trước khi kịp gửi ack</b> — hệ thống vẫn tưởng chưa xử lý và gửi lại message, dẫn tới Worker khác xử lý <b>lần thứ 2</b> cho cùng 1 giao dịch — nguy cơ trừ tiền 2 lần.</p>
+      </div>
+      <p><b>Cách khắc phục — consumer (Worker) phải idempotent:</b> áp dụng đúng kỹ thuật idempotency key đã học ở Câu 2. Mỗi message mang theo 1 <code>transaction_id</code> duy nhất, Worker trước khi xử lý sẽ kiểm tra xem <code>transaction_id</code> này đã được xử lý thành công chưa (tra trong DB) — nếu rồi thì bỏ qua, chưa thì mới xử lý — đảm bảo dù message bị gửi lại bao nhiêu lần, kết quả cuối cùng vẫn chỉ như xử lý đúng 1 lần.</p>
+
+      <div class="interview-line">
+        <span class="callout-label">Trả lời mẫu khi phỏng vấn</span>
+        <p>"Em tách việc nhận request và xử lý request ra 2 bước riêng: server chỉ đẩy nhanh vào queue rồi trả 202 Accepted ngay, còn worker phía sau xử lý dần theo khả năng thật của hệ thống — tránh nghẽn connection pool khi traffic dồn cùng lúc. Để giữ đúng thứ tự trên cùng 1 account mà vẫn parallel được giữa các account khác, em partition theo account_id — message cùng account luôn vào 1 partition xử lý tuần tự. Vì hệ thống queue dùng at-least-once delivery, worker có thể nhận lại message đã xử lý rồi nếu chưa kịp ack trước khi crash, nên em bắt buộc consumer phải idempotent bằng transaction_id, tránh trừ tiền 2 lần."</p>
+      </div>
+    </section>
+
+    <nav class="pager">
+      <a class="prev" href="03-distributed-transaction-saga.html"><span class="pager-dir">← Câu trước</span><span class="pager-title">03. Transaction xuyên service</span></a>
+      <a class="next" href="05-rate-limiting.html"><span class="pager-dir">Câu tiếp theo →</span><span class="pager-title">05. Rate Limiting</span></a>
+    </nav>
+  </main>
+</div>
+
+<footer>
+  Interview Knowledge — sổ tay ôn phỏng vấn tổng hợp từ ghi chép cá nhân.
+  Ưu tiên trả lời theo cấu trúc: vấn đề → giải pháp → vì sao chọn cách này thay vì cách khác.
+</footer>
+
+<script src="../assets/search-index.js" defer></script>
+<script src="../assets/js/main.js" defer></script>
+</body>
+</html>

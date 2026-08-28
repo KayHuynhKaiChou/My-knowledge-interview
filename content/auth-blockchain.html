@@ -1,0 +1,85 @@
+    <!-- ============ OAuth2 ============ -->
+    <section class="qa" id="oauth2" data-nav="OAuth2">
+      <div class="q-tag"><span class="n">1</span> Authorization</div>
+      <h2 class="q-title">OAuth2 là gì, gồm những vai trò nào?</h2>
+      <div class="callout answer">
+        <span class="callout-label">Đáp án</span>
+        <p>OAuth2 là giao thức <b>cấp quyền</b> (authorization), cho phép ứng dụng bên thứ ba truy cập tài nguyên của người dùng trên một dịch vụ khác (Google, Microsoft, Facebook…) mà không cần dùng trực tiếp username/password của người dùng.</p>
+      </div>
+
+      <h3 class="sub">Các vai trò trong OAuth2</h3>
+      <table>
+        <thead><tr><th>Vai trò</th><th>Ý nghĩa</th></tr></thead>
+        <tbody>
+          <tr><td>Resource Owner</td><td>Chủ sở hữu tài nguyên — chính là người dùng</td></tr>
+          <tr><td>Resource Server</td><td>Nơi lưu trữ tài nguyên</td></tr>
+          <tr><td>Client</td><td>Ứng dụng bên thứ ba muốn truy cập</td></tr>
+          <tr><td>Authorization Server</td><td>Xác thực và cấp token (có thể trùng với Resource Server)</td></tr>
+        </tbody>
+      </table>
+
+      <h3 class="sub">Token &amp; scope</h3>
+      <table>
+        <thead><tr><th>Thành phần</th><th>Vai trò</th></tr></thead>
+        <tbody>
+          <tr><td>Access Token</td><td>Dùng để truy cập tài nguyên, thời hạn ngắn</td></tr>
+          <tr><td>Refresh Token</td><td>Lấy Access Token mới khi hết hạn, thời hạn dài hơn</td></tr>
+          <tr><td>Scope</td><td>Giới hạn phạm vi truy cập của Access Token</td></tr>
+        </tbody>
+      </table>
+
+      <div class="interview-line">
+        <span class="callout-label">Trả lời mẫu khi phỏng vấn</span>
+        <p>"OAuth2 là giao thức cấp quyền chứ không phải giao thức xác thực: người dùng đăng nhập ở Authorization Server, ứng dụng của em chỉ nhận về access token với scope giới hạn đúng những gì cần, không bao giờ thấy mật khẩu của họ. Access token để thời hạn ngắn cho an toàn, khi hết hạn thì dùng refresh token lấy token mới nên người dùng không phải đăng nhập lại. Nếu cần thông tin danh tính người dùng thì phải dùng thêm OpenID Connect nằm trên OAuth2."</p>
+      </div>
+    </section>
+
+    <!-- ============ Solana ============ -->
+    <section class="qa" id="solana" data-nav="Solana">
+      <div class="q-tag"><span class="n">2</span> Web3</div>
+      <h2 class="q-title">Solana là gì?</h2>
+      <p class="lede">Solana là nền tảng blockchain hiệu suất cao, được thiết kế để hỗ trợ:</p>
+      <ul>
+        <li>Ứng dụng phi tập trung (DApp)</li>
+        <li>Smart contract (hợp đồng thông minh)</li>
+        <li>Giao dịch nhanh, phí rẻ — phù hợp với NFT, DeFi, game blockchain…</li>
+      </ul>
+    </section>
+
+    <!-- ============ DApp ============ -->
+    <section class="qa" id="dapp" data-nav="DApp">
+      <div class="q-tag"><span class="n">3</span> Web3</div>
+      <h2 class="q-title">DApp là gì, cấu trúc gồm những phần nào?</h2>
+      <div class="callout answer">
+        <span class="callout-label">Định nghĩa đơn giản</span>
+        <p>DApp là ứng dụng hoạt động trên mạng blockchain, nơi logic chính (smart contract) được thực thi minh bạch, không thể sửa đổi, và dữ liệu được lưu phân tán.</p>
+      </div>
+
+      <h3 class="sub">Cấu trúc của một DApp</h3>
+      <table>
+        <thead><tr><th>Thành phần</th><th>Vai trò</th></tr></thead>
+        <tbody>
+          <tr><td>Smart contract</td><td>Chạy trên blockchain (Solana, Ethereum…), định nghĩa logic ứng dụng</td></tr>
+          <tr><td>Frontend (UI)</td><td>Thường là website, kết nối ví như Phantom/MetaMask</td></tr>
+          <tr><td>Blockchain</td><td>Nơi lưu trữ dữ liệu và xử lý logic qua smart contract</td></tr>
+          <tr><td>Wallet (ví)</td><td>Để người dùng kết nối, ký giao dịch, xác thực danh tính</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ============ MetaMask ============ -->
+    <section class="qa" id="metamask" data-nav="MetaMask">
+      <div class="q-tag"><span class="n">4</span> Web3</div>
+      <h2 class="q-title">MetaMask đóng vai trò gì trong một DApp?</h2>
+      <p class="lede">MetaMask là ví tiền mã hoá (crypto wallet) phổ biến, hoạt động như một extension trình duyệt hoặc app di động.</p>
+      <ul>
+        <li>Quản lý tài sản tiền điện tử (ETH, USDC…).</li>
+        <li>Kết nối và tương tác với các DApp.</li>
+        <li>Ký giao dịch, gửi tiền, mint NFT, staking…</li>
+        <li>Dùng với blockchain như Ethereum, Polygon, BNB Chain…</li>
+      </ul>
+      <div class="callout">
+        <span class="callout-label">Tích hợp phía front-end</span>
+        <p><code>@metamask/sdk-react</code> là SDK chính thức của MetaMask dành cho React — dùng để mở popup kết nối ví và yêu cầu người dùng ký giao dịch ngay trong ứng dụng web.</p>
+      </div>
+    </section>

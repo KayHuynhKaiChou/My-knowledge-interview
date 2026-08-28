@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Làm sao chặn 1 user spam request rút tiền/đặt hàng liên tục?">
+<title>05. Rate Limiting — Advanced Backend</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body data-root="../">
+
+<header class="topbar">
+  <a class="topbar-brand" href="../index.html" aria-label="Interview Knowledge — trang chủ">
+    <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true">
+      <defs><linearGradient id="ikBadge" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#f0b355"/><stop offset="1" stop-color="#b9752a"/>
+      </linearGradient></defs>
+      <rect x="2" y="2" width="60" height="60" rx="15" fill="url(#ikBadge)"/>
+      <path d="M21 21 L33 32 L21 43" fill="none" stroke="#0b0e13" stroke-width="7"
+            stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M37 43 H46" stroke="#0b0e13" stroke-width="7" stroke-linecap="round"/>
+    </svg>
+    <span class="brand-text">Interview Knowledge</span>
+  </a>
+  <nav class="topbar-nav">
+    <details class="nav-group has-active">
+      <summary>Backend</summary>
+      <div class="nav-dropdown">
+        <a href="../advanced-backend/index.html" class="active">Advanced Backend</a>
+        <a href="../backend-dotnet-nestjs/index.html">.NET &amp; NestJS</a>
+        <a href="../database-sql/index.html">Database &amp; SQL</a>
+        <a href="../backend-infrastructure/index.html">Hạ tầng</a>
+        <a href="../realtime-socket/index.html">Realtime &amp; Socket</a>
+        <a href="../case-studies/index.html">Case studies</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Frontend</summary>
+      <div class="nav-dropdown">
+        <a href="../javascript-core/index.html">JavaScript &amp; TS</a>
+        <a href="../react/index.html">React &amp; State</a>
+        <a href="../nextjs/index.html">Next.js</a>
+        <a href="../css-html/index.html">CSS &amp; HTML</a>
+        <a href="../browser-web-api/index.html">Browser &amp; Web API</a>
+        <a href="../react-native/index.html">React Native</a>
+        <a href="../frontend-tooling/index.html">Frontend Tooling</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Quy trình &amp; Nền tảng</summary>
+      <div class="nav-dropdown">
+        <a href="../git/index.html">Git</a>
+        <a href="../testing-environments/index.html">Testing</a>
+        <a href="../saas-platforms/index.html">SaaS &amp; Nền tảng</a>
+        <a href="../auth-blockchain/index.html">Auth &amp; Blockchain</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Khác</summary>
+      <div class="nav-dropdown">
+        <a href="../interview-intro/index.html">Giới thiệu &amp; English</a>
+        <a href="../project-notes/index.html">Ghi chú dự án</a>
+      </div>
+    </details>
+  </nav>
+  <button class="search-trigger" id="searchTrigger" aria-label="Tìm kiếm nội dung">
+    <span class="search-icon" aria-hidden="true">⌕</span>
+    <span class="search-label">Tìm kiếm</span>
+    <kbd>/</kbd>
+  </button>
+</header>
+
+<div class="search-overlay" id="searchOverlay" hidden>
+  <div class="search-box" role="dialog" aria-label="Tìm kiếm nội dung">
+    <input type="search" id="searchInput" autocomplete="off" spellcheck="false"
+           placeholder="Tìm trong toàn bộ nội dung — closure, saga, index, rebase…">
+    <div class="search-results" id="searchResults"></div>
+    <div class="search-hint">Enter mở mục · ↑↓ chọn · Esc đóng</div>
+  </div>
+</div>
+
+<div class="shell">
+  <button class="mobile-toggle" id="navToggle" aria-label="Mở mục lục">☰ Mục lục</button>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">Advanced Backend</div>
+    <div class="brand-sub">12 mục &middot; sổ tay ôn phỏng vấn</div>
+
+    <div class="nav-block">
+      <p class="nav-label">Nội dung</p>
+      <ul class="nav-list">
+        <li><a href="01-race-condition-lock-deadlock.html"><span class="nav-num">01</span><span class="nav-text">Race Condition, Lock &amp; Deadlock</span></a></li>
+        <li><a href="02-idempotency.html"><span class="nav-num">02</span><span class="nav-text">Idempotency</span></a></li>
+        <li><a href="03-distributed-transaction-saga.html"><span class="nav-num">03</span><span class="nav-text">Transaction xuyên service</span></a></li>
+        <li><a href="04-queue-async-processing.html"><span class="nav-num">04</span><span class="nav-text">Queue &amp; Async Processing</span></a></li>
+        <li><a href="05-rate-limiting.html" class="active"><span class="nav-num">05</span><span class="nav-text">Rate Limiting</span></a></li>
+        <li><a href="06-database-query-optimization.html"><span class="nav-num">06</span><span class="nav-text">Tối ưu Database &amp; Query</span></a></li>
+        <li><a href="07-redis-caching.html"><span class="nav-num">07</span><span class="nav-text">Redis &mdash; khái niệm &amp; case study</span></a></li>
+        <li><a href="08-scalability-pagination.html"><span class="nav-num">08</span><span class="nav-text">Scalability &amp; Pagination</span></a></li>
+        <li><a href="09-database-index.html"><span class="nav-num">09</span><span class="nav-text">Index &mdash; cơ chế &amp; đánh đổi</span></a></li>
+        <li><a href="10-background-job.html"><span class="nav-num">10</span><span class="nav-text">Background Job</span></a></li>
+        <li><a href="11-multi-tenant.html"><span class="nav-num">11</span><span class="nav-text">Multi-tenant</span></a></li>
+        <li><a href="12-api-design.html"><span class="nav-num">12</span><span class="nav-text">API Design</span></a></li>
+      </ul>
+    </div>
+
+    <div class="nav-block">
+      <p class="nav-label">Trong trang này</p>
+      <div id="pageToc"></div>
+    </div>
+  </aside>
+  <main>
+    <div class="crumb">
+      <a href="index.html">Advanced Backend</a>
+      <span class="sep">/</span>
+      <span>Câu 05</span>
+    </div>
+
+    <section class="qa" id="q5">
+      <div class="q-tag"><span class="n">5</span> Câu hỏi ứng dụng thường gặp</div>
+      <h2 class="q-title">"Làm sao chặn 1 user spam request rút tiền/đặt hàng liên tục?"</h2>
+
+      <h3 class="sub">5.1 — Rate Limiting là gì</h3>
+      <p>Mục tiêu: giới hạn 1 user/IP chỉ được gọi API tối đa <b>N lần trong 1 khoảng thời gian</b> (ví dụ tối đa 10 request/giây). Nếu không giới hạn, 1 user (cố ý spam hoặc bug ở client tự động retry vô hạn) có thể gửi hàng nghìn request/giây, làm sập DB hoặc chiếm hết tài nguyên của người dùng khác. Vấn đề kỹ thuật cần giải: làm sao đếm được "user này đã gọi bao nhiêu lần trong khoảng thời gian gần đây" một cách chính xác và nhanh — đó là lý do cần thuật toán riêng, không chỉ đơn giản là 1 biến đếm.</p>
+
+      <h3 class="sub">5.2 — Fixed Window Counter: chia thời gian thành khung cố định theo lịch</h3>
+      <p>Chia thời gian thành các khung <b>cố định, đóng theo lịch</b> (giống chia lịch theo tháng — tháng nào cũng bắt đầu từ ngày 1), không phụ thuộc request tới lúc nào. Redis lưu <b>từng khung riêng biệt</b> — mỗi khung là 1 key chứa số lượng request đã đếm được trong khung đó — chứ không phải 1 key duy nhất bị reset giá trị về 0.</p>
+
+      <h4 class="subsub">Làm sao biết request thuộc khung nào</h4>
+      <p>Máy tính quy đổi thời gian thành Unix timestamp (số giây kể từ 1/1/1970), rồi xác định khung bằng phép chia lấy nguyên (<code>floor</code> — chia xong bỏ phần thập phân):</p>
+      <pre><code>window_size = 60 giây (kích thước mỗi khung)
+window_id = floor(unix_timestamp / window_size)</code></pre>
+      <p>Con số <code>window_id</code> đại diện chính xác cho 1 khung 60 giây cụ thể. Bất kỳ request nào rơi vào cùng khoảng 60 giây đó đều tính ra <b>cùng 1 window_id</b>, vì phép chia nguyên bo tất cả các giây trong khoảng về chung 1 khung:</p>
+      <pre><code>9:52:00 → timestamp 1750000320 → floor(1750000320/60) = 29166672  → cùng khung
+9:52:44 → timestamp 1750000364 → floor(1750000364/60) = 29166672  → cùng khung
+9:52:59 → timestamp 1750000379 → floor(1750000379/60) = 29166672  → cùng khung
+9:53:00 → timestamp 1750000380 → floor(1750000380/60) = 29166673  → KHUNG MỚI (khác số)</code></pre>
+
+      <h4 class="subsub">Redis lưu gì cho Fixed Window — key theo window_id, kèm TTL để tự thay khung mới</h4>
+      <p>Mỗi khung 60 giây tương ứng với <b>1 key Redis riêng biệt, có vòng đời độc lập</b> — không phải 1 key bị "reset về 0". Khi khung hết hạn, key cũ tự bị Redis xoá (qua TTL), và khung mới bắt đầu bằng 1 key hoàn toàn mới, độc lập với key cũ.</p>
+      <pre><code>const windowSize = 60; // giây
+
+function checkRateLimit(userId) {
+  const now = Math.floor(Date.now() / 1000);         // unix timestamp hiện tại (giây)
+  const windowId = Math.floor(now / windowSize);       // tính khung — CÔNG THỨC Ở TRÊN
+
+  const key = `rate_limit:${userId}:${windowId}`;
+  // ví dụ key thực tế: "rate_limit:user_123:29166672"
+
+  const count = redis.incr(key);   // tăng bộ đếm của key này lên 1 (chưa có thì tự tạo = 1)
+
+  if (count === 1) {
+    redis.expire(key, windowSize); // lần đầu của khung này → đặt TTL = 60s để tự xoá
+  }
+
+  if (count > 5) {
+    return { allowed: false };     // vượt quá 5 → từ chối (count vẫn giữ nguyên, KHÔNG lùi lại 0)
+  }
+  return { allowed: true };
+}</code></pre>
+      <p><b>Ví dụ minh hoạ (không cần đổi ra Unix timestamp để dễ hình dung, dù thực tế vẫn phải quy đổi như công thức ở trên):</b> giới hạn 5 request / 60 giây. 1 request gửi lúc <b>10:10:20</b> — hệ thống xác định khung 60 giây chứa mốc này là <b>[10:10:00 → 10:11:00]</b> (khung cố định theo lịch tròn phút, không tính lùi từ thời điểm request). Redis lưu 1 key đại diện cho đúng khung này, đặt TTL để key tự hết hạn khi khung kết thúc (còn khoảng 40 giây nữa tính từ 10:10:20, vì khung kết thúc lúc 10:11:00), kèm theo 1 bộ đếm bắt đầu từ 0.</p>
+      <p>Nếu bộ đếm hiện tại &lt; 5 thì request được cho phép và bộ đếm tăng thêm 1. Mọi request khác cũng rơi vào cùng khung [10:10:00 → 10:11:00] — ví dụ lúc 10:10:35, 10:10:50 — đều dùng chung đúng 1 key, 1 bộ đếm đó, cứ tăng dần cho tới khi chạm 5 thì các request tiếp theo trong khung này bị từ chối (429), bộ đếm vẫn giữ nguyên chứ không lùi lại. Khi đồng hồ chạm mốc 10:11:00, key này tự hết hạn (Redis tự xoá) — request đầu tiên rơi vào khung mới [10:11:00 → 10:12:00] sẽ tạo ra 1 key hoàn toàn mới, bộ đếm lại bắt đầu từ 0.</p>
+
+      <div class="callout">
+        <span class="callout-label">Add / xoá diễn ra khi nào</span>
+        <p><b>Add (tăng):</b> mỗi khi có request tới, <code>INCR</code> ngay trên key của khung hiện tại — không có bước "thêm" riêng, <code>INCR</code> tự tạo key nếu chưa có. <b>Xoá:</b> không xoá bằng tay — dùng <code>EXPIRE key 60</code> đặt ngay tại lần đầu tiên key được tạo, để Redis <b>tự động</b> xoá key đó sau đúng 60 giây. Khi khung mới bắt đầu (window_id khác), 1 key hoàn toàn mới được sinh ra, độc lập với key cũ — key cũ tự "chết" theo TTL riêng, không ai cần chủ động dọn.</p>
+      </div>
+
+      <h4 class="subsub">Lỗ hổng kinh điển của Fixed Window</h4>
+      <pre class="bad"><code>10:00:56 → 10:00:59 → user dồn gọi 5 request LIÊN TIẾP, đếm 1→5,
+                       tất cả CHO PHÉP vì cùng thuộc Khung [10:00:00-10:01:00)
+10:01:01 → SANG KHUNG MỚI → đếm reset về 0 (key mới)
+           → user LẠI dồn gọi tiếp 5 request nữa ngay 10:01:01-10:01:04
+              đều CHO PHÉP vì thuộc khung mới, đếm mới toanh
+
+→ KẾT QUẢ: user gọi được 10 request chỉ trong vòng 8 giây,
+   dù quy định là "5 request / 60 giây" — vượt xa ý định giới hạn ban đầu!</code></pre>
+      <p>Đây chính là lý do sinh ra Sliding Window — để xoá bỏ lỗ hổng ở đúng ranh giới giữa 2 khung.</p>
+
+      <h3 class="sub">5.3 — Sliding Window Log: đếm chính xác trong "cửa sổ thời gian trượt"</h3>
+      <p>Đếm số request đã xảy ra trong N giây gần nhất, <b>tính từ chính thời điểm request hiện tại</b> — không cố định theo mốc phút/giây tròn. Mỗi request mới đến, cửa sổ được <b>tính lại hoàn toàn mới</b>: luôn là "N giây ngược về trước tính từ thời điểm request đó", không nối tiếp từ mốc cũ.</p>
+      <p><b>Ví dụ minh hoạ:</b> giới hạn 5 request / 60 giây. Redis đang lưu 1 mảng rỗng <code>[]</code> cho user này. Request đầu tiên gửi vào lúc <b>10:10:20</b> — lấy 10:10:20 làm mốc kết thúc (end time), lùi lại 60 giây để lấy mốc bắt đầu (start time) là <b>10:09:20</b>. Vậy khung đang xét là <b>[10:09:20 → 10:10:20]</b>.</p>
+      <p>Từng phần tử timestamp đang có trong mảng sẽ được kiểm tra: cái nào thuộc khung [10:09:20 → 10:10:20] thì giữ lại, cái nào không thuộc (cũ hơn 10:09:20) thì bị xoá khỏi mảng. Sau khi lọc xong, lấy độ dài mảng (số phần tử còn lại) so sánh với 5 — nếu <b>≥ 5</b> thì trả về 429 (từ chối), nếu <b>&lt; 5</b> thì cho phép và thêm timestamp 10:10:20 vào mảng. Vì đây là request đầu tiên nên mảng đang rỗng, độ dài = 0 &lt; 5 → cho phép, mảng giờ thành <code>[10:10:20]</code>. Request tiếp theo đến lúc nào cũng lặp lại đúng quy trình này — tự tính lại khung riêng của nó, không dùng chung khung cố định với request trước.</p>
+      <p>Vì sao gọi là "trượt" (sliding): khác với fixed window (cửa sổ cố định theo lịch: <code>[0-60s), [60-120s)...</code>, dễ bị spam dồn ở 2 đầu ranh giới khung mà vẫn "hợp lệ" theo từng khung riêng lẻ), sliding window luôn tính lùi đúng N giây từ chính thời điểm hiện tại — không có lỗ hổng ranh giới này.</p>
+
+      <div class="callout">
+        <span class="callout-label">Khác biệt cốt lõi giữa 2 cách xác định mốc khung</span>
+        <p><b>Sliding Window</b>: mốc bắt đầu khung <b>tính lùi lại từ chính thời điểm request</b> (10:10:20 → lùi 60s → 10:09:20) — mỗi request có 1 khung riêng của nó, khung này "trượt" theo sát thời gian thực.</p>
+        <p><b>Fixed Window</b>: mốc khung <b>cố định theo lịch tròn phút</b> (10:10:00 → 10:11:00), không quan tâm request rơi vào giây nào trong phút đó — nhiều request khác nhau (10:10:05, 10:10:20, 10:10:55...) đều dùng chung 1 khung, 1 key, 1 bộ đếm duy nhất cho tới khi phút đó kết thúc.</p>
+      </div>
+
+      <h4 class="subsub">Redis lưu gì cho Sliding Window Log</h4>
+      <p>Redis lưu <b>timestamp của từng request đã xảy ra</b>, dùng cấu trúc <code>Sorted Set</code> (ZSET) — vì ZSET cho phép sắp xếp và lọc theo khoảng giá trị (dùng timestamp làm điểm sắp xếp — "score").</p>
+      <pre><code>const key = `rate_limit:sliding:${userId}`;
+const now = Date.now();
+const windowMs = 60000; // cửa sổ 60 giây
+
+// Bước 1: xoá các timestamp đã "trượt" ra khỏi cửa sổ (cũ hơn 60s so với hiện tại)
+await redis.zremrangebyscore(key, 0, now - windowMs);
+
+// Bước 2: đếm số request còn lại trong cửa sổ
+const count = await redis.zcard(key);
+
+if (count >= 10) {
+  throw new Error("429 Too Many Requests");
+}
+
+// Bước 3: ghi nhận request hiện tại — value phải DUY NHẤT (ZSET không cho trùng value)
+// nên thường ghép thêm số random/uuid vào cùng timestamp
+await redis.zadd(key, now, `${now}-${Math.random()}`);
+await redis.expire(key, 60); // tự dọn key nếu user ngừng gọi hẳn</code></pre>
+      <p>Mỗi request thành công tạo ra <b>1 entry riêng trong ZSET</b> — nếu user gọi 10 request/giây liên tục, ZSET đó chứa hàng trăm entry timestamp. Đây chính là lý do Sliding Window Log tốn bộ nhớ hơn Token Bucket: nó lưu lại "dấu vết" của từng request, kích thước dữ liệu tăng theo số lượng request.</p>
+
+      <div class="callout">
+        <span class="callout-label">Tóm gọn khác biệt cách Redis lưu: Fixed Window vs Sliding Window</span>
+        <p><b>Fixed Window</b>: Redis lưu <b>từng khung riêng biệt</b> — mỗi khung là 1 key (định danh bằng <code>window_id</code>) chứa <b>số lượng request</b> đã đếm trong khung đó (kiểu dữ liệu số nguyên, dùng <code>INCR</code>); khung hết hạn (TTL) thì key tự biến mất, khung mới sinh ra key hoàn toàn mới.</p>
+        <p><b>Sliding Window Log</b>: Redis lưu <b>1 danh sách (mảng) các timestamp</b> của từng request đã xảy ra (dùng ZSET); không có khái niệm "khung" hay "reset" — mỗi request cũ tự "rơi rụng" dần khỏi danh sách khi quá 60 giây tuổi, còn request mới liên tục được thêm vào.</p>
+      </div>
+
+      <h3 class="sub">5.4 — Token Bucket: cái xô chứa token, refill dần theo thời gian</h3>
+      <p>Mỗi user có 1 cái xô (bucket) chứa tối đa N token. Mỗi lần user gọi API, hệ thống lấy đi 1 token trong xô — hết token thì từ chối request (429). Xô này tự động được đổ thêm token dần dần theo thời gian (ví dụ mỗi giây thêm 2 token, tới khi đầy).</p>
+      <pre><code>Xô của user A: [🪙🪙🪙🪙🪙🪙🪙🪙🪙🪙]  10 token đầy
+
+User A gọi 10 request liên tiếp trong 1 giây → dùng hết 10 token
+Xô của user A: [ ]  0 token → request thứ 11 bị từ chối
+
+1 giây sau, xô tự refill thêm 2 token (quy định "refill 2 token/giây")
+Xô của user A: [🪙🪙]  → user lại được gọi thêm 2 request nữa</code></pre>
+      <p>Điểm khác biệt cốt lõi so với Sliding Window: Token Bucket cho phép <b>burst</b> — user được gọi dồn dập 1 lúc (miễn còn token trong xô), nhưng về lâu dài trung bình vẫn bị giới hạn theo tốc độ refill. Giống việc được phép tiêu hết tiền tiết kiệm trong 1 ngày, nhưng lương chỉ về từ từ mỗi tháng.</p>
+
+      <h4 class="subsub">Redis lưu gì cho Token Bucket</h4>
+      <p>Khác hẳn Sliding Window Log, Token Bucket <b>không lưu từng request</b> — chỉ cần lưu đúng <b>2 con số</b> cho mỗi user: số token còn lại trong xô, và thời điểm lần cuối xô được refill (để tính xem đã tới lúc thêm token mới chưa). Dùng cấu trúc <code>Hash</code> trong Redis.</p>
+      <pre><code>const key = `rate_limit:bucket:${userId}`;
+const maxTokens = 10;
+const refillRate = 2; // 2 token mỗi giây
+const now = Date.now();
+
+// Đọc trạng thái xô hiện tại (Redis Hash lưu 2 field: tokens và lastRefill)
+let bucket = await redis.hgetall(key);
+
+if (!bucket || Object.keys(bucket).length === 0) {
+  bucket = { tokens: maxTokens, lastRefill: now };   // lần đầu → xô đầy
+} else {
+  // Tính từ lần refill trước tới giờ đã được thêm bao nhiêu token
+  const elapsedSeconds = (now - bucket.lastRefill) / 1000;
+  const tokensToAdd = elapsedSeconds * refillRate;
+  bucket.tokens = Math.min(maxTokens, bucket.tokens + tokensToAdd);
+  bucket.lastRefill = now;
+}
+
+if (bucket.tokens < 1) {
+  throw new Error("429 Too Many Requests"); // hết token, không có gì để trừ
+}
+
+bucket.tokens -= 1; // trừ 1 token cho request này
+await redis.hset(key, { tokens: bucket.tokens, lastRefill: bucket.lastRefill });
+await redis.expire(key, 3600); // dọn key nếu user ngừng hoạt động lâu</code></pre>
+      <p>Redis chỉ giữ <b>1 record duy nhất cho mỗi user</b> (2 field: <code>tokens</code>, <code>lastRefill</code>), bất kể user đó đã gọi bao nhiêu request trong quá khứ — kích thước dữ liệu <b>cố định</b>, không phình to theo lưu lượng như Sliding Window Log.</p>
+
+      <table>
+        <thead><tr><th>Tiêu chí</th><th>Sliding Window Log</th><th>Token Bucket</th></tr></thead>
+        <tbody>
+          <tr><td>Cấu trúc Redis</td><td><code>Sorted Set</code> (ZSET)</td><td><code>Hash</code> (2 field: tokens, lastRefill)</td></tr>
+          <tr><td>Lưu cái gì</td><td>Từng timestamp của mọi request trong cửa sổ</td><td>Chỉ 2 con số: số token còn lại + thời điểm refill cuối</td></tr>
+          <tr><td>Kích thước dữ liệu</td><td>Tăng theo số lượng request</td><td>Cố định, không đổi dù gọi bao nhiêu request</td></tr>
+          <tr><td>Cho phép burst?</td><td>Không</td><td>Có — gọi dồn dập miễn còn token</td></tr>
+          <tr><td>Phù hợp khi</td><td>Cần chính xác tuyệt đối, traffic không quá lớn</td><td>Traffic có tính đợt, cần tiết kiệm bộ nhớ ở quy mô lớn</td></tr>
+        </tbody>
+      </table>
+
+      <h3 class="sub">5.5 — Rate limit ở API Gateway hay ở Service?</h3>
+      <p><b>"Chặn thô"</b> ở Gateway nghĩa là kiểm tra đơn giản, không cần biết gì về business logic bên trong — chỉ dựa vào thông tin có sẵn ngay ở tầng network/HTTP (IP, user_id trong token, path của API). Gateway đứng trước tất cả service, không biết (và không cần biết) chi tiết nghiệp vụ như "user này có phải VIP không" — chỉ đếm request theo IP/user, vượt ngưỡng thì chặn ngay, không cho đi tiếp vào hệ thống phía sau. Mục đích chính là chặn spam/DDoS quy mô lớn sớm nhất có thể, giống bảo vệ đứng ở cổng chỉ kiểm tra thẻ ra vào, không kiểm tra bạn định làm gì bên trong toà nhà.</p>
+      <pre><code>Request → [API Gateway: check thô — IP này gọi > 100 req/phút chưa? Có → chặn ngay]
+              ↓ (nếu chưa vượt ngưỡng)
+          [Order Service: check tinh — user này có đang có 1 đơn pending chưa
+           thanh toán không? Loại sản phẩm này có giới hạn mua mỗi user không?]</code></pre>
+      <p><b>"Chặn tinh"</b> ở Service là chặn dựa theo logic nghiệp vụ cụ thể của từng chức năng (business rule, không phải chỉ đếm request đơn thuần) — ví dụ "user này đã đặt hàng sản phẩm X quá 3 lần trong ngày rồi". Gateway giảm tải sớm cho toàn hệ thống nhưng khó áp rule theo business logic; Service linh hoạt hơn nhưng request đã tốn tài nguyên đi qua Gateway trước khi bị chặn. Thực tế: dùng <b>cả 2 lớp</b>.</p>
+    </section>
+
+    <nav class="pager">
+      <a class="prev" href="04-queue-async-processing.html"><span class="pager-dir">← Câu trước</span><span class="pager-title">04. Queue &amp; Async Processing</span></a>
+      <a class="next" href="06-database-query-optimization.html"><span class="pager-dir">Câu tiếp theo →</span><span class="pager-title">06. Tối ưu Database &amp; Query</span></a>
+    </nav>
+  </main>
+</div>
+
+<footer>
+  Interview Knowledge — sổ tay ôn phỏng vấn tổng hợp từ ghi chép cá nhân.
+  Ưu tiên trả lời theo cấu trúc: vấn đề → giải pháp → vì sao chọn cách này thay vì cách khác.
+</footer>
+
+<script src="../assets/search-index.js" defer></script>
+<script src="../assets/js/main.js" defer></script>
+</body>
+</html>

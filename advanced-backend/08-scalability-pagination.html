@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="API trả về danh sách 10.000 record — offset hay cursor-based pagination?">
+<title>08. Scalability & Pagination — Advanced Backend</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body data-root="../">
+
+<header class="topbar">
+  <a class="topbar-brand" href="../index.html" aria-label="Interview Knowledge — trang chủ">
+    <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true">
+      <defs><linearGradient id="ikBadge" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#f0b355"/><stop offset="1" stop-color="#b9752a"/>
+      </linearGradient></defs>
+      <rect x="2" y="2" width="60" height="60" rx="15" fill="url(#ikBadge)"/>
+      <path d="M21 21 L33 32 L21 43" fill="none" stroke="#0b0e13" stroke-width="7"
+            stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M37 43 H46" stroke="#0b0e13" stroke-width="7" stroke-linecap="round"/>
+    </svg>
+    <span class="brand-text">Interview Knowledge</span>
+  </a>
+  <nav class="topbar-nav">
+    <details class="nav-group has-active">
+      <summary>Backend</summary>
+      <div class="nav-dropdown">
+        <a href="../advanced-backend/index.html" class="active">Advanced Backend</a>
+        <a href="../backend-dotnet-nestjs/index.html">.NET &amp; NestJS</a>
+        <a href="../database-sql/index.html">Database &amp; SQL</a>
+        <a href="../backend-infrastructure/index.html">Hạ tầng</a>
+        <a href="../realtime-socket/index.html">Realtime &amp; Socket</a>
+        <a href="../case-studies/index.html">Case studies</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Frontend</summary>
+      <div class="nav-dropdown">
+        <a href="../javascript-core/index.html">JavaScript &amp; TS</a>
+        <a href="../react/index.html">React &amp; State</a>
+        <a href="../nextjs/index.html">Next.js</a>
+        <a href="../css-html/index.html">CSS &amp; HTML</a>
+        <a href="../browser-web-api/index.html">Browser &amp; Web API</a>
+        <a href="../react-native/index.html">React Native</a>
+        <a href="../frontend-tooling/index.html">Frontend Tooling</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Quy trình &amp; Nền tảng</summary>
+      <div class="nav-dropdown">
+        <a href="../git/index.html">Git</a>
+        <a href="../testing-environments/index.html">Testing</a>
+        <a href="../saas-platforms/index.html">SaaS &amp; Nền tảng</a>
+        <a href="../auth-blockchain/index.html">Auth &amp; Blockchain</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Khác</summary>
+      <div class="nav-dropdown">
+        <a href="../interview-intro/index.html">Giới thiệu &amp; English</a>
+        <a href="../project-notes/index.html">Ghi chú dự án</a>
+      </div>
+    </details>
+  </nav>
+  <button class="search-trigger" id="searchTrigger" aria-label="Tìm kiếm nội dung">
+    <span class="search-icon" aria-hidden="true">⌕</span>
+    <span class="search-label">Tìm kiếm</span>
+    <kbd>/</kbd>
+  </button>
+</header>
+
+<div class="search-overlay" id="searchOverlay" hidden>
+  <div class="search-box" role="dialog" aria-label="Tìm kiếm nội dung">
+    <input type="search" id="searchInput" autocomplete="off" spellcheck="false"
+           placeholder="Tìm trong toàn bộ nội dung — closure, saga, index, rebase…">
+    <div class="search-results" id="searchResults"></div>
+    <div class="search-hint">Enter mở mục · ↑↓ chọn · Esc đóng</div>
+  </div>
+</div>
+
+<div class="shell">
+  <button class="mobile-toggle" id="navToggle" aria-label="Mở mục lục">☰ Mục lục</button>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">Advanced Backend</div>
+    <div class="brand-sub">12 mục &middot; sổ tay ôn phỏng vấn</div>
+
+    <div class="nav-block">
+      <p class="nav-label">Nội dung</p>
+      <ul class="nav-list">
+        <li><a href="01-race-condition-lock-deadlock.html"><span class="nav-num">01</span><span class="nav-text">Race Condition, Lock &amp; Deadlock</span></a></li>
+        <li><a href="02-idempotency.html"><span class="nav-num">02</span><span class="nav-text">Idempotency</span></a></li>
+        <li><a href="03-distributed-transaction-saga.html"><span class="nav-num">03</span><span class="nav-text">Transaction xuyên service</span></a></li>
+        <li><a href="04-queue-async-processing.html"><span class="nav-num">04</span><span class="nav-text">Queue &amp; Async Processing</span></a></li>
+        <li><a href="05-rate-limiting.html"><span class="nav-num">05</span><span class="nav-text">Rate Limiting</span></a></li>
+        <li><a href="06-database-query-optimization.html"><span class="nav-num">06</span><span class="nav-text">Tối ưu Database &amp; Query</span></a></li>
+        <li><a href="07-redis-caching.html"><span class="nav-num">07</span><span class="nav-text">Redis &mdash; khái niệm &amp; case study</span></a></li>
+        <li><a href="08-scalability-pagination.html" class="active"><span class="nav-num">08</span><span class="nav-text">Scalability &amp; Pagination</span></a></li>
+        <li><a href="09-database-index.html"><span class="nav-num">09</span><span class="nav-text">Index &mdash; cơ chế &amp; đánh đổi</span></a></li>
+        <li><a href="10-background-job.html"><span class="nav-num">10</span><span class="nav-text">Background Job</span></a></li>
+        <li><a href="11-multi-tenant.html"><span class="nav-num">11</span><span class="nav-text">Multi-tenant</span></a></li>
+        <li><a href="12-api-design.html"><span class="nav-num">12</span><span class="nav-text">API Design</span></a></li>
+      </ul>
+    </div>
+
+    <div class="nav-block">
+      <p class="nav-label">Trong trang này</p>
+      <div id="pageToc"></div>
+    </div>
+  </aside>
+  <main>
+    <div class="crumb">
+      <a href="index.html">Advanced Backend</a>
+      <span class="sep">/</span>
+      <span>Câu 08</span>
+    </div>
+
+    <section class="qa" id="q8">
+      <div class="q-tag"><span class="n">8</span> Câu hỏi ứng dụng thường gặp</div>
+      <h2 class="q-title">"API trả về danh sách 10.000 record — offset hay cursor-based pagination?"</h2>
+
+      <h3 class="sub">8.1 — Lý do 1: Offset tốn hiệu năng — DB phải quét bỏ N row mỗi lần</h3>
+      <div class="code-label bad">Offset — chậm dần khi page càng sâu</div>
+      <pre class="bad"><code>SELECT * FROM comments ORDER BY created_at DESC LIMIT 20 OFFSET 10000;</code></pre>
+      <p>DB không thể "nhảy thẳng" tới row thứ 10000 — dù có index, nó vẫn phải <b>duyệt qua đủ 10000 row đầu tiên rồi mới bỏ đi</b>, chỉ lấy 20 row tiếp theo. Càng phân trang sâu (offset càng lớn), thời gian query càng tăng tuyến tính — trang 1 nhanh, trang 500 chậm hẳn.</p>
+
+      <h3 class="sub">8.2 — Lý do 2: Offset gây lệch dữ liệu khi có insert/delete xen giữa các lần load</h3>
+      <p>Đây là lỗi tinh vi, dễ bị bỏ qua. Ví dụ load danh sách comment, sắp mới nhất lên đầu:</p>
+      <pre class="bad"><code>Trang 1 (OFFSET 0, LIMIT 5): comment [10, 9, 8, 7, 6]  (id giảm dần theo thời gian)
+
+Giữa lúc đó, có 1 comment MỚI (id=11) được ai đó đăng thêm vào
+
+Trang 2 (OFFSET 5, LIMIT 5): DB tính lại từ đầu — giờ thứ tự thực tế đã là
+                              [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
+                              OFFSET 5 nghĩa là "bỏ qua 5 row đầu" = bỏ qua [11,10,9,8,7]
+                              → trả về [6, 5, 4, 3, 2]
+
+→ Comment id=6 xuất hiện Ở CẢ TRANG 1 VÀ TRANG 2 (bị trùng lặp)!
+  Vì ở trang 1, vị trí của "6" là row thứ 5 (index 4).
+  Nhưng khi có thêm comment mới chèn vào đầu, "6" bị đẩy xuống thành row thứ 6 (index 5)
+  → OFFSET 5 giờ lại trúng ngay vào nó lần nữa.</code></pre>
+      <p>Ngược lại, nếu có <b>xoá</b> bớt dữ liệu giữa các lần load, sẽ xảy ra chiều ngược lại — <b>mất hẳn 1 record</b>, không hiển thị ở trang nào cả, vì offset bị "hụt" đi so với vị trí thực tế.</p>
+
+      <h3 class="sub">8.3 — Cursor-based giải quyết cả 2 vấn đề trên như thế nào</h3>
+      <p>Thay vì nói "bỏ qua N row", cursor nói "lấy các row <b>sau</b> row cụ thể này" — dùng chính giá trị dữ liệu thật (không phải vị trí đếm) làm điều kiện lọc:</p>
+      <div class="code-label good">Cursor-based — ổn định ở mọi độ sâu</div>
+      <pre class="good"><code>SELECT * FROM comments
+WHERE created_at < '2026-08-27T10:00:00'
+ORDER BY created_at DESC LIMIT 20;</code></pre>
+      <p>Vì so sánh dựa trên <b>giá trị thật của row cuối cùng đã thấy</b>, dù có bao nhiêu row mới được chèn thêm ở đâu đó, nó không ảnh hưởng tới kết quả của trang tiếp theo — không bị trùng, không bị mất record.</p>
+
+      <h4 class="subsub">Vì sao chỉ dùng created_at chưa đủ — cần composite cursor (created_at + id)</h4>
+      <p><code>created_at</code> có thể bị <b>trùng giá trị</b> giữa nhiều record (2 comment tạo cùng 1 mili giây, hoặc DB chỉ lưu độ chính xác tới giây). Nếu chỉ dùng <code>created_at</code> làm điều kiện, những record có cùng giá trị có thể bị <b>bỏ sót</b> hoặc <b>lặp lại</b> giữa các trang. Giải pháp: kết hợp <code>created_at</code> + <code>id</code> làm điều kiện lọc, vì <code>id</code> luôn duy nhất, đảm bảo thứ tự tuyệt đối dù <code>created_at</code> có bị trùng:</p>
+      <pre class="good"><code>SELECT * FROM comments
+WHERE (created_at, id) < ('2026-08-27T10:00:00', 458)
+ORDER BY created_at DESC, id DESC
+LIMIT 20;</code></pre>
+      <p><code>(created_at, id) &lt; (X, Y)</code> nghĩa là: nhỏ hơn theo <code>created_at</code> trước, nếu bằng nhau thì so tiếp theo <code>id</code> — đảm bảo thứ tự nhất quán tuyệt đối, không có 2 record nào "hoà" nhau để gây trùng/sót.</p>
+
+      <h4 class="subsub">Vì sao cần "encode" cursor thành 1 chuỗi</h4>
+      <p>Thay vì bắt Frontend tự quản lý và gửi lại 2 giá trị riêng (<code>created_at</code> và <code>id</code>) mỗi lần gọi trang tiếp theo, Backend <b>gộp 2 giá trị đó lại, encode thành 1 chuỗi duy nhất</b> (thường bằng Base64) — để FE chỉ cần lưu và gửi lại <b>1 chuỗi cursor duy nhất</b>, không cần biết bên trong nó chứa gì (che giấu cấu trúc dữ liệu thật, tránh FE tự ý sửa/đoán giá trị); và BE có thể đổi cấu trúc cursor sau này mà không phá vỡ hợp đồng API với FE.</p>
+      <pre><code>Dữ liệu thật: { createdAt: "2026-08-27T10:00:00.000Z", id: 458 }
+        ↓ JSON.stringify rồi Base64 encode
+Cursor gửi cho FE: "eyJjcmVhdGVkQXQiOiIyMDI2LTA4LTI3VDEwOjAwOjAwLjAwMFoiLCJpZCI6NDU4fQ=="</code></pre>
+
+      <h3 class="sub">8.4 — Code mẫu NestJS: giao tiếp FE-BE cho cả 2 cách (load comment 1 bài viết)</h3>
+
+      <h4 class="subsub">Offset-based</h4>
+      <pre><code>// comment.controller.ts
+@Controller('posts/:postId/comments')
+export class CommentController {
+  constructor(private commentService: CommentService) {}
+
+  @Get()
+  async getComments(
+    @Param('postId') postId: string,
+    @Query('page') page = 1,
+    @Query('limit') limit = 20,
+  ) {
+    return this.commentService.findByOffset(postId, +page, +limit);
+  }
+}</code></pre>
+      <pre><code>// comment.service.ts
+async findByOffset(postId: string, page: number, limit: number) {
+  const skip = (page - 1) * limit;
+
+  const [data, total] = await this.commentRepo.findAndCount({
+    where: { postId },
+    order: { createdAt: 'DESC', id: 'DESC' },
+    skip,          // TypeORM tự dịch thành OFFSET
+    take: limit,   // và LIMIT
+  });
+
+  return {
+    data,
+    pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+  };
+}</code></pre>
+      <p><b>FE gọi:</b></p>
+      <pre><code>GET /posts/5/comments?page=1&limit=20
+GET /posts/5/comments?page=2&limit=20   ← FE tự tính số trang tiếp theo, tự quản lý "page"</code></pre>
+
+      <h4 class="subsub">Cursor-based</h4>
+      <pre><code>// comment.controller.ts
+@Get()
+async getComments(
+  @Param('postId') postId: string,
+  @Query('cursor') cursor?: string,   // optional — lần đầu load thì không có
+  @Query('limit') limit = 20,
+) {
+  return this.commentService.findByCursor(postId, cursor, +limit);
+}</code></pre>
+      <pre><code>// comment.service.ts
+async findByCursor(postId: string, cursor: string | undefined, limit: number) {
+  const qb = this.commentRepo.createQueryBuilder('c')
+    .where('c.postId = :postId', { postId })
+    .orderBy('c.createdAt', 'DESC')
+    .addOrderBy('c.id', 'DESC')
+    .take(limit + 1); // lấy dư 1 record để biết còn trang tiếp theo hay không
+
+  if (cursor) {
+    const { createdAt, id } = this.decodeCursor(cursor);
+    // điều kiện composite: lấy record "sau" đúng vị trí cursor trỏ tới
+    qb.andWhere(
+      '(c.createdAt < :createdAt) OR (c.createdAt = :createdAt AND c.id < :id)',
+      { createdAt, id },
+    );
+  }
+
+  const rows = await qb.getMany();
+  const hasNextPage = rows.length > limit;
+  const data = hasNextPage ? rows.slice(0, limit) : rows;
+
+  const nextCursor = hasNextPage
+    ? this.encodeCursor(data[data.length - 1])   // encode từ record CUỐI trang này
+    : null;
+
+  return { data, nextCursor };
+}
+
+private encodeCursor(record: Comment): string {
+  const payload = JSON.stringify({ createdAt: record.createdAt, id: record.id });
+  return Buffer.from(payload).toString('base64');
+}
+
+private decodeCursor(cursor: string): { createdAt: string; id: number } {
+  const payload = Buffer.from(cursor, 'base64').toString('utf-8');
+  return JSON.parse(payload);
+}</code></pre>
+      <p><b>FE gọi — luồng giao tiếp:</b></p>
+      <pre><code>Lần 1 (load trang đầu — CHƯA có cursor):
+  GET /posts/5/comments?limit=20
+  → Response: { data: [...20 comment...], nextCursor: "eyJjcmVhdGVkQXQiOi..." }
+
+Lần 2 (user cuộn xuống / bấm "xem thêm" — FE lấy nextCursor từ response trước, gửi lại):
+  GET /posts/5/comments?limit=20&cursor=eyJjcmVhdGVkQXQiOi...
+  → Response: { data: [...20 comment tiếp theo...], nextCursor: "eyJ..." (hoặc null nếu hết) }
+
+FE không cần biết bên trong cursor chứa gì — chỉ cần "cầm" chuỗi BE trả về
+và gửi lại y nguyên ở lần gọi tiếp theo. Khi nextCursor = null → hết dữ liệu, ẩn nút "xem thêm".</code></pre>
+
+      <table>
+        <thead><tr><th></th><th>Offset-based</th><th>Cursor-based</th></tr></thead>
+        <tbody>
+          <tr><td>FE cần biết gì</td><td>Số trang hiện tại (<code>page</code>), tự tăng dần</td><td>Chỉ cầm <code>nextCursor</code> từ response trước, không cần hiểu ý nghĩa bên trong</td></tr>
+          <tr><td>FE có tự nhảy tới trang bất kỳ được không</td><td>Có (<code>?page=50</code>)</td><td>Không — chỉ đi tuần tự từng trang, không nhảy cóc được</td></tr>
+          <tr><td>Khi nào hết dữ liệu</td><td>FE tự so <code>page</code> với <code>totalPages</code></td><td>BE trả <code>nextCursor: null</code></td></tr>
+          <tr><td>Phù hợp UI</td><td>Bảng có số trang (1,2,3...)</td><td>Infinite scroll, nút "xem thêm" (giống load comment Facebook, Instagram)</td></tr>
+        </tbody>
+      </table>
+
+      <div class="interview-line">
+        <span class="callout-label">Trả lời mẫu khi phỏng vấn</span>
+        <p>"Em chọn cursor-based cho feed/infinite-scroll vì 2 lý do: offset càng sâu DB càng phải quét bỏ nhiều row nên chậm dần, và offset dễ bị lệch dữ liệu (trùng hoặc mất record) nếu có insert/delete xen giữa các lần load — vì nó dựa vào vị trí đếm chứ không dựa vào giá trị thật. Cursor thì dùng chính giá trị của record cuối cùng đã thấy làm điều kiện lọc tiếp, nên không bị ảnh hưởng bởi thay đổi dữ liệu ở giữa. Em dùng composite cursor gồm created_at và id thay vì chỉ created_at, để tránh trùng khi nhiều record có cùng thời gian tạo, rồi encode gộp 2 giá trị đó thành 1 chuỗi base64 để FE chỉ cần cầm và gửi lại, không cần biết cấu trúc bên trong."</p>
+      </div>
+
+      <h3 class="sub">8.5 — Chẩn đoán feature search/filter chậm — thứ tự kiểm tra</h3>
+      <ol>
+        <li><code>EXPLAIN ANALYZE</code> — có dùng index không hay full table scan.</li>
+        <li>Kiểm tra N+1 qua query log.</li>
+        <li>Filter phức tạp (<code>OR</code>, <code>LIKE '%...%'</code>) không tận dụng index → cân nhắc Elasticsearch nếu data lớn.</li>
+        <li>Đo riêng thời gian serialize response so với thời gian query DB để biết nghẽn ở đâu.</li>
+      </ol>
+    </section>
+
+    <nav class="pager">
+      <a class="prev" href="07-redis-caching.html"><span class="pager-dir">← Câu trước</span><span class="pager-title">07. Redis &mdash; khái niệm &amp; case study</span></a>
+      <a class="next" href="09-database-index.html"><span class="pager-dir">Câu tiếp theo →</span><span class="pager-title">09. Index &mdash; cơ chế &amp; đánh đổi</span></a>
+    </nav>
+  </main>
+</div>
+
+<footer>
+  Interview Knowledge — sổ tay ôn phỏng vấn tổng hợp từ ghi chép cá nhân.
+  Ưu tiên trả lời theo cấu trúc: vấn đề → giải pháp → vì sao chọn cách này thay vì cách khác.
+</footer>
+
+<script src="../assets/search-index.js" defer></script>
+<script src="../assets/js/main.js" defer></script>
+</body>
+</html>

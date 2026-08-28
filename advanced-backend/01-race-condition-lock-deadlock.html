@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="10 triệu trong tài khoản, 2 request cùng trừ 6 triệu — xử lý sao?">
+<title>01. Race Condition, Lock & Deadlock — Advanced Backend</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body data-root="../">
+
+<header class="topbar">
+  <a class="topbar-brand" href="../index.html" aria-label="Interview Knowledge — trang chủ">
+    <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true">
+      <defs><linearGradient id="ikBadge" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#f0b355"/><stop offset="1" stop-color="#b9752a"/>
+      </linearGradient></defs>
+      <rect x="2" y="2" width="60" height="60" rx="15" fill="url(#ikBadge)"/>
+      <path d="M21 21 L33 32 L21 43" fill="none" stroke="#0b0e13" stroke-width="7"
+            stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M37 43 H46" stroke="#0b0e13" stroke-width="7" stroke-linecap="round"/>
+    </svg>
+    <span class="brand-text">Interview Knowledge</span>
+  </a>
+  <nav class="topbar-nav">
+    <details class="nav-group has-active">
+      <summary>Backend</summary>
+      <div class="nav-dropdown">
+        <a href="../advanced-backend/index.html" class="active">Advanced Backend</a>
+        <a href="../backend-dotnet-nestjs/index.html">.NET &amp; NestJS</a>
+        <a href="../database-sql/index.html">Database &amp; SQL</a>
+        <a href="../backend-infrastructure/index.html">Hạ tầng</a>
+        <a href="../realtime-socket/index.html">Realtime &amp; Socket</a>
+        <a href="../case-studies/index.html">Case studies</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Frontend</summary>
+      <div class="nav-dropdown">
+        <a href="../javascript-core/index.html">JavaScript &amp; TS</a>
+        <a href="../react/index.html">React &amp; State</a>
+        <a href="../nextjs/index.html">Next.js</a>
+        <a href="../css-html/index.html">CSS &amp; HTML</a>
+        <a href="../browser-web-api/index.html">Browser &amp; Web API</a>
+        <a href="../react-native/index.html">React Native</a>
+        <a href="../frontend-tooling/index.html">Frontend Tooling</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Quy trình &amp; Nền tảng</summary>
+      <div class="nav-dropdown">
+        <a href="../git/index.html">Git</a>
+        <a href="../testing-environments/index.html">Testing</a>
+        <a href="../saas-platforms/index.html">SaaS &amp; Nền tảng</a>
+        <a href="../auth-blockchain/index.html">Auth &amp; Blockchain</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Khác</summary>
+      <div class="nav-dropdown">
+        <a href="../interview-intro/index.html">Giới thiệu &amp; English</a>
+        <a href="../project-notes/index.html">Ghi chú dự án</a>
+      </div>
+    </details>
+  </nav>
+  <button class="search-trigger" id="searchTrigger" aria-label="Tìm kiếm nội dung">
+    <span class="search-icon" aria-hidden="true">⌕</span>
+    <span class="search-label">Tìm kiếm</span>
+    <kbd>/</kbd>
+  </button>
+</header>
+
+<div class="search-overlay" id="searchOverlay" hidden>
+  <div class="search-box" role="dialog" aria-label="Tìm kiếm nội dung">
+    <input type="search" id="searchInput" autocomplete="off" spellcheck="false"
+           placeholder="Tìm trong toàn bộ nội dung — closure, saga, index, rebase…">
+    <div class="search-results" id="searchResults"></div>
+    <div class="search-hint">Enter mở mục · ↑↓ chọn · Esc đóng</div>
+  </div>
+</div>
+
+<div class="shell">
+  <button class="mobile-toggle" id="navToggle" aria-label="Mở mục lục">☰ Mục lục</button>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">Advanced Backend</div>
+    <div class="brand-sub">12 mục &middot; sổ tay ôn phỏng vấn</div>
+
+    <div class="nav-block">
+      <p class="nav-label">Nội dung</p>
+      <ul class="nav-list">
+        <li><a href="01-race-condition-lock-deadlock.html" class="active"><span class="nav-num">01</span><span class="nav-text">Race Condition, Lock &amp; Deadlock</span></a></li>
+        <li><a href="02-idempotency.html"><span class="nav-num">02</span><span class="nav-text">Idempotency</span></a></li>
+        <li><a href="03-distributed-transaction-saga.html"><span class="nav-num">03</span><span class="nav-text">Transaction xuyên service</span></a></li>
+        <li><a href="04-queue-async-processing.html"><span class="nav-num">04</span><span class="nav-text">Queue &amp; Async Processing</span></a></li>
+        <li><a href="05-rate-limiting.html"><span class="nav-num">05</span><span class="nav-text">Rate Limiting</span></a></li>
+        <li><a href="06-database-query-optimization.html"><span class="nav-num">06</span><span class="nav-text">Tối ưu Database &amp; Query</span></a></li>
+        <li><a href="07-redis-caching.html"><span class="nav-num">07</span><span class="nav-text">Redis &mdash; khái niệm &amp; case study</span></a></li>
+        <li><a href="08-scalability-pagination.html"><span class="nav-num">08</span><span class="nav-text">Scalability &amp; Pagination</span></a></li>
+        <li><a href="09-database-index.html"><span class="nav-num">09</span><span class="nav-text">Index &mdash; cơ chế &amp; đánh đổi</span></a></li>
+        <li><a href="10-background-job.html"><span class="nav-num">10</span><span class="nav-text">Background Job</span></a></li>
+        <li><a href="11-multi-tenant.html"><span class="nav-num">11</span><span class="nav-text">Multi-tenant</span></a></li>
+        <li><a href="12-api-design.html"><span class="nav-num">12</span><span class="nav-text">API Design</span></a></li>
+      </ul>
+    </div>
+
+    <div class="nav-block">
+      <p class="nav-label">Trong trang này</p>
+      <div id="pageToc"></div>
+    </div>
+  </aside>
+  <main>
+    <div class="crumb">
+      <a href="index.html">Advanced Backend</a>
+      <span class="sep">/</span>
+      <span>Câu 01</span>
+    </div>
+
+    <section class="qa" id="q1">
+      <div class="q-tag"><span class="n">1</span> Câu hỏi ứng dụng thường gặp</div>
+      <h2 class="q-title">"10 triệu trong tài khoản, 2 request cùng trừ 6 triệu — xử lý sao?"</h2>
+      <p class="lede">Đây là câu hỏi nền tảng nhất khi phỏng vấn backend/payment. Nó test 3 lớp hiểu biết liền nhau: race condition là gì → 2 loại lock giải quyết ra sao → và rủi ro deadlock khi dùng lock sai cách.</p>
+
+      <h3 class="sub">1.1 — Vấn đề gốc: khoảng hở giữa đọc và ghi</h3>
+      <p>Cách làm sai phổ biến nhất là đọc số dư ra ứng dụng, kiểm tra, rồi mới ghi lại — giữa 3 bước này có một <b>khoảng hở (gap)</b> mà request khác có thể chen vào.</p>
+      <div class="code-label bad">Sai — có khoảng hở giữa đọc và ghi</div>
+      <pre class="bad"><code>const account = await db.query("SELECT balance FROM account WHERE id=1");
+// A và B cùng đọc được balance = 10.000.000
+
+if (account.balance >= 6000000) {   // cả 2 request đều pass điều kiện này
+  await db.query(
+    "UPDATE account SET balance = ? WHERE id=1",
+    account.balance - 6000000        // cả 2 đều tính ra 4.000.000
+  );
+}
+// Kết quả: balance cuối cùng = 4.000.000 (đáng lẽ phải là -2tr / báo lỗi)
+// 1 trong 2 giao dịch coi như "biến mất" — mất tiền hoặc dư tiền sai</code></pre>
+
+      <div class="flow">
+        <div class="flow-step"><div class="flow-time">t=0ms</div><div class="flow-text">Request A: SELECT balance → đọc được 10.000.000</div></div>
+        <div class="flow-step"><div class="flow-time">t=1ms</div><div class="flow-text">Request B: SELECT balance → CŨNG đọc được 10.000.000 (A chưa ghi gì cả)</div></div>
+        <div class="flow-step"><div class="flow-time">t=2ms</div><div class="flow-text locked">Request A: UPDATE balance = 4.000.000</div></div>
+        <div class="flow-step"><div class="flow-time">t=3ms</div><div class="flow-text locked">Request B: UPDATE balance = 4.000.000 (ghi đè, không biết gì về A)</div></div>
+      </div>
+
+      <h3 class="sub">1.2 — Cách giải đúng #1: Atomic UPDATE (khuyên dùng cho phép cộng/trừ đơn giản)</h3>
+      <p>Gộp cả đọc, kiểm tra điều kiện và ghi vào <b>một câu lệnh SQL duy nhất</b> — để DB tự đảm bảo atomic ở tầng row, không cần lock tường minh.</p>
+      <div class="code-label good">Đúng — không có khoảng hở</div>
+      <pre class="good"><code>UPDATE account
+SET balance = balance - 6000000
+WHERE id = 1 AND balance >= 6000000;
+
+-- affected_rows == 1 → trừ thành công
+-- affected_rows == 0 → không đủ tiền, reject</code></pre>
+      <p>Điểm mấu chốt: <code>balance - 6000000</code> là biểu thức <b>tương đối</b>, được DB tính toán ngay tại thời điểm UPDATE thực thi, dựa trên giá trị <b>mới nhất</b> trong DB — không phải giá trị đã đọc ra ứng dụng từ trước. Vì vậy không quan trọng 2 request cách nhau bao lâu (kể cả vài mili giây): DB luôn <b>serialize</b> 2 UPDATE cùng chạm 1 row bằng row-lock ngầm định, request đến sau sẽ chạy trên dữ liệu đã được request trước cập nhật xong.</p>
+
+      <div class="callout">
+        <span class="callout-label">Cẩn thận — lỗi tinh vi khi "tưởng" là atomic</span>
+        <p>Nếu vẫn đọc balance ra app rồi tính rồi <code>SET balance = &lt;giá trị tuyệt đối&gt;</code> (dù có kèm điều kiện WHERE giống hệt), vẫn bị <b>lost update</b>: điều kiện WHERE có thể vẫn đúng (vì check trên giá trị mới nhất) nhưng giá trị SET lại dựa trên dữ liệu cũ, ghi đè mất mọi thay đổi xảy ra ở giữa.</p>
+      </div>
+      <div class="code-label bad">Trông giống atomic nhưng vẫn sai — SET giá trị tuyệt đối tính sẵn ở app</div>
+      <pre class="bad"><code>SELECT balance FROM account WHERE id = 1;  -- đọc được 10.000.000
+-- tính ở app: 10tr - 6tr = 4tr
+UPDATE account SET balance = 4000000 WHERE id = 1 AND balance >= 6000000;</code></pre>
+      <div class="flow">
+        <div class="flow-step"><div class="flow-time">t=0</div><div class="flow-text">Bạn SELECT → đọc được balance = 10.000.000</div></div>
+        <div class="flow-step"><div class="flow-time">t=1</div><div class="flow-text locked">Giao dịch KHÁC cộng thêm 5.000.000 → balance thực tế lúc này là 15.000.000</div></div>
+        <div class="flow-step"><div class="flow-time">t=2</div><div class="flow-text locked">UPDATE ... SET balance = 4000000 WHERE balance >= 6000000 → điều kiện vẫn ĐÚNG (15tr ≥ 6tr) → ghi đè thẳng 4.000.000 → khoản 5tr vừa cộng vào BỊ MẤT TRẮNG</div></div>
+      </div>
+      <p>Chỉ an toàn khi phép tính là biểu thức tương đối, được <b>DB tính ngay trong câu SQL</b> (<code>balance = balance - 6000000</code>) — không phải hard-code hay tính sẵn ở app rồi truyền số tuyệt đối xuống. Vấn đề không nằm ở chỗ "số đó hard-code hay tính toán", mà nằm ở chỗ <b>phép trừ diễn ra ở đâu</b> — ở app (dựa trên dữ liệu cũ, luôn rủi ro) hay ở DB (dựa trên dữ liệu mới nhất tại thời điểm ghi, an toàn).</p>
+
+      <h3 class="sub">1.3 — Cách giải đúng #2: Pessimistic Lock (khi phải tính toán phức tạp ở application)</h3>
+      <p>Atomic UPDATE ở mục 1.2 chỉ viết được khi phép tính là <b>biểu thức tương đối đơn giản</b> mà SQL diễn đạt gọn trong 1 dòng (<code>balance - 6000000</code>). Nhưng nếu số tiền trừ phụ thuộc vào dữ liệu <b>ở bảng khác</b> — ví dụ phải trừ 6 triệu nhưng cộng lại một khoản voucher đang active của account đó — thì bắt buộc phải <b>đọc dữ liệu ra application để tính toán trước</b>, không thể nhét gọn vào 1 câu UPDATE như <code>SET balance = balance - 6000000 + voucher_amount</code> được, vì <code>voucher_amount</code> nằm ở bảng <code>vouchers</code>, không phải cột có sẵn trên bảng <code>account</code>.</p>
+      <p>Đây chính là lúc khoảng hở giữa đọc và ghi quay trở lại — và pessimistic lock được dùng để bịt khoảng hở đó trong lúc application xử lý logic phức tạp:</p>
+      <pre><code>BEGIN;
+
+-- Bước 1: lock row account NGAY KHI ĐỌC — request khác chạm vào row này
+-- sẽ bị BLOCK ở đây cho tới khi transaction này COMMIT
+SELECT balance FROM account WHERE id = 1 FOR UPDATE;   -- app nhận về balance = 10.000.000
+
+-- Bước 2: TÍNH TOÁN Ở APPLICATION — đây là lý do cần lock
+--   - query thêm bảng vouchers để lấy voucher đang active của account này
+--   - áp dụng business rule (voucher tối đa bao nhiêu %, có hết hạn chưa...)
+--   - có thể mất vài chục ms, thậm chí gọi thêm service khác
+const voucher = await db.query(
+  "SELECT amount FROM vouchers WHERE account_id = 1 AND status = 'active' FOR UPDATE"
+);                                         // ví dụ voucher.amount = 500.000
+const newBalance = 10000000 - 6000000 + voucher.amount;   // app tự tính = 4.500.000
+await db.query(
+  "UPDATE vouchers SET status = 'used' WHERE account_id = 1 AND status = 'active'"
+);
+
+-- Bước 3: ghi giá trị ĐÃ TÍNH XONG xuống — an toàn vì suốt từ bước 1
+-- không có request nào khác chen được vào row này
+UPDATE account SET balance = 4500000 WHERE id = 1;
+
+COMMIT;   -- lúc này request khác đang đợi mới được đọc balance mới nhất</code></pre>
+      <p>Nếu không có <code>FOR UPDATE</code> ở bước 1, một request B khác có thể đọc <code>balance = 10.000.000</code> song song trong lúc A đang tính toán voucher, rồi B ghi đè lên kết quả của A ngay sau khi A COMMIT — y hệt bài toán lost update ở mục 1.2, chỉ khác là lần này khoảng hở nằm ở bước tính voucher chứ không phải phép trừ đơn thuần. <code>FOR UPDATE</code> giữ nguyên row bị khoá suốt từ lúc đọc cho tới lúc COMMIT, nên dù application có mất bao lâu để tính toán, không ai chen vào giữa được.</p>
+      <div class="callout">
+        <span class="callout-label">Vậy khi nào chọn atomic UPDATE (1.2), khi nào chọn pessimistic lock (1.3)?</span>
+        <p>Atomic UPDATE khi phép tính viết gọn được thành 1 biểu thức SQL thuần (chỉ dùng cột ngay trên chính bảng đó). Pessimistic lock khi phải đọc thêm dữ liệu từ bảng khác, gọi thêm logic/service, rồi mới tính ra được giá trị cuối cùng để ghi — lúc đó không thể tránh khỏi bước "đọc ra app rồi tính" nên phải khoá row lại trong suốt thời gian đó.</p>
+      </div>
+
+      <h3 class="sub">1.4 — Cách giải đúng #3: Optimistic Lock (dùng cột <code>version</code>)</h3>
+      <pre><code>-- Bước 1: đọc kèm version
+SELECT balance, version FROM account WHERE id = 1;  -- balance=10tr, version=5
+
+-- Bước 2: tính toán ở app (có thể phức tạp, tốn thời gian, gọi thêm service khác...)
+newBalance = balance - 6000000
+
+-- Bước 3: ghi, kèm điều kiện version phải khớp với lúc đọc
+UPDATE account SET balance = newBalance, version = version + 1
+WHERE id = 1 AND version = 5;
+
+-- affected_rows == 0 → version đã đổi, có người update trước → đọc lại & RETRY</code></pre>
+
+      <h3 class="sub">1.5 — Vì sao cần cột <code>version</code> riêng, không tận dụng luôn cột <code>balance</code>?</h3>
+      <p><code>version</code> và <code>balance</code> đều chỉ là column bình thường, không có gì đặc biệt về cơ chế DB — khác biệt nằm ở <b>ý nghĩa</b>: <code>version</code> là con số vô nghĩa về nghiệp vụ, chỉ để trả lời "row này có bị đổi gì không kể từ lúc tôi đọc" — bắt được <b>mọi</b> thay đổi trên row, bất kể đổi field nào. Còn <code>balance</code> là giá trị nghiệp vụ thật. Nếu dùng thẳng <code>balance</code> làm điều kiện chống conflict thay cho <code>version</code>, sẽ dính lại đúng lỗi <b>lost update</b> đã gặp ở mục 1.2 — chỉ khác là lần này có kèm điều kiện WHERE nhưng vẫn không đủ:</p>
+      <div class="code-label bad">Dùng balance thay version — vẫn dính lost update</div>
+      <pre class="bad"><code>SELECT balance FROM account WHERE id = 1;  -- 10tr
+-- tính toán ở app: 10tr - 6tr = 4tr
+UPDATE account SET balance = 4000000 WHERE id = 1 AND balance >= 6000000;</code></pre>
+      <div class="flow">
+        <div class="flow-step"><div class="flow-time">t=0</div><div class="flow-text">Bạn SELECT → đọc được balance = 10tr</div></div>
+        <div class="flow-step"><div class="flow-time">t=1</div><div class="flow-text locked">1 giao dịch KHÁC (ví dụ ai đó chuyển khoản vào) cộng thêm 5tr → balance thực tế bây giờ là 15tr</div></div>
+        <div class="flow-step"><div class="flow-time">t=2</div><div class="flow-text locked">Bạn chạy UPDATE ... SET balance = 4000000 WHERE balance >= 6000000 → điều kiện balance >= 6000000 vẫn ĐÚNG (vì 15tr >= 6tr) → UPDATE thành công, balance bị SET THẲNG thành 4000000 → 5tr vừa được cộng vào LÚC NÃY BỊ MẤT TRẮNG!</div></div>
+      </div>
+      <p>Dùng chính <code>balance</code> làm điều kiện chỉ an toàn khi phép tính là cộng/trừ tương đối viết gọn trong 1 UPDATE, để DB tự tính ngay tại thời điểm ghi (mục 1.2: <code>balance = balance - 6000000</code>). Ngay khi logic phức tạp hơn — phải đọc ra app tính toán rồi mới ghi giá trị tuyệt đối xuống — dùng <code>balance</code> làm điều kiện sẽ không đủ, vì WHERE có thể pass (check đúng trên giá trị mới nhất) trong khi SET lại ghi đè lên thay đổi đã xảy ra ở giữa mà điều kiện đó không hề biết tới. Đây chính là lý do cần một cột riêng, vô can với nghiệp vụ, chỉ để phát hiện "có ai đụng vào row này chưa" — đó là vai trò của <code>version</code>.</p>
+
+      <h3 class="sub">1.6 — So sánh Pessimistic vs Optimistic Lock</h3>
+
+      <div class="callout">
+        <span class="callout-label">3 thuật ngữ dùng trong bảng so sánh: Contention, Connection Pool và Throughput</span>
+        <p><b>Contention</b> (tranh chấp) = mức độ nhiều request cùng muốn đụng vào <b>chung 1 row</b> tại cùng thời điểm. Contention <b>cao</b> nghĩa là rất nhiều request tranh nhau 1 row (ví dụ ví tiền của 1 KOL giờ cao điểm, hàng nghìn giao dịch/giây cùng chạm vào 1 account). Contention <b>thấp</b> nghĩa là hiếm khi có 2 request cùng chạm vào 1 row (ví dụ 1 admin và 1 user A cùng lúc sửa profile của user A, cả tháng chưa chắc có 2 request trùng nhau).</p>
+        <p><b>Connection Pool</b> = một "hồ chứa" gồm sẵn N kết nối (connection) đã mở tới DB, dùng chung cho toàn bộ ứng dụng — vì mở 1 connection mới tới DB khá tốn thời gian (bắt tay TCP, xác thực...), nên hệ thống mở sẵn 1 số lượng cố định (ví dụ 100 connection), mỗi request cần nói chuyện với DB sẽ "mượn" 1 connection trong pool, dùng xong thì trả lại cho request khác dùng tiếp. Vì số lượng connection trong pool là <b>có giới hạn</b>, nếu tại 1 thời điểm có nhiều hơn 100 request cùng cần dùng DB, những request dư ra phải xếp hàng đợi có connection trống mới chạy được — bất kể request đó có liên quan gì tới row đang bị tranh chấp hay không.</p>
+        <p><b>Throughput</b> = số lượng request mà hệ thống (DB) xử lý xong được trong 1 đơn vị thời gian (ví dụ số giao dịch/giây). Throughput không chỉ phụ thuộc vào 1 row đang được tranh chấp — nó còn phụ thuộc vào connection pool nói trên. Nếu pessimistic lock giữ 1 row quá lâu, request đang đợi lock đó vẫn tiếp tục <b>giữ luôn 1 connection trong pool</b> suốt thời gian chờ — dù bản thân nó chỉ cần vài mili giây để chạy nếu không phải đợi. Khi đủ nhiều request cùng đợi như vậy, connection pool có thể bị chiếm hết, khiến cả những request đến <b>row hoàn toàn khác</b> — vốn không liên quan gì tới tranh chấp — cũng bị nghẽn theo vì không còn connection trống để mượn. Đó là lý do throughput của <b>toàn hệ thống</b> giảm, chứ không chỉ riêng những request đang chạm vào row bị tranh chấp.</p>
+      </div>
+
+      <table>
+        <thead><tr><th>Tiêu chí</th><th>Pessimistic Lock</th><th>Optimistic Lock</th></tr></thead>
+        <tbody>
+          <tr><td>Cơ chế</td><td>Khoá row ngay khi đọc, request khác phải <b>đợi</b></td><td>Không khoá, cho chạy song song, <b>check conflict lúc ghi</b> bằng version</td></tr>
+          <tr><td>Hiện thực</td><td><code>SELECT ... FOR UPDATE</code>, hoặc atomic <code>UPDATE ... WHERE</code></td><td>Cột <code>version</code>, <code>UPDATE ... WHERE version = X</code></td></tr>
+          <tr><td>Khi conflict</td><td>Request B tự đợi, không cần code retry</td><td>Request B fail ngay, <b>phải tự viết logic retry</b></td></tr>
+          <tr><td>Throughput khi contention cao</td><td>Giảm — nhiều request xếp hàng, có thể chiếm hết connection pool trong lúc đợi</td><td>Tệ hơn nếu conflict quá nhiều — retry storm, tốn round-trip DB liên tục</td></tr>
+          <tr><td>Throughput khi contention thấp</td><td>Tốt, gần như không khác biệt</td><td>Tốt hơn — không giữ connection chờ, giải phóng ngay sau mỗi request</td></tr>
+          <tr><td>Rủi ro deadlock</td><td>Có</td><td>Không (vì không giữ lock)</td></tr>
+          <tr><td>Case nên dùng</td><td>Ví điện tử giờ cao điểm, giữ chỗ vé sự kiện hot — contention cao, giá trị giao dịch quan trọng</td><td>User sửa profile của chính mình từ 2 thiết bị, 2 tab cùng edit 1 document — contention hiếm nhưng vẫn có thể xảy ra</td></tr>
+        </tbody>
+      </table>
+
+      <div class="interview-line">
+        <span class="callout-label">Trả lời mẫu khi phỏng vấn</span>
+        <p>"Pessimistic lock chọn cách ngăn chặn trước, chấp nhận độ trễ để đảm bảo chắc chắn không conflict. Optimistic lock chọn cách phát hiện sau, không chặn ai cả, chỉ kiểm tra lúc ghi rồi retry nếu có tranh chấp. Em chọn pessimistic khi biết trước tranh chấp xảy ra thường xuyên và giữ lock lâu sẽ nghẽn connection pool — ví dụ ví tiền giờ cao điểm. Em chọn optimistic khi tranh chấp hiếm nhưng vẫn có thể xảy ra — ví dụ user mở app trên 2 thiết bị cùng sửa 1 profile — lúc đó không đáng để lock chờ cho một trường hợp hiếm khi xảy ra."</p>
+      </div>
+
+      <h3 class="sub">1.7 — Retry ở Optimistic Lock: làm sao và khi nào dừng</h3>
+      <pre><code>async function withdrawOptimistic(accountId, amount, maxRetries = 3) {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    const row = await db.query(
+      "SELECT balance, version FROM account WHERE id = ?", [accountId]
+    );
+    if (row.balance < amount) {
+      throw new Error("Không đủ số dư"); // lỗi nghiệp vụ — KHÔNG retry
+    }
+    const result = await db.query(
+      "UPDATE account SET balance = ?, version = version + 1 WHERE id = ? AND version = ?",
+      [row.balance - amount, accountId, row.version]
+    );
+    if (result.affectedRows === 1) return { success: true };
+    await sleep(50 * Math.pow(2, attempt)); // backoff: 50ms, 100ms, 200ms...
+  }
+  throw new Error("Giao dịch thất bại do tranh chấp, vui lòng thử lại sau");
+}</code></pre>
+      <p><b>Dừng retry khi:</b></p>
+      <ul>
+        <li>Đã chạm giới hạn số lần thử (thường 3–5 lần) — row đang bị tranh chấp quá nặng, retry thêm chỉ tốn tài nguyên; nên trả lỗi hoặc chuyển sang queue/pessimistic lock cho riêng row đó.</li>
+        <li>Fail vì lý do <b>nghiệp vụ</b> (không đủ số dư) — không phải do conflict version, retry không giải quyết được gì.</li>
+        <li>Version nhảy bất thường liên tục — nên log điều tra thay vì retry mù.</li>
+      </ul>
+
+      <h3 class="sub">1.8 — Deadlock: khi nào xảy ra, ví dụ cụ thể</h3>
+      <p>Deadlock xảy ra khi 2 (hoặc nhiều) transaction <b>cùng giữ lock của nhau</b> và <b>cùng đợi lock mà đối phương đang giữ</b> — tạo thành vòng chờ khép kín, kẹt vĩnh viễn nếu DB không can thiệp.</p>
+
+      <p><b>Ví dụ:</b> account <code>id=1</code> có 10tr, account <code>id=2</code> có 5tr. Cùng lúc có 2 giao dịch chuyển tiền <b>ngược chiều nhau</b>:</p>
+      <div class="code-label bad">Transaction A — chuyển 1tr từ account 1 → 2</div>
+      <pre class="bad"><code>BEGIN;
+
+-- Bước 1: lock account 1 trước
+SELECT * FROM account WHERE id=1 FOR UPDATE;   -- A LOCK được row 1
+
+-- Bước 2: cần lock thêm account 2 để cộng tiền
+UPDATE account SET balance = balance + 1000000 WHERE id=2;
+-- A phải CHỜ vì row 2 đang bị B giữ lock ...</code></pre>
+      <div class="code-label bad">Transaction B — chuyển 500k từ account 2 → 1 (chạy gần như cùng lúc)</div>
+      <pre class="bad"><code>BEGIN;
+
+-- Bước 1: lock account 2 trước
+SELECT * FROM account WHERE id=2 FOR UPDATE;   -- B LOCK được row 2
+
+-- Bước 2: cần lock thêm account 1 để trừ tiền
+UPDATE account SET balance = balance - 500000 WHERE id=1;
+-- B phải CHỜ vì row 1 đang bị A giữ lock ...
+
+-- KẸT CỨNG: A đợi B nhả row 2, B đợi A nhả row 1 → DEADLOCK</code></pre>
+      <p>DB sẽ tự phát hiện vòng chờ khép kín này (deadlock detector chạy ngầm) và chủ động huỷ 1 trong 2 transaction, trả lỗi kiểu:</p>
+      <pre><code>ERROR 1213: Deadlock found when trying to get lock; try restarting transaction</code></pre>
+      <p>Transaction bị huỷ phải tự rollback và <b>retry lại từ đầu</b> ở tầng application. Transaction còn lại tiếp tục chạy bình thường.</p>
+
+      <div class="flow">
+        <div class="flow-step"><div class="flow-time">A</div><div class="flow-text ok">Chuyển 1tr từ account 1 → 2. Lock account 1 trước (FOR UPDATE) — thành công.</div></div>
+        <div class="flow-step"><div class="flow-time">B</div><div class="flow-text ok">Chuyển 500k từ account 2 → 1. Lock account 2 trước (FOR UPDATE) — thành công.</div></div>
+        <div class="flow-step"><div class="flow-time">A</div><div class="flow-text locked">Cần lock thêm account 2 để cộng tiền → BỊ CHẶN vì B đang giữ.</div></div>
+        <div class="flow-step"><div class="flow-time">B</div><div class="flow-text locked">Cần lock thêm account 1 để trừ tiền → BỊ CHẶN vì A đang giữ.</div></div>
+        <div class="flow-step"><div class="flow-time">⛔</div><div class="flow-text locked">A đợi B, B đợi A → DEADLOCK. DB tự phát hiện và huỷ 1 trong 2 transaction.</div></div>
+      </div>
+      <p><b>Cách tránh:</b> luôn lock các row theo <b>một thứ tự cố định</b> (ví dụ luôn theo <code>id</code> tăng dần), bất kể chiều nghiệp vụ của giao dịch là gì — để không bao giờ có 2 transaction giữ 2 row theo thứ tự ngược nhau.</p>
+      <div class="code-label good">Cả A và B đều lock account có id NHỎ HƠN trước, bất kể chiều chuyển tiền</div>
+      <pre class="good"><code>-- app luôn tính: min_id = LEAST(from_id, to_id), max_id = GREATEST(from_id, to_id)
+BEGIN;
+SELECT * FROM account WHERE id = 1 FOR UPDATE;  -- luôn lock id nhỏ hơn trước
+SELECT * FROM account WHERE id = 2 FOR UPDATE;  -- rồi mới lock id lớn hơn
+-- ... thực hiện UPDATE cả 2 ...
+COMMIT;</code></pre>
+      <p>Dù A chuyển 1→2 hay B chuyển 2→1, <b>cả 2 đều phải lock row id=1 trước tiên</b>. Nếu A đã lock được row 1, B sẽ phải đợi ngay từ bước đầu — không xảy ra tình huống A giữ 1 chờ 2, B giữ 2 chờ 1 cùng lúc. B chỉ đơn giản đứng đợi ở hàng, không có vòng lặp khép kín.</p>
+      <p>Bổ sung thêm: giữ transaction càng ngắn càng tốt, set <code>lock timeout</code> (ví dụ <code>innodb_lock_wait_timeout</code>) để tránh treo vô hạn nếu deadlock detector chậm phát hiện, và ưu tiên atomic UPDATE thay vì nhiều câu lệnh giữ lock khi logic cho phép.</p>
+
+      <h3 class="sub">1.9 — Hiểu lầm thường gặp: Stored Procedure có tự tránh được race condition không?</h3>
+      <div class="verdict no">✕ KHÔNG</div>
+      <p>Chuyển logic vào stored procedure <b>không</b> tự động giải quyết race condition. Vấn đề nằm ở việc có <b>khoảng hở giữa đọc và ghi</b> hay không — không liên quan tới việc code chạy ở tầng application hay bên trong DB. "Không có application nữa" không đồng nghĩa với "không có concurrency nữa": concurrency ở đây là <b>2 session/connection khác nhau</b> gọi vào DB, không liên quan gì tới việc logic nằm ở app hay ở procedure.</p>
+      <div class="code-label bad">Vẫn SAI dù nằm trong stored procedure, vì thiếu FOR UPDATE</div>
+      <pre class="bad"><code>CREATE PROCEDURE withdraw(IN acc_id INT, IN amount DECIMAL)
+BEGIN
+  DECLARE current_balance DECIMAL;
+  -- Bước 1: đọc — PLAIN SELECT, không lock
+  SELECT balance INTO current_balance FROM account WHERE id = acc_id;
+
+  -- Bước 2: tính toán bên trong procedure (vẫn là "tính rồi mới ghi")
+  IF current_balance >= amount THEN
+    SET current_balance = current_balance - amount;
+    -- Bước 3: ghi giá trị đã tính
+    UPDATE account SET balance = current_balance WHERE id = acc_id;
+  END IF;
+END;</code></pre>
+      <p>Kịch bản 2 session gọi gần như đồng thời:</p>
+      <div class="flow">
+        <div class="flow-step"><div class="flow-time">A</div><div class="flow-text">SELECT balance INTO ... → đọc 10tr</div></div>
+        <div class="flow-step"><div class="flow-time">B</div><div class="flow-text">SELECT balance INTO ... → CŨNG đọc 10tr (A chưa UPDATE, chưa commit → chưa đổi gì trong DB, B đọc thoải mái)</div></div>
+        <div class="flow-step"><div class="flow-time">A</div><div class="flow-text locked">current_balance = 10tr - 6tr = 4tr → UPDATE balance = 4tr</div></div>
+        <div class="flow-step"><div class="flow-time">B</div><div class="flow-text locked">current_balance = 10tr - 6tr = 4tr → UPDATE balance = 4tr (ghi đè, không biết gì về A)</div></div>
+      </div>
+      <p>Cả 2 session đều trừ thành công, balance cuối cùng là 4tr thay vì phải là -2tr (báo lỗi) hoặc chỉ 1 trong 2 thành công — y hệt lỗi race condition ở tầng app, vì bản chất vấn đề là <b>plain SELECT không tạo lock</b>, bất kể SELECT đó được gọi từ app hay từ trong procedure.</p>
+
+      <h4 class="subsub">Cách sửa #1 — dùng FOR UPDATE để lock ngay khi đọc</h4>
+      <pre class="good"><code>CREATE PROCEDURE withdraw(IN acc_id INT, IN amount DECIMAL)
+BEGIN
+    DECLARE current_balance DECIMAL;
+
+    START TRANSACTION;
+
+    -- Dùng FOR UPDATE để LOCK row ngay khi đọc
+    SELECT balance INTO current_balance FROM account WHERE id = acc_id FOR UPDATE;
+    -- Session B gọi cùng lúc sẽ bị BLOCK ở đúng dòng này cho tới khi A COMMIT
+
+    IF current_balance >= amount THEN
+        UPDATE account SET balance = balance - amount WHERE id = acc_id;
+        COMMIT;
+    ELSE
+        ROLLBACK;
+    END IF;
+END;</code></pre>
+
+      <h4 class="subsub">Cách sửa #2 — atomic UPDATE ngay trong procedure (gọn nhất)</h4>
+      <pre class="good"><code>CREATE PROCEDURE withdraw(IN acc_id INT, IN amount DECIMAL, OUT success BOOLEAN)
+BEGIN
+    UPDATE account SET balance = balance - amount
+    WHERE id = acc_id AND balance >= amount;
+
+    SET success = (ROW_COUNT() > 0);
+END;</code></pre>
+      <p>Cách 2 là tốt nhất — gọn, không cần transaction tường minh, không cần <code>FOR UPDATE</code>, vì cả đọc-check-ghi nằm trong 1 câu UPDATE atomic, đúng nguyên tắc y hệt mục 1.2. Nguyên tắc không đổi dù logic nằm ở app hay ở DB: muốn an toàn thực sự phải loại bỏ khoảng hở giữa đọc và ghi, chứ không phải chuyển chỗ chạy code.</p>
+
+      <div class="interview-line">
+        <span class="callout-label">Trả lời mẫu khi phỏng vấn</span>
+        <p>"Chuyển logic vào stored procedure không tự động giải quyết race condition, vì vấn đề nằm ở việc có tồn tại khoảng hở giữa đọc và ghi hay không — chứ không phải code chạy ở đâu. Nếu trong procedure vẫn viết kiểu SELECT rồi tính rồi UPDATE mà không lock, thì 2 session gọi procedure đó cùng lúc vẫn interleave với nhau y hệt race condition ở tầng app. Muốn an toàn thực sự, procedure vẫn phải dùng SELECT FOR UPDATE hoặc atomic UPDATE với điều kiện, đúng nguyên tắc y hệt như viết ở application."</p>
+      </div>
+    </section>
+
+    <nav class="pager">
+      <a class="prev" href="index.html"><span class="pager-dir">← Quay lại</span><span class="pager-title">Mục lục Advanced Backend</span></a>
+      <a class="next" href="02-idempotency.html"><span class="pager-dir">Câu tiếp theo →</span><span class="pager-title">02. Idempotency</span></a>
+    </nav>
+  </main>
+</div>
+
+<footer>
+  Interview Knowledge — sổ tay ôn phỏng vấn tổng hợp từ ghi chép cá nhân.
+  Ưu tiên trả lời theo cấu trúc: vấn đề → giải pháp → vì sao chọn cách này thay vì cách khác.
+</footer>
+
+<script src="../assets/search-index.js" defer></script>
+<script src="../assets/js/main.js" defer></script>
+</body>
+</html>

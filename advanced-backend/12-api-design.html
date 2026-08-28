@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Thiết kế API sao cho đúng chuẩn — REST, GraphQL, versioning, idempotent method là gì?">
+<title>12. API Design — Advanced Backend</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body data-root="../">
+
+<header class="topbar">
+  <a class="topbar-brand" href="../index.html" aria-label="Interview Knowledge — trang chủ">
+    <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true">
+      <defs><linearGradient id="ikBadge" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#f0b355"/><stop offset="1" stop-color="#b9752a"/>
+      </linearGradient></defs>
+      <rect x="2" y="2" width="60" height="60" rx="15" fill="url(#ikBadge)"/>
+      <path d="M21 21 L33 32 L21 43" fill="none" stroke="#0b0e13" stroke-width="7"
+            stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M37 43 H46" stroke="#0b0e13" stroke-width="7" stroke-linecap="round"/>
+    </svg>
+    <span class="brand-text">Interview Knowledge</span>
+  </a>
+  <nav class="topbar-nav">
+    <details class="nav-group has-active">
+      <summary>Backend</summary>
+      <div class="nav-dropdown">
+        <a href="../advanced-backend/index.html" class="active">Advanced Backend</a>
+        <a href="../backend-dotnet-nestjs/index.html">.NET &amp; NestJS</a>
+        <a href="../database-sql/index.html">Database &amp; SQL</a>
+        <a href="../backend-infrastructure/index.html">Hạ tầng</a>
+        <a href="../realtime-socket/index.html">Realtime &amp; Socket</a>
+        <a href="../case-studies/index.html">Case studies</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Frontend</summary>
+      <div class="nav-dropdown">
+        <a href="../javascript-core/index.html">JavaScript &amp; TS</a>
+        <a href="../react/index.html">React &amp; State</a>
+        <a href="../nextjs/index.html">Next.js</a>
+        <a href="../css-html/index.html">CSS &amp; HTML</a>
+        <a href="../browser-web-api/index.html">Browser &amp; Web API</a>
+        <a href="../react-native/index.html">React Native</a>
+        <a href="../frontend-tooling/index.html">Frontend Tooling</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Quy trình &amp; Nền tảng</summary>
+      <div class="nav-dropdown">
+        <a href="../git/index.html">Git</a>
+        <a href="../testing-environments/index.html">Testing</a>
+        <a href="../saas-platforms/index.html">SaaS &amp; Nền tảng</a>
+        <a href="../auth-blockchain/index.html">Auth &amp; Blockchain</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Khác</summary>
+      <div class="nav-dropdown">
+        <a href="../interview-intro/index.html">Giới thiệu &amp; English</a>
+        <a href="../project-notes/index.html">Ghi chú dự án</a>
+      </div>
+    </details>
+  </nav>
+  <button class="search-trigger" id="searchTrigger" aria-label="Tìm kiếm nội dung">
+    <span class="search-icon" aria-hidden="true">⌕</span>
+    <span class="search-label">Tìm kiếm</span>
+    <kbd>/</kbd>
+  </button>
+</header>
+
+<div class="search-overlay" id="searchOverlay" hidden>
+  <div class="search-box" role="dialog" aria-label="Tìm kiếm nội dung">
+    <input type="search" id="searchInput" autocomplete="off" spellcheck="false"
+           placeholder="Tìm trong toàn bộ nội dung — closure, saga, index, rebase…">
+    <div class="search-results" id="searchResults"></div>
+    <div class="search-hint">Enter mở mục · ↑↓ chọn · Esc đóng</div>
+  </div>
+</div>
+
+<div class="shell">
+  <button class="mobile-toggle" id="navToggle" aria-label="Mở mục lục">☰ Mục lục</button>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">Advanced Backend</div>
+    <div class="brand-sub">12 mục &middot; sổ tay ôn phỏng vấn</div>
+
+    <div class="nav-block">
+      <p class="nav-label">Nội dung</p>
+      <ul class="nav-list">
+        <li><a href="01-race-condition-lock-deadlock.html"><span class="nav-num">01</span><span class="nav-text">Race Condition, Lock &amp; Deadlock</span></a></li>
+        <li><a href="02-idempotency.html"><span class="nav-num">02</span><span class="nav-text">Idempotency</span></a></li>
+        <li><a href="03-distributed-transaction-saga.html"><span class="nav-num">03</span><span class="nav-text">Transaction xuyên service</span></a></li>
+        <li><a href="04-queue-async-processing.html"><span class="nav-num">04</span><span class="nav-text">Queue &amp; Async Processing</span></a></li>
+        <li><a href="05-rate-limiting.html"><span class="nav-num">05</span><span class="nav-text">Rate Limiting</span></a></li>
+        <li><a href="06-database-query-optimization.html"><span class="nav-num">06</span><span class="nav-text">Tối ưu Database &amp; Query</span></a></li>
+        <li><a href="07-redis-caching.html"><span class="nav-num">07</span><span class="nav-text">Redis &mdash; khái niệm &amp; case study</span></a></li>
+        <li><a href="08-scalability-pagination.html"><span class="nav-num">08</span><span class="nav-text">Scalability &amp; Pagination</span></a></li>
+        <li><a href="09-database-index.html"><span class="nav-num">09</span><span class="nav-text">Index &mdash; cơ chế &amp; đánh đổi</span></a></li>
+        <li><a href="10-background-job.html"><span class="nav-num">10</span><span class="nav-text">Background Job</span></a></li>
+        <li><a href="11-multi-tenant.html"><span class="nav-num">11</span><span class="nav-text">Multi-tenant</span></a></li>
+        <li><a href="12-api-design.html" class="active"><span class="nav-num">12</span><span class="nav-text">API Design</span></a></li>
+      </ul>
+    </div>
+
+    <div class="nav-block">
+      <p class="nav-label">Trong trang này</p>
+      <div id="pageToc"></div>
+    </div>
+  </aside>
+  <main>
+    <div class="crumb">
+      <a href="index.html">Advanced Backend</a>
+      <span class="sep">/</span>
+      <span>Câu 12</span>
+    </div>
+
+    <section class="qa" id="q12">
+      <div class="q-tag"><span class="n">12</span> Câu hỏi ứng dụng thường gặp</div>
+      <h2 class="q-title">"Thiết kế API sao cho đúng chuẩn — REST, GraphQL, versioning, idempotent method là gì?"</h2>
+
+      <h3 class="sub">12.1 — REST vs GraphQL vs gRPC — khi nào chọn cái nào</h3>
+      <table>
+        <thead><tr><th></th><th>REST</th><th>GraphQL</th><th>gRPC</th></tr></thead>
+        <tbody>
+          <tr><td>Cách hoạt động</td><td>Nhiều endpoint cố định, mỗi endpoint trả về 1 cấu trúc dữ liệu định sẵn</td><td>1 endpoint duy nhất, client tự chọn chính xác field nào cần lấy</td><td>Giao tiếp nhị phân (Protocol Buffers), tốc độ cao, định nghĩa contract rõ ràng qua file <code>.proto</code></td></tr>
+          <tr><td>Ưu điểm</td><td>Đơn giản, dễ cache (HTTP cache chuẩn), dễ debug (đọc được bằng mắt), hệ sinh thái tool lớn</td><td>Tránh over-fetching/under-fetching — FE không phải gọi nhiều lần hay nhận dư field không cần</td><td>Nhanh hơn REST/GraphQL nhiều lần (nhị phân, HTTP/2), phù hợp giao tiếp nội bộ tốc độ cao</td></tr>
+          <tr><td>Nhược điểm</td><td>Dễ bị over-fetching (trả dư field) hoặc phải tạo nhiều endpoint riêng cho từng nhu cầu FE</td><td>Khó cache hơn REST, dễ bị lạm dụng gây query quá nặng (N+1 ở tầng GraphQL resolver), phức tạp hơn khi setup</td><td>Không đọc được trực tiếp bằng trình duyệt/Postman như REST, cần tool riêng để test, không phù hợp gọi trực tiếp từ web browser</td></tr>
+          <tr><td>Phù hợp khi</td><td>API công khai, CRUD đơn giản, cần dễ tích hợp cho nhiều loại client khác nhau</td><td>FE phức tạp, nhiều loại client (web, mobile) cần lấy dữ liệu khác nhau từ cùng nguồn</td><td>Giao tiếp <b>giữa các service nội bộ</b> trong hệ thống microservices, cần độ trễ thấp</td></tr>
+        </tbody>
+      </table>
+
+      <h3 class="sub">12.2 — Idempotent HTTP methods — method nào được phép gọi lại nhiều lần an toàn</h3>
+      <p>"Idempotent" ở đây nghĩa là: gọi 1 lần hay gọi lại nhiều lần với cùng 1 request, kết quả cuối cùng trên server vẫn giống nhau — không tạo thêm tác dụng phụ nếu gọi lặp. Đây là khái niệm liên hệ trực tiếp với <b>idempotency key</b> đã học ở Câu 2, nhưng ở đây là tính chất <b>mặc định</b> của từng HTTP method theo chuẩn, không cần thêm cơ chế gì.</p>
+      <table>
+        <thead><tr><th>Method</th><th>Idempotent?</th><th>Ý nghĩa</th></tr></thead>
+        <tbody>
+          <tr><td><code>GET</code></td><td>Có</td><td>Chỉ đọc dữ liệu, gọi bao nhiêu lần cũng không thay đổi gì trên server</td></tr>
+          <tr><td><code>PUT</code></td><td>Có</td><td>Ghi đè toàn bộ resource bằng đúng dữ liệu gửi lên — gọi lại nhiều lần, resource vẫn ở đúng trạng thái đó, không đổi thêm</td></tr>
+          <tr><td><code>DELETE</code></td><td>Có</td><td>Xoá 1 resource — gọi lại lần 2 dù resource đã bị xoá từ lần 1, kết quả cuối cùng vẫn là "resource không tồn tại", không gây lỗi thêm</td></tr>
+          <tr><td><code>PATCH</code></td><td>Tuỳ cách viết</td><td>Nếu patch kiểu "set field X = giá trị Y" thì idempotent; nếu patch kiểu "tăng field X thêm 1" thì KHÔNG idempotent (gọi 2 lần sẽ tăng 2 lần)</td></tr>
+          <tr><td><code>POST</code></td><td><b>Không</b></td><td>Thường dùng để tạo mới resource — gọi lại nhiều lần sẽ tạo ra nhiều resource trùng lặp (chính là bài toán double-submit ở Câu 2, cần idempotency key để bù đắp cho việc POST vốn dĩ không idempotent)</td></tr>
+        </tbody>
+      </table>
+      <p>Ý nghĩa thực tế: vì <code>POST</code> không idempotent theo bản chất, nên với các API tạo giao dịch quan trọng (đặt hàng, thanh toán) luôn cần bổ sung thêm <b>idempotency key</b> ở tầng ứng dụng (Câu 2) để bù đắp cho tính chất này — đây là lý do 2 kiến thức này luôn đi kèm nhau khi phỏng vấn.</p>
+
+      <h3 class="sub">12.3 — API Versioning — vì sao cần và các cách phổ biến</h3>
+      <p>Khi API đã có client đang dùng (mobile app cũ chưa update, đối tác đã tích hợp), không thể tự ý đổi cấu trúc response hay behavior của API cũ — sẽ làm hỏng những client đang phụ thuộc vào nó. Versioning cho phép vừa giữ API cũ hoạt động, vừa phát triển API mới song song.</p>
+      <table>
+        <thead><tr><th>Cách versioning</th><th>Ví dụ</th><th>Ưu / nhược</th></tr></thead>
+        <tbody>
+          <tr><td>URI Path</td><td><code>/v1/orders</code>, <code>/v2/orders</code></td><td>Dễ thấy, dễ debug, dễ route ở Gateway — cách phổ biến nhất</td></tr>
+          <tr><td>Header</td><td><code>Accept: application/vnd.company.v2+json</code></td><td>URL sạch hơn nhưng khó test nhanh bằng trình duyệt, dễ bị quên set header</td></tr>
+          <tr><td>Query Param</td><td><code>/orders?version=2</code></td><td>Dễ làm nhưng dễ bị quên truyền, không phải chuẩn phổ biến</td></tr>
+        </tbody>
+      </table>
+      <p><b>Khi nào cần bump version:</b> chỉ cần khi có <b>breaking change</b> — đổi cấu trúc response, xoá field cũ, đổi ý nghĩa 1 field. Thêm field mới (optional) hoặc thêm endpoint mới thường <b>không cần</b> bump version, vì không phá vỡ client cũ đang dùng.</p>
+
+      <h3 class="sub">12.4 — Chuẩn hoá format response và lỗi trong dự án</h3>
+      <p>Một API design tốt cần format response <b>nhất quán</b> giữa mọi endpoint, để FE xử lý dễ dàng mà không cần biết trước cấu trúc riêng của từng API.</p>
+      <pre><code>// Response thành công — bọc trong 1 envelope chung
+{
+  "success": true,
+  "data": { "id": 1, "name": "..." },
+  "meta": { "page": 1, "totalPages": 10 }   // nếu có phân trang
+}
+
+// Response lỗi — format thống nhất cho MỌI lỗi, dù lỗi 400, 404, hay 500
+{
+  "success": false,
+  "error": {
+    "code": "INSUFFICIENT_BALANCE",     // mã lỗi máy đọc được, để FE switch-case xử lý
+    "message": "Số dư không đủ để thực hiện giao dịch",  // message người đọc được
+    "details": { "currentBalance": 2000000, "requiredAmount": 5000000 }
+  }
+}</code></pre>
+      <p>Lợi ích của format lỗi có <code>code</code> riêng biệt: FE có thể xử lý logic khác nhau dựa vào <code>code</code> (ví dụ hiện popup nạp tiền khi gặp <code>INSUFFICIENT_BALANCE</code>) mà không cần so sánh chuỗi <code>message</code> (dễ vỡ nếu đổi ngôn ngữ hiển thị hoặc chỉnh sửa câu chữ).</p>
+
+      <div class="interview-line">
+        <span class="callout-label">Trả lời mẫu khi phỏng vấn</span>
+        <p>"Em chọn REST cho hầu hết API CRUD thông thường vì dễ tích hợp và cache, chỉ cân nhắc GraphQL khi FE cần linh hoạt lấy dữ liệu từ nhiều nguồn khác nhau, và gRPC cho giao tiếp nội bộ giữa các service cần tốc độ cao. Về versioning em dùng URI path vì dễ debug và route ở Gateway, chỉ bump version khi có breaking change thật sự. Em luôn chuẩn hoá format response và lỗi thống nhất giữa các endpoint, đặc biệt lỗi luôn có mã code riêng để FE xử lý logic theo code thay vì so sánh message, tránh vỡ khi đổi ngôn ngữ hiển thị."</p>
+      </div>
+    </section>
+
+    <nav class="pager">
+      <a class="prev" href="11-multi-tenant.html"><span class="pager-dir">← Câu trước</span><span class="pager-title">11. Multi-tenant</span></a>
+      <a class="next" href="index.html"><span class="pager-dir">Hoàn thành →</span><span class="pager-title">Về mục lục Advanced Backend</span></a>
+    </nav>
+  </main>
+</div>
+
+<footer>
+  Interview Knowledge — sổ tay ôn phỏng vấn tổng hợp từ ghi chép cá nhân.
+  Ưu tiên trả lời theo cấu trúc: vấn đề → giải pháp → vì sao chọn cách này thay vì cách khác.
+</footer>
+
+<script src="../assets/search-index.js" defer></script>
+<script src="../assets/js/main.js" defer></script>
+</body>
+</html>
