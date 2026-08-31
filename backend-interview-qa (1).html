@@ -899,32 +899,40 @@ COMMIT;
                        nếu payment gateway phản hồi chậm)</code></pre>
       <p>Traffic thấp thì 1 request 300ms không vấn đề gì. Nhưng nếu <b>1000 request cùng lúc</b>, mỗi request đều cần 1 connection DB để chạy song song — trong khi connection pool của DB chỉ có giới hạn (ví dụ 100 connection, xem lại khái niệm ở mục 1.6). Kết quả: 900 request còn lại phải xếp hàng chờ, có request bị timeout, DB quá tải vì phải xử lý 1000 giao dịch ghi cùng lúc.</p>
 
-      <h3 class="sub">4.2 — Giải pháp: tách "nhận request" và "xử lý request" ra làm 2 việc riêng biệt</h3>
-      <p>Ý tưởng cốt lõi: <b>không bắt client chờ tới khi xử lý xong hoàn toàn mới trả lời</b> — server chỉ làm 1 việc cực nhẹ và nhanh: <b>ghi nhận yêu cầu vào 1 hàng đợi (queue)</b>, rồi trả lời ngay cho client "đã nhận được yêu cầu, sẽ xử lý sau".</p>
-      <pre class="good"><code>Client gửi request → Server: chỉ đẩy message vào QUEUE (thao tác cực nhanh, ~5-10ms)
-                      → trả về NGAY: "202 Accepted, transaction_id = abc123"
-                      (KHÔNG chờ xử lý xong, KHÔNG ghi DB ngay lúc này)
+      <h3 class="sub">4.2 — Giải pháp: đưa phần xử lý nặng sang Background Job</h3>
+      <p>Bản chất mỗi request chỉ nên xử lý <b>phần bắt buộc và thật nhanh</b>: validate dữ liệu cơ bản, tạo <code>transaction_id</code>, đóng gói yêu cầu thành một <b>message object</b> (ví dụ: <code>transaction_id</code>, <code>account_id</code>, số tiền, thời gian tạo), rồi lưu message đó vào queue. Server trả kết quả đã tiếp nhận; phần ghi DB nghiệp vụ, gọi payment gateway và retry được giao cho <b>Background Job</b> xử lý sau.</p>
+      <pre class="good"><code>Client gửi request
+  → API validate cơ bản + tạo transaction_id
+  → đóng gói Message { transaction_id, account_id, amount, created_at }
+  → lưu Message vào QUEUE
+  → trả ngay: "202 Accepted, transaction_id = abc123"
 
 Phía sau, độc lập:
-Worker (tiến trình riêng) → liên tục lấy message ra khỏi queue → xử lý từng cái
-                           (ghi DB, gọi payment gateway...) → cập nhật trạng thái</code></pre>
+Background Job / Worker → lấy message từ queue → xử lý thanh toán
+                        → ghi DB → cập nhật trạng thái</code></pre>
+      <p>Có thể triển khai theo từng mức:</p>
+      <ul>
+        <li><b>Mức đơn giản — Cron Job:</b> API lưu các job đang chờ; cron chạy theo chu kỳ để lấy một batch và xử lý. Dễ làm nhưng có độ trễ theo lịch chạy, khả năng realtime và scale còn hạn chế.</li>
+        <li><b>Mức thực tế hơn — Redis List:</b> API dùng <code>LPUSH/RPUSH</code> để đưa message vào hàng đợi; worker dùng <code>BRPOP/BLPOP</code> để chờ và xử lý liên tục. Nhanh, đơn giản, phù hợp khi chưa cần hệ thống streaming phức tạp.</li>
+        <li><b>Mức cao hơn — Apache Kafka:</b> message được ghi vào topic; nhiều consumer có thể xử lý song song theo các partition. Kafka phù hợp khi tải lớn, cần scale consumer, replay message và kiểm soát thứ tự theo key.</li>
+      </ul>
       <div class="callout">
         <span class="callout-label">Ý nghĩa mã 202 Accepted</span>
         <p>Báo "yêu cầu của bạn đã được chấp nhận để xử lý, nhưng chưa xử lý xong" — khác với <code>200 OK</code> (đã xử lý xong hoàn toàn). Client nhận <code>transaction_id</code> để sau đó hỏi lại "giao dịch abc123 hiện đang ở trạng thái nào" (qua API riêng, hoặc WebSocket/push notification khi xử lý xong).</p>
       </div>
       <p>Vì sao cách này giải quyết được vấn đề tải: bước "đẩy vào queue" cực nhẹ và nhanh (không đụng DB, không gọi payment gateway), nên dù 1000 request cùng lúc, server vẫn đẩy hết vào queue trong tích tắc, không nghẽn connection pool DB. Việc xử lý thật sự (nặng, chậm) được <b>Worker xử lý dần theo khả năng thật của hệ thống</b>, không bị dồn ép xử lý 1000 cái cùng lúc.</p>
 
-      <h3 class="sub">4.3 — Giữ đúng thứ tự trên cùng 1 account mà vẫn parallel giữa các account khác</h3>
-      <p>Giả sử user A gửi 2 giao dịch liên tiếp: "rút 5 triệu" rồi ngay sau đó "rút 3 triệu". Nếu Worker xử lý 2 message này <b>không theo đúng thứ tự</b> (chạy song song ngẫu nhiên), có thể dẫn tới sai lệch số dư hoặc logic nghiệp vụ.</p>
-      <p><b>Partition theo <code>account_id</code></b> giải quyết đúng bài toán này: đảm bảo mọi message của cùng 1 account luôn đi vào cùng 1 "làn đường" riêng, được xử lý tuần tự bởi đúng 1 Worker, trong khi account khác thì đi làn khác, xử lý song song không liên quan tới nhau.</p>
-      <pre><code>Account A: rút 5tr (msg 1) → rút 3tr (msg 2)  ─┐
+      <h3 class="sub">4.3 — Kafka Partition: hàng đợi riêng để giữ thứ tự theo <code>account_id</code></h3>
+      <p>Về cách hình dung, <b>mỗi partition chính là một hàng đợi (một làn message) có thứ tự</b>. Mục đích quan trọng của partition trong bài toán này là vừa chia tải để xử lý song song, vừa giữ đúng thứ tự các message có cùng key.</p>
+      <p>Ví dụ account A gửi giao dịch <b>5 triệu trước</b>, sau đó gửi tiếp giao dịch <b>8 triệu</b>. Producer dùng <code>account_id</code> làm message key; Kafka luôn đưa các message của account A vào cùng một partition. Consumer đọc partition đó theo thứ tự nên giao dịch 5 triệu được xử lý trước giao dịch 8 triệu.</p>
+      <pre><code>Account A: gửi 5tr (msg 1) → gửi 8tr (msg 2)  ─┐
                                                  ├─→ cùng vào Partition 1 → Worker 1 xử lý TUẦN TỰ
 Account A: msg khác nếu có                     ─┘   (đảm bảo đúng thứ tự cho A)
 
 Account B: chuyển khoản (msg 3)                ─┐
                                                  ├─→ vào Partition 2 → Worker 2 xử lý
                                                  ┘   (chạy SONG SONG với Worker 1, không đợi nhau)</code></pre>
-      <p>Kafka/SQS FIFO cho phép khai báo <code>account_id</code> làm "khoá phân vùng" — hệ thống tự đảm bảo message có cùng khoá này luôn vào cùng 1 partition, giữ đúng thứ tự gửi vào cũng là thứ tự xử lý.</p>
+      <p>Như vậy, <code>account_id</code> là <b>partition key</b>: cùng key thì cùng partition và giữ thứ tự; khác key có thể vào partition khác để được xử lý song song. Kafka chỉ đảm bảo thứ tự <b>bên trong từng partition</b>, không đảm bảo một thứ tự chung giữa toàn bộ partition.</p>
 
       <h3 class="sub">4.4 — Worker crash giữa chừng, message có mất không?</h3>
       <p>Giả sử Worker đang xử lý message "rút 5tr" của account A, ghi được nửa chừng vào DB thì server crash (mất điện, restart...). Message đó có bị mất luôn không?</p>
@@ -941,7 +949,7 @@ Hệ thống queue: chưa nhận được ack → coi message "chưa xử lý xo
 
       <div class="interview-line">
         <span class="callout-label">Trả lời mẫu khi phỏng vấn</span>
-        <p>"Em tách việc nhận request và xử lý request ra 2 bước riêng: server chỉ đẩy nhanh vào queue rồi trả 202 Accepted ngay, còn worker phía sau xử lý dần theo khả năng thật của hệ thống — tránh nghẽn connection pool khi traffic dồn cùng lúc. Để giữ đúng thứ tự trên cùng 1 account mà vẫn parallel được giữa các account khác, em partition theo account_id — message cùng account luôn vào 1 partition xử lý tuần tự. Vì hệ thống queue dùng at-least-once delivery, worker có thể nhận lại message đã xử lý rồi nếu chưa kịp ack trước khi crash, nên em bắt buộc consumer phải idempotent bằng transaction_id, tránh trừ tiền 2 lần."</p>
+        <p>"Em chỉ xử lý phần bắt buộc ngay trong request: validate cơ bản, tạo transaction_id, đóng gói dữ liệu thành message object rồi lưu vào queue và trả 202 Accepted. Phần nặng được đưa sang background job; hệ thống đơn giản có thể dùng cron job, cần xử lý liên tục thì dùng Redis List, còn tải lớn và cần scale tốt thì dùng Apache Kafka. Với Kafka, em dùng account_id làm partition key. Có thể hiểu mỗi partition là một hàng đợi có thứ tự: account A gửi 5 triệu trước rồi 8 triệu sau thì cả hai message vào cùng partition và được xử lý đúng thứ tự, trong khi account khác vẫn chạy song song. Consumer cũng phải idempotent bằng transaction_id để tránh trừ tiền hai lần khi message được retry."</p>
       </div>
     </section>
 
