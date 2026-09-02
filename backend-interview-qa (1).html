@@ -450,11 +450,11 @@
 <body>
 
 <div class="shell">
-  <button class="mobile-toggle" id="navToggle">☰ Mục lục — 8 câu hỏi</button>
+  <button class="mobile-toggle" id="navToggle">☰ Mục lục — 13 câu hỏi</button>
   <aside class="sidebar" id="sidebar">
     <div class="brand">Sổ Cái Kỹ Thuật</div>
     <div class="brand-sub">Backend Concurrency & Payment System<br>Tổng hợp buổi trao đổi — dùng để ôn phỏng vấn</div>
-    <div class="nav-label">12 câu hỏi</div>
+    <div class="nav-label">13 câu hỏi</div>
     <ul class="nav-list">
       <li><a href="#q1"><span class="nav-num">01</span> Race Condition, Lock & Deadlock</a></li>
       <li><a href="#q2"><span class="nav-num">02</span> Idempotency</a></li>
@@ -468,6 +468,7 @@
       <li><a href="#q10"><span class="nav-num">10</span> Background Job</a></li>
       <li><a href="#q11"><span class="nav-num">11</span> Multi-tenant</a></li>
       <li><a href="#q12"><span class="nav-num">12</span> API Design</a></li>
+      <li><a href="#q13"><span class="nav-num">13</span> Normalization &amp; Denormalization</a></li>
     </ul>
   </aside>
 
@@ -1847,6 +1848,128 @@ async findEmployeeById(tenantId: number, employeeId: number) {
       <div class="interview-line">
         <span class="callout-label">Trả lời mẫu khi phỏng vấn</span>
         <p>"Em chọn REST cho hầu hết API CRUD thông thường vì dễ tích hợp và cache, chỉ cân nhắc GraphQL khi FE cần linh hoạt lấy dữ liệu từ nhiều nguồn khác nhau, và gRPC cho giao tiếp nội bộ giữa các service cần tốc độ cao. Về versioning em dùng URI path vì dễ debug và route ở Gateway, chỉ bump version khi có breaking change thật sự. Em luôn chuẩn hoá format response và lỗi thống nhất giữa các endpoint, đặc biệt lỗi luôn có mã code riêng để FE xử lý logic theo code thay vì so sánh message, tránh vỡ khi đổi ngôn ngữ hiển thị."</p>
+      </div>
+    </section>
+
+<!-- ============ Q13 ============ -->
+    <section class="qa" id="q13">
+      <div class="q-tag"><span class="n">13</span> Câu hỏi ứng dụng thường gặp</div>
+      <h2 class="q-title">"Normalization và Denormalization trong thiết kế DB là gì, khi nào chọn cái nào?"</h2>
+
+      <h3 class="sub">13.1 — Normalization (chuẩn hoá) là gì</h3>
+      <p>Normalization là quá trình <b>tổ chức dữ liệu sao cho mỗi thông tin chỉ được lưu đúng 1 lần, ở đúng 1 chỗ</b> — tách dữ liệu ra thành nhiều bảng nhỏ, liên kết với nhau qua khoá ngoại (foreign key), để tránh <b>dư thừa dữ liệu (redundancy)</b> và tránh <b>bất thường khi cập nhật (update anomaly)</b>.</p>
+
+      <h4 class="subsub">Ví dụ vấn đề khi KHÔNG chuẩn hoá</h4>
+      <pre class="bad"><code>-- Bảng orders KHÔNG chuẩn hoá — nhồi hết thông tin khách hàng vào từng dòng đơn hàng
+CREATE TABLE orders (
+  id INT,
+  customer_name VARCHAR(255),
+  customer_email VARCHAR(255),
+  product_name VARCHAR(255),
+  product_price DECIMAL,
+  quantity INT
+);
+
+-- id | customer_name | customer_email | product_name | product_price | quantity
+-- 1  | Nguyen Van A   | a@gmail.com     | Áo thun      | 150000        | 2
+-- 2  | Nguyen Van A   | a@gmail.com     | Quần jean    | 350000        | 1
+-- 3  | Nguyen Van A   | a@gmail.com     | Giày         | 500000        | 1</code></pre>
+      <p>Thông tin "Nguyen Van A" và email bị <b>lặp lại 3 lần</b>. Nếu khách đổi email, phải <b>UPDATE cả 3 dòng</b> — quên 1 dòng là dữ liệu mâu thuẫn (dòng thì email cũ, dòng thì email mới) — đây là "update anomaly".</p>
+
+      <h4 class="subsub">Sau khi chuẩn hoá — tách bảng, liên kết qua khoá ngoại</h4>
+      <pre class="good"><code>CREATE TABLE customers (
+  id INT PRIMARY KEY, name VARCHAR(255), email VARCHAR(255)
+);
+CREATE TABLE products (
+  id INT PRIMARY KEY, name VARCHAR(255), price DECIMAL
+);
+CREATE TABLE orders (
+  id INT PRIMARY KEY, customer_id INT REFERENCES customers(id)
+);
+CREATE TABLE order_items (
+  id INT PRIMARY KEY, order_id INT REFERENCES orders(id),
+  product_id INT REFERENCES products(id), quantity INT
+);</code></pre>
+      <p>Thông tin khách hàng giờ chỉ tồn tại <b>đúng 1 dòng duy nhất</b>. Đổi email chỉ cần <code>UPDATE customers ... WHERE id = 1</code> — 1 lần duy nhất, mọi đơn hàng liên kết tới customer đó tự động "thấy" email mới khi join.</p>
+
+      <h4 class="subsub">Cái giá phải trả: phải JOIN nhiều bảng khi đọc</h4>
+      <pre><code>SELECT o.id, c.name, c.email, p.name AS product_name, oi.quantity, p.price
+FROM orders o
+JOIN customers c ON c.id = o.customer_id
+JOIN order_items oi ON oi.order_id = o.id
+JOIN products p ON p.id = oi.product_id
+WHERE o.id = 1;</code></pre>
+      <p>Càng nhiều bảng phải JOIN, query càng phức tạp và có thể chậm hơn khi data lớn — đây chính là điểm mà Denormalization can thiệp vào.</p>
+
+      <h3 class="sub">13.2 — Denormalization (phi chuẩn hoá) là gì</h3>
+      <p>Denormalization là <b>chủ động chấp nhận dư thừa dữ liệu 1 phần</b> (đi ngược nguyên tắc chuẩn hoá) để <b>đổi lấy tốc độ đọc nhanh hơn</b>, giảm số lượng JOIN cần thiết — thường áp dụng sau khi đã chuẩn hoá đúng chuẩn, nhưng đo được rằng JOIN đang là nút thắt hiệu năng thực sự.</p>
+
+      <h4 class="subsub">Ví dụ 1 — snapshot giá tại thời điểm đặt hàng</h4>
+      <pre class="good"><code>CREATE TABLE order_items (
+  id INT PRIMARY KEY,
+  order_id INT REFERENCES orders(id),
+  product_id INT REFERENCES products(id),
+  product_name VARCHAR(255),   -- DƯ THỪA có chủ đích — copy lại từ bảng products
+  product_price DECIMAL,        -- DƯ THỪA có chủ đích — giá TẠI THỜI ĐIỂM đặt hàng
+  quantity INT
+);</code></pre>
+      <p>Đây không chỉ là tối ưu tốc độ — nó giải quyết đúng 1 bài toán nghiệp vụ: nếu sau này shop <b>đổi giá sản phẩm</b>, đơn hàng cũ vẫn phải hiển thị <b>đúng giá tại thời điểm khách đã mua</b>, không phải giá hiện tại — nếu chỉ JOIN sang bảng <code>products</code> để lấy giá, hoá đơn cũ sẽ tự động đổi sai theo giá mới, gây sai lệch tài chính nghiêm trọng. Denormalize <code>product_price</code> vào ngay <code>order_items</code> chính là cách "chụp lại ảnh chớp nhoáng" (snapshot) dữ liệu tại đúng thời điểm giao dịch.</p>
+
+      <h4 class="subsub">Ví dụ 2 — đếm sẵn thay vì tính lại mỗi lần</h4>
+      <pre><code>-- Thay vì mỗi lần hiển thị bài viết phải COUNT(*) từ bảng comments (chậm nếu triệu comment)
+SELECT COUNT(*) FROM comments WHERE post_id = 5;
+
+-- Denormalize: thêm cột đếm sẵn ngay trên bảng posts
+ALTER TABLE posts ADD COLUMN comment_count INT DEFAULT 0;
+
+-- Đọc bài viết giờ chỉ cần 1 câu, không cần COUNT nữa
+SELECT title, comment_count FROM posts WHERE id = 5;</code></pre>
+      <p><b>Đánh đổi:</b> giờ có 2 chỗ lưu cùng 1 thông tin (số comment thật trong bảng <code>comments</code>, và số đếm sẵn trong <code>posts</code>) — nếu code có bug quên tăng <code>comment_count</code> khi thêm comment, 2 số này sẽ <b>lệch nhau</b>, y hệt tinh thần "lệch cache-DB" đã học ở Câu 7, chỉ khác là đây là lệch giữa 2 bảng trong cùng 1 DB.</p>
+
+      <h3 class="sub">13.3 — Đảm bảo đồng bộ khi ghi denormalized data: Transaction hoặc Trigger</h3>
+      <p>2 câu lệnh <code>INSERT comment</code> và <code>UPDATE comment_count</code> là <b>2 câu lệnh SQL tách biệt</b>. Nếu chỉ viết tuần tự mà không có gì ràng buộc: <code>INSERT</code> chạy thành công, nhưng server crash/lỗi <b>trước khi kịp chạy</b> <code>UPDATE</code> — kết quả là <code>comments</code> có dữ liệu mới nhưng <code>posts.comment_count</code> không tăng theo, gây lệch.</p>
+
+      <h4 class="subsub">Cách 1 — Transaction: gói 2 câu lệnh thành 1 khối "cùng sống cùng chết"</h4>
+      <pre class="good"><code>BEGIN;
+INSERT INTO comments (post_id, content) VALUES (5, 'Hay quá');
+UPDATE posts SET comment_count = comment_count + 1 WHERE id = 5;
+COMMIT;
+-- Nếu có lỗi ở bất kỳ dòng nào trước COMMIT → ROLLBACK toàn bộ,
+-- không có chuyện chỉ 1 trong 2 câu lệnh thành công</code></pre>
+      <p>Áp dụng đúng nguyên lý ACID đã dùng xuyên suốt từ mục 1.2 — đảm bảo <code>INSERT</code> và <code>UPDATE</code> luôn <b>cùng thành công hoặc cùng thất bại</b>.</p>
+
+      <h4 class="subsub">Cách 2 — Trigger: để DB tự động làm, không phụ thuộc code application</h4>
+      <pre class="good"><code>CREATE TRIGGER trg_increment_comment_count
+AFTER INSERT ON comments
+FOR EACH ROW
+BEGIN
+  UPDATE posts SET comment_count = comment_count + 1 WHERE id = NEW.post_id;
+END;</code></pre>
+      <p>Mỗi khi có 1 dòng mới được <code>INSERT</code> vào bảng <code>comments</code>, DB <b>tự động</b> chạy thêm câu <code>UPDATE</code> để tăng <code>comment_count</code>, không cần lập trình viên tự viết thêm dòng code ở tầng application. Dù ai gọi <code>INSERT INTO comments</code> từ đâu — API, script backfill, công cụ quản trị DB — trigger vẫn tự chạy, đảm bảo đồng bộ mà không phụ thuộc việc lập trình viên có nhớ viết đúng ở mọi nơi hay không.</p>
+
+      <table>
+        <thead><tr><th></th><th>Transaction</th><th>Trigger</th></tr></thead>
+        <tbody>
+          <tr><td>Ai chịu trách nhiệm</td><td>Lập trình viên phải <b>nhớ</b> viết đúng cả 2 câu lệnh trong 1 transaction ở mọi nơi tạo comment</td><td>DB <b>tự động</b> làm, không phụ thuộc code application nhớ hay quên</td></tr>
+          <tr><td>Rủi ro</td><td>Nếu có 1 chỗ code khác (script backfill, service khác) quên bọc transaction → vẫn bị lệch</td><td>An toàn hơn vì áp dụng cho MỌI đường tạo comment, không sót</td></tr>
+          <tr><td>Nhược điểm</td><td>Phải discipline tốt, dễ sót nếu hệ thống có nhiều điểm tạo comment</td><td>Logic nghiệp vụ bị "giấu" trong DB, khó thấy khi đọc code application, khó test/debug hơn</td></tr>
+        </tbody>
+      </table>
+
+      <h3 class="sub">13.4 — Bảng so sánh tổng hợp</h3>
+      <table>
+        <thead><tr><th></th><th>Normalization</th><th>Denormalization</th></tr></thead>
+        <tbody>
+          <tr><td>Mục tiêu</td><td>Tránh dư thừa, tránh mâu thuẫn dữ liệu khi update</td><td>Tăng tốc độ đọc, giảm số lượng JOIN</td></tr>
+          <tr><td>Đánh đổi</td><td>Đọc phải JOIN nhiều bảng, có thể chậm</td><td>Ghi phức tạp hơn (phải đồng bộ nhiều chỗ), rủi ro dữ liệu bị lệch</td></tr>
+          <tr><td>Phù hợp khi</td><td>Hệ thống ghi nhiều, cần dữ liệu luôn nhất quán tuyệt đối (giao dịch tài chính, dữ liệu lõi nghiệp vụ)</td><td>Hệ thống đọc nhiều hơn ghi rất nhiều lần, cần tốc độ đọc cực nhanh (dashboard, feed, báo cáo)</td></tr>
+          <tr><td>Ví dụ</td><td>Thiết kế OLTP (order, payment, inventory)</td><td>Thiết kế OLAP/reporting, cache đếm sẵn, snapshot giá tại thời điểm giao dịch</td></tr>
+        </tbody>
+      </table>
+
+      <div class="interview-line">
+        <span class="callout-label">Trả lời mẫu khi phỏng vấn</span>
+        <p>"Em thiết kế theo chuẩn hoá trước để đảm bảo tính nhất quán, tránh dư thừa và mâu thuẫn dữ liệu khi update — đặc biệt với dữ liệu giao dịch quan trọng. Chỉ khi đã đo được JOIN đang là nút thắt hiệu năng thực sự, hoặc có yêu cầu nghiệp vụ cần lưu lại snapshot dữ liệu tại 1 thời điểm như giá sản phẩm lúc đặt hàng, em mới cân nhắc denormalize có chủ đích — và luôn đảm bảo đồng bộ đúng bằng transaction hoặc trigger, vì denormalize tạo ra 2 nơi lưu cùng 1 thông tin, nếu ghi không đồng bộ sẽ dẫn tới dữ liệu lệch nhau giữa các bảng."</p>
       </div>
     </section>
 

@@ -77,6 +77,8 @@ QA_PAGES = [
      "Shared schema, schema riêng hay database riêng &mdash; chọn theo quy mô và yêu cầu cách ly dữ liệu."),
     (12, "api-design", "API Design",
      "REST vs GraphQL vs gRPC, versioning, idempotent method và chuẩn hoá format response / error."),
+    (13, "normalization-denormalization", "Normalization &amp; Denormalization",
+     "Chuẩn hoá để giữ dữ liệu nhất quán, phi chuẩn hoá để tối ưu tốc độ đọc và cách kiểm soát dữ liệu dư thừa."),
 ]
 
 EXTRA_CSS = """

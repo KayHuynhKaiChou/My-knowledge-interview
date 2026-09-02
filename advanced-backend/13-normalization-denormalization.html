@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Normalization và Denormalization trong thiết kế DB là gì, khi nào chọn cái nào?">
+<title>13. Normalization & Denormalization — Advanced Backend</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body data-root="../">
+
+<header class="topbar">
+  <a class="topbar-brand" href="../index.html" aria-label="Interview Knowledge — trang chủ">
+    <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true">
+      <defs><linearGradient id="ikBadge" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#f0b355"/><stop offset="1" stop-color="#b9752a"/>
+      </linearGradient></defs>
+      <rect x="2" y="2" width="60" height="60" rx="15" fill="url(#ikBadge)"/>
+      <path d="M21 21 L33 32 L21 43" fill="none" stroke="#0b0e13" stroke-width="7"
+            stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M37 43 H46" stroke="#0b0e13" stroke-width="7" stroke-linecap="round"/>
+    </svg>
+    <span class="brand-text">Interview Knowledge</span>
+  </a>
+  <nav class="topbar-nav">
+    <details class="nav-group has-active">
+      <summary>Backend</summary>
+      <div class="nav-dropdown">
+        <a href="../advanced-backend/index.html" class="active">Advanced Backend</a>
+        <a href="../backend-dotnet-nestjs/index.html">.NET &amp; NestJS</a>
+        <a href="../database-sql/index.html">Database &amp; SQL</a>
+        <a href="../backend-infrastructure/index.html">Hạ tầng</a>
+        <a href="../realtime-socket/index.html">Realtime &amp; Socket</a>
+        <a href="../case-studies/index.html">Case studies</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Frontend</summary>
+      <div class="nav-dropdown">
+        <a href="../javascript-core/index.html">JavaScript &amp; TS</a>
+        <a href="../react/index.html">React &amp; State</a>
+        <a href="../nextjs/index.html">Next.js</a>
+        <a href="../css-html/index.html">CSS &amp; HTML</a>
+        <a href="../browser-web-api/index.html">Browser &amp; Web API</a>
+        <a href="../react-native/index.html">React Native</a>
+        <a href="../frontend-tooling/index.html">Frontend Tooling</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Quy trình &amp; Nền tảng</summary>
+      <div class="nav-dropdown">
+        <a href="../git/index.html">Git</a>
+        <a href="../testing-environments/index.html">Testing</a>
+        <a href="../saas-platforms/index.html">SaaS &amp; Nền tảng</a>
+        <a href="../auth-blockchain/index.html">Auth &amp; Blockchain</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Khác</summary>
+      <div class="nav-dropdown">
+        <a href="../interview-intro/index.html">Giới thiệu &amp; English</a>
+        <a href="../project-notes/index.html">Ghi chú dự án</a>
+      </div>
+    </details>
+  </nav>
+  <button class="search-trigger" id="searchTrigger" aria-label="Tìm kiếm nội dung">
+    <span class="search-icon" aria-hidden="true">⌕</span>
+    <span class="search-label">Tìm kiếm</span>
+    <kbd>/</kbd>
+  </button>
+</header>
+
+<div class="search-overlay" id="searchOverlay" hidden>
+  <div class="search-box" role="dialog" aria-label="Tìm kiếm nội dung">
+    <input type="search" id="searchInput" autocomplete="off" spellcheck="false"
+           placeholder="Tìm trong toàn bộ nội dung — closure, saga, index, rebase…">
+    <div class="search-results" id="searchResults"></div>
+    <div class="search-hint">Enter mở mục · ↑↓ chọn · Esc đóng</div>
+  </div>
+</div>
+
+<div class="shell">
+  <button class="mobile-toggle" id="navToggle" aria-label="Mở mục lục">☰ Mục lục</button>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">Advanced Backend</div>
+    <div class="brand-sub">13 mục &middot; sổ tay ôn phỏng vấn</div>
+
+    <div class="nav-block">
+      <p class="nav-label">Nội dung</p>
+      <ul class="nav-list">
+        <li><a href="01-race-condition-lock-deadlock.html"><span class="nav-num">01</span><span class="nav-text">Race Condition, Lock &amp; Deadlock</span></a></li>
+        <li><a href="02-idempotency.html"><span class="nav-num">02</span><span class="nav-text">Idempotency</span></a></li>
+        <li><a href="03-distributed-transaction-saga.html"><span class="nav-num">03</span><span class="nav-text">Transaction xuyên service</span></a></li>
+        <li><a href="04-queue-async-processing.html"><span class="nav-num">04</span><span class="nav-text">Queue &amp; Async Processing</span></a></li>
+        <li><a href="05-rate-limiting.html"><span class="nav-num">05</span><span class="nav-text">Rate Limiting</span></a></li>
+        <li><a href="06-database-query-optimization.html"><span class="nav-num">06</span><span class="nav-text">Tối ưu Database &amp; Query</span></a></li>
+        <li><a href="07-redis-caching.html"><span class="nav-num">07</span><span class="nav-text">Redis &mdash; khái niệm &amp; case study</span></a></li>
+        <li><a href="08-scalability-pagination.html"><span class="nav-num">08</span><span class="nav-text">Scalability &amp; Pagination</span></a></li>
+        <li><a href="09-database-index.html"><span class="nav-num">09</span><span class="nav-text">Index &mdash; cơ chế &amp; đánh đổi</span></a></li>
+        <li><a href="10-background-job.html"><span class="nav-num">10</span><span class="nav-text">Background Job</span></a></li>
+        <li><a href="11-multi-tenant.html"><span class="nav-num">11</span><span class="nav-text">Multi-tenant</span></a></li>
+        <li><a href="12-api-design.html"><span class="nav-num">12</span><span class="nav-text">API Design</span></a></li>
+        <li><a href="13-normalization-denormalization.html" class="active"><span class="nav-num">13</span><span class="nav-text">Normalization &amp; Denormalization</span></a></li>
+      </ul>
+    </div>
+
+    <div class="nav-block">
+      <p class="nav-label">Trong trang này</p>
+      <div id="pageToc"></div>
+    </div>
+  </aside>
+  <main>
+    <div class="crumb">
+      <a href="index.html">Advanced Backend</a>
+      <span class="sep">/</span>
+      <span>Câu 13</span>
+    </div>
+
+    <section class="qa" id="q13">
+      <div class="q-tag"><span class="n">13</span> Câu hỏi ứng dụng thường gặp</div>
+      <h2 class="q-title">"Normalization và Denormalization trong thiết kế DB là gì, khi nào chọn cái nào?"</h2>
+
+      <h3 class="sub">13.1 — Normalization (chuẩn hoá) là gì</h3>
+      <p>Normalization là quá trình <b>tổ chức dữ liệu sao cho mỗi thông tin chỉ được lưu đúng 1 lần, ở đúng 1 chỗ</b> — tách dữ liệu ra thành nhiều bảng nhỏ, liên kết với nhau qua khoá ngoại (foreign key), để tránh <b>dư thừa dữ liệu (redundancy)</b> và tránh <b>bất thường khi cập nhật (update anomaly)</b>.</p>
+
+      <h4 class="subsub">Ví dụ vấn đề khi KHÔNG chuẩn hoá</h4>
+      <pre class="bad"><code>-- Bảng orders KHÔNG chuẩn hoá — nhồi hết thông tin khách hàng vào từng dòng đơn hàng
+CREATE TABLE orders (
+  id INT,
+  customer_name VARCHAR(255),
+  customer_email VARCHAR(255),
+  product_name VARCHAR(255),
+  product_price DECIMAL,
+  quantity INT
+);
+
+-- id | customer_name | customer_email | product_name | product_price | quantity
+-- 1  | Nguyen Van A   | a@gmail.com     | Áo thun      | 150000        | 2
+-- 2  | Nguyen Van A   | a@gmail.com     | Quần jean    | 350000        | 1
+-- 3  | Nguyen Van A   | a@gmail.com     | Giày         | 500000        | 1</code></pre>
+      <p>Thông tin "Nguyen Van A" và email bị <b>lặp lại 3 lần</b>. Nếu khách đổi email, phải <b>UPDATE cả 3 dòng</b> — quên 1 dòng là dữ liệu mâu thuẫn (dòng thì email cũ, dòng thì email mới) — đây là "update anomaly".</p>
+
+      <h4 class="subsub">Sau khi chuẩn hoá — tách bảng, liên kết qua khoá ngoại</h4>
+      <pre class="good"><code>CREATE TABLE customers (
+  id INT PRIMARY KEY, name VARCHAR(255), email VARCHAR(255)
+);
+CREATE TABLE products (
+  id INT PRIMARY KEY, name VARCHAR(255), price DECIMAL
+);
+CREATE TABLE orders (
+  id INT PRIMARY KEY, customer_id INT REFERENCES customers(id)
+);
+CREATE TABLE order_items (
+  id INT PRIMARY KEY, order_id INT REFERENCES orders(id),
+  product_id INT REFERENCES products(id), quantity INT
+);</code></pre>
+      <p>Thông tin khách hàng giờ chỉ tồn tại <b>đúng 1 dòng duy nhất</b>. Đổi email chỉ cần <code>UPDATE customers ... WHERE id = 1</code> — 1 lần duy nhất, mọi đơn hàng liên kết tới customer đó tự động "thấy" email mới khi join.</p>
+
+      <h4 class="subsub">Cái giá phải trả: phải JOIN nhiều bảng khi đọc</h4>
+      <pre><code>SELECT o.id, c.name, c.email, p.name AS product_name, oi.quantity, p.price
+FROM orders o
+JOIN customers c ON c.id = o.customer_id
+JOIN order_items oi ON oi.order_id = o.id
+JOIN products p ON p.id = oi.product_id
+WHERE o.id = 1;</code></pre>
+      <p>Càng nhiều bảng phải JOIN, query càng phức tạp và có thể chậm hơn khi data lớn — đây chính là điểm mà Denormalization can thiệp vào.</p>
+
+      <h3 class="sub">13.2 — Denormalization (phi chuẩn hoá) là gì</h3>
+      <p>Denormalization là <b>chủ động chấp nhận dư thừa dữ liệu 1 phần</b> (đi ngược nguyên tắc chuẩn hoá) để <b>đổi lấy tốc độ đọc nhanh hơn</b>, giảm số lượng JOIN cần thiết — thường áp dụng sau khi đã chuẩn hoá đúng chuẩn, nhưng đo được rằng JOIN đang là nút thắt hiệu năng thực sự.</p>
+
+      <h4 class="subsub">Ví dụ 1 — snapshot giá tại thời điểm đặt hàng</h4>
+      <pre class="good"><code>CREATE TABLE order_items (
+  id INT PRIMARY KEY,
+  order_id INT REFERENCES orders(id),
+  product_id INT REFERENCES products(id),
+  product_name VARCHAR(255),   -- DƯ THỪA có chủ đích — copy lại từ bảng products
+  product_price DECIMAL,        -- DƯ THỪA có chủ đích — giá TẠI THỜI ĐIỂM đặt hàng
+  quantity INT
+);</code></pre>
+      <p>Đây không chỉ là tối ưu tốc độ — nó giải quyết đúng 1 bài toán nghiệp vụ: nếu sau này shop <b>đổi giá sản phẩm</b>, đơn hàng cũ vẫn phải hiển thị <b>đúng giá tại thời điểm khách đã mua</b>, không phải giá hiện tại — nếu chỉ JOIN sang bảng <code>products</code> để lấy giá, hoá đơn cũ sẽ tự động đổi sai theo giá mới, gây sai lệch tài chính nghiêm trọng. Denormalize <code>product_price</code> vào ngay <code>order_items</code> chính là cách "chụp lại ảnh chớp nhoáng" (snapshot) dữ liệu tại đúng thời điểm giao dịch.</p>
+
+      <h4 class="subsub">Ví dụ 2 — đếm sẵn thay vì tính lại mỗi lần</h4>
+      <pre><code>-- Thay vì mỗi lần hiển thị bài viết phải COUNT(*) từ bảng comments (chậm nếu triệu comment)
+SELECT COUNT(*) FROM comments WHERE post_id = 5;
+
+-- Denormalize: thêm cột đếm sẵn ngay trên bảng posts
+ALTER TABLE posts ADD COLUMN comment_count INT DEFAULT 0;
+
+-- Đọc bài viết giờ chỉ cần 1 câu, không cần COUNT nữa
+SELECT title, comment_count FROM posts WHERE id = 5;</code></pre>
+      <p><b>Đánh đổi:</b> giờ có 2 chỗ lưu cùng 1 thông tin (số comment thật trong bảng <code>comments</code>, và số đếm sẵn trong <code>posts</code>) — nếu code có bug quên tăng <code>comment_count</code> khi thêm comment, 2 số này sẽ <b>lệch nhau</b>, y hệt tinh thần "lệch cache-DB" đã học ở Câu 7, chỉ khác là đây là lệch giữa 2 bảng trong cùng 1 DB.</p>
+
+      <h3 class="sub">13.3 — Đảm bảo đồng bộ khi ghi denormalized data: Transaction hoặc Trigger</h3>
+      <p>2 câu lệnh <code>INSERT comment</code> và <code>UPDATE comment_count</code> là <b>2 câu lệnh SQL tách biệt</b>. Nếu chỉ viết tuần tự mà không có gì ràng buộc: <code>INSERT</code> chạy thành công, nhưng server crash/lỗi <b>trước khi kịp chạy</b> <code>UPDATE</code> — kết quả là <code>comments</code> có dữ liệu mới nhưng <code>posts.comment_count</code> không tăng theo, gây lệch.</p>
+
+      <h4 class="subsub">Cách 1 — Transaction: gói 2 câu lệnh thành 1 khối "cùng sống cùng chết"</h4>
+      <pre class="good"><code>BEGIN;
+INSERT INTO comments (post_id, content) VALUES (5, 'Hay quá');
+UPDATE posts SET comment_count = comment_count + 1 WHERE id = 5;
+COMMIT;
+-- Nếu có lỗi ở bất kỳ dòng nào trước COMMIT → ROLLBACK toàn bộ,
+-- không có chuyện chỉ 1 trong 2 câu lệnh thành công</code></pre>
+      <p>Áp dụng đúng nguyên lý ACID đã dùng xuyên suốt từ mục 1.2 — đảm bảo <code>INSERT</code> và <code>UPDATE</code> luôn <b>cùng thành công hoặc cùng thất bại</b>.</p>
+
+      <h4 class="subsub">Cách 2 — Trigger: để DB tự động làm, không phụ thuộc code application</h4>
+      <pre class="good"><code>CREATE TRIGGER trg_increment_comment_count
+AFTER INSERT ON comments
+FOR EACH ROW
+BEGIN
+  UPDATE posts SET comment_count = comment_count + 1 WHERE id = NEW.post_id;
+END;</code></pre>
+      <p>Mỗi khi có 1 dòng mới được <code>INSERT</code> vào bảng <code>comments</code>, DB <b>tự động</b> chạy thêm câu <code>UPDATE</code> để tăng <code>comment_count</code>, không cần lập trình viên tự viết thêm dòng code ở tầng application. Dù ai gọi <code>INSERT INTO comments</code> từ đâu — API, script backfill, công cụ quản trị DB — trigger vẫn tự chạy, đảm bảo đồng bộ mà không phụ thuộc việc lập trình viên có nhớ viết đúng ở mọi nơi hay không.</p>
+
+      <table>
+        <thead><tr><th></th><th>Transaction</th><th>Trigger</th></tr></thead>
+        <tbody>
+          <tr><td>Ai chịu trách nhiệm</td><td>Lập trình viên phải <b>nhớ</b> viết đúng cả 2 câu lệnh trong 1 transaction ở mọi nơi tạo comment</td><td>DB <b>tự động</b> làm, không phụ thuộc code application nhớ hay quên</td></tr>
+          <tr><td>Rủi ro</td><td>Nếu có 1 chỗ code khác (script backfill, service khác) quên bọc transaction → vẫn bị lệch</td><td>An toàn hơn vì áp dụng cho MỌI đường tạo comment, không sót</td></tr>
+          <tr><td>Nhược điểm</td><td>Phải discipline tốt, dễ sót nếu hệ thống có nhiều điểm tạo comment</td><td>Logic nghiệp vụ bị "giấu" trong DB, khó thấy khi đọc code application, khó test/debug hơn</td></tr>
+        </tbody>
+      </table>
+
+      <h3 class="sub">13.4 — Bảng so sánh tổng hợp</h3>
+      <table>
+        <thead><tr><th></th><th>Normalization</th><th>Denormalization</th></tr></thead>
+        <tbody>
+          <tr><td>Mục tiêu</td><td>Tránh dư thừa, tránh mâu thuẫn dữ liệu khi update</td><td>Tăng tốc độ đọc, giảm số lượng JOIN</td></tr>
+          <tr><td>Đánh đổi</td><td>Đọc phải JOIN nhiều bảng, có thể chậm</td><td>Ghi phức tạp hơn (phải đồng bộ nhiều chỗ), rủi ro dữ liệu bị lệch</td></tr>
+          <tr><td>Phù hợp khi</td><td>Hệ thống ghi nhiều, cần dữ liệu luôn nhất quán tuyệt đối (giao dịch tài chính, dữ liệu lõi nghiệp vụ)</td><td>Hệ thống đọc nhiều hơn ghi rất nhiều lần, cần tốc độ đọc cực nhanh (dashboard, feed, báo cáo)</td></tr>
+          <tr><td>Ví dụ</td><td>Thiết kế OLTP (order, payment, inventory)</td><td>Thiết kế OLAP/reporting, cache đếm sẵn, snapshot giá tại thời điểm giao dịch</td></tr>
+        </tbody>
+      </table>
+
+      <div class="interview-line">
+        <span class="callout-label">Trả lời mẫu khi phỏng vấn</span>
+        <p>"Em thiết kế theo chuẩn hoá trước để đảm bảo tính nhất quán, tránh dư thừa và mâu thuẫn dữ liệu khi update — đặc biệt với dữ liệu giao dịch quan trọng. Chỉ khi đã đo được JOIN đang là nút thắt hiệu năng thực sự, hoặc có yêu cầu nghiệp vụ cần lưu lại snapshot dữ liệu tại 1 thời điểm như giá sản phẩm lúc đặt hàng, em mới cân nhắc denormalize có chủ đích — và luôn đảm bảo đồng bộ đúng bằng transaction hoặc trigger, vì denormalize tạo ra 2 nơi lưu cùng 1 thông tin, nếu ghi không đồng bộ sẽ dẫn tới dữ liệu lệch nhau giữa các bảng."</p>
+      </div>
+    </section>
+
+    <nav class="pager">
+      <a class="prev" href="12-api-design.html"><span class="pager-dir">← Câu trước</span><span class="pager-title">12. API Design</span></a>
+      <a class="next" href="index.html"><span class="pager-dir">Hoàn thành →</span><span class="pager-title">Về mục lục Advanced Backend</span></a>
+    </nav>
+  </main>
+</div>
+
+<footer>
+  Interview Knowledge — sổ tay ôn phỏng vấn tổng hợp từ ghi chép cá nhân.
+  Ưu tiên trả lời theo cấu trúc: vấn đề → giải pháp → vì sao chọn cách này thay vì cách khác.
+</footer>
+
+<script src="../assets/search-index.js" defer></script>
+<script src="../assets/js/main.js" defer></script>
+</body>
+</html>
