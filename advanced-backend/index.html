@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="12 câu hỏi chuyên sâu về concurrency, lock, idempotency, saga, queue, cache, index và API design — kèm code và câu trả lời mẫu.">
+<meta name="description" content="14 câu hỏi chuyên sâu về concurrency, lock, idempotency, saga, queue, cache, index, API design, normalization và import Excel tối ưu — kèm code và câu trả lời mẫu.">
 <title>Advanced Backend — Interview Knowledge</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -88,7 +88,7 @@
   <button class="mobile-toggle" id="navToggle" aria-label="Mở mục lục">☰ Mục lục</button>
   <aside class="sidebar" id="sidebar">
     <div class="brand">Advanced Backend</div>
-    <div class="brand-sub">13 mục &middot; sổ tay ôn phỏng vấn</div>
+    <div class="brand-sub">14 mục &middot; sổ tay ôn phỏng vấn</div>
 
     <div class="nav-block">
       <p class="nav-label">Nội dung</p>
@@ -106,13 +106,14 @@
         <li><a href="11-multi-tenant.html"><span class="nav-num">11</span><span class="nav-text">Multi-tenant</span></a></li>
         <li><a href="12-api-design.html"><span class="nav-num">12</span><span class="nav-text">API Design</span></a></li>
         <li><a href="13-normalization-denormalization.html"><span class="nav-num">13</span><span class="nav-text">Normalization &amp; Denormalization</span></a></li>
+        <li><a href="14-excel-import-optimization.html"><span class="nav-num">14</span><span class="nav-text">Import Excel tối ưu</span></a></li>
       </ul>
     </div>
   </aside>
   <main>
     <div class="hero">
       <div class="hero-kicker">Interview prep · Backend / Payment System</div>
-      <h1>Advanced Backend — 12 câu hỏi phỏng vấn thường gặp</h1>
+      <h1>Advanced Backend — 14 câu hỏi phỏng vấn thường gặp</h1>
       <p class="lede">Từ bài toán kinh điển “2 request cùng trừ tiền 1 tài khoản” cho tới idempotency, saga, queue, cache, index và API design. Mỗi câu hỏi là một trang riêng, kèm ví dụ code, so sánh thực tế và câu trả lời mẫu dùng được ngay khi phỏng vấn.</p>
     </div>
 
@@ -182,6 +183,11 @@
         <span class="card-num">CÂU 13</span>
         <h3>Normalization &amp; Denormalization</h3>
         <p>Chuẩn hoá để giữ dữ liệu nhất quán, phi chuẩn hoá để tối ưu tốc độ đọc và cách kiểm soát dữ liệu dư thừa.</p>
+      </a>
+      <a class="topic-card" href="14-excel-import-optimization.html">
+        <span class="card-num">CÂU 14</span>
+        <h3>Import Excel tối ưu</h3>
+        <p>File Excel nhiều dòng: background job, đọc theo stream, gộp check trùng thành 1 query, chunk + transaction, và validate FE/BE.</p>
       </a>
     </div>
   </main>

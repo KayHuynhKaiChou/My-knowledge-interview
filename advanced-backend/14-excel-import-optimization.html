@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Import Excel nhiều dòng để insert/upsert — FE và BE cần làm gì để tối ưu?">
+<title>14. Import Excel tối ưu — Advanced Backend</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body data-root="../">
+
+<header class="topbar">
+  <a class="topbar-brand" href="../index.html" aria-label="Interview Knowledge — trang chủ">
+    <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true">
+      <defs><linearGradient id="ikBadge" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#f0b355"/><stop offset="1" stop-color="#b9752a"/>
+      </linearGradient></defs>
+      <rect x="2" y="2" width="60" height="60" rx="15" fill="url(#ikBadge)"/>
+      <path d="M21 21 L33 32 L21 43" fill="none" stroke="#0b0e13" stroke-width="7"
+            stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M37 43 H46" stroke="#0b0e13" stroke-width="7" stroke-linecap="round"/>
+    </svg>
+    <span class="brand-text">Interview Knowledge</span>
+  </a>
+  <nav class="topbar-nav">
+    <details class="nav-group has-active">
+      <summary>Backend</summary>
+      <div class="nav-dropdown">
+        <a href="../advanced-backend/index.html" class="active">Advanced Backend</a>
+        <a href="../backend-dotnet-nestjs/index.html">.NET &amp; NestJS</a>
+        <a href="../database-sql/index.html">Database &amp; SQL</a>
+        <a href="../backend-infrastructure/index.html">Hạ tầng</a>
+        <a href="../realtime-socket/index.html">Realtime &amp; Socket</a>
+        <a href="../case-studies/index.html">Case studies</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Frontend</summary>
+      <div class="nav-dropdown">
+        <a href="../javascript-core/index.html">JavaScript &amp; TS</a>
+        <a href="../react/index.html">React &amp; State</a>
+        <a href="../nextjs/index.html">Next.js</a>
+        <a href="../css-html/index.html">CSS &amp; HTML</a>
+        <a href="../browser-web-api/index.html">Browser &amp; Web API</a>
+        <a href="../react-native/index.html">React Native</a>
+        <a href="../frontend-tooling/index.html">Frontend Tooling</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Quy trình &amp; Nền tảng</summary>
+      <div class="nav-dropdown">
+        <a href="../git/index.html">Git</a>
+        <a href="../testing-environments/index.html">Testing</a>
+        <a href="../saas-platforms/index.html">SaaS &amp; Nền tảng</a>
+        <a href="../auth-blockchain/index.html">Auth &amp; Blockchain</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Khác</summary>
+      <div class="nav-dropdown">
+        <a href="../interview-intro/index.html">Giới thiệu &amp; English</a>
+        <a href="../project-notes/index.html">Ghi chú dự án</a>
+      </div>
+    </details>
+  </nav>
+  <button class="search-trigger" id="searchTrigger" aria-label="Tìm kiếm nội dung">
+    <span class="search-icon" aria-hidden="true">⌕</span>
+    <span class="search-label">Tìm kiếm</span>
+    <kbd>/</kbd>
+  </button>
+</header>
+
+<div class="search-overlay" id="searchOverlay" hidden>
+  <div class="search-box" role="dialog" aria-label="Tìm kiếm nội dung">
+    <input type="search" id="searchInput" autocomplete="off" spellcheck="false"
+           placeholder="Tìm trong toàn bộ nội dung — closure, saga, index, rebase…">
+    <div class="search-results" id="searchResults"></div>
+    <div class="search-hint">Enter mở mục · ↑↓ chọn · Esc đóng</div>
+  </div>
+</div>
+
+<div class="shell">
+  <button class="mobile-toggle" id="navToggle" aria-label="Mở mục lục">☰ Mục lục</button>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">Advanced Backend</div>
+    <div class="brand-sub">14 mục &middot; sổ tay ôn phỏng vấn</div>
+
+    <div class="nav-block">
+      <p class="nav-label">Nội dung</p>
+      <ul class="nav-list">
+        <li><a href="01-race-condition-lock-deadlock.html"><span class="nav-num">01</span><span class="nav-text">Race Condition, Lock &amp; Deadlock</span></a></li>
+        <li><a href="02-idempotency.html"><span class="nav-num">02</span><span class="nav-text">Idempotency</span></a></li>
+        <li><a href="03-distributed-transaction-saga.html"><span class="nav-num">03</span><span class="nav-text">Transaction xuyên service</span></a></li>
+        <li><a href="04-queue-async-processing.html"><span class="nav-num">04</span><span class="nav-text">Queue &amp; Async Processing</span></a></li>
+        <li><a href="05-rate-limiting.html"><span class="nav-num">05</span><span class="nav-text">Rate Limiting</span></a></li>
+        <li><a href="06-database-query-optimization.html"><span class="nav-num">06</span><span class="nav-text">Tối ưu Database &amp; Query</span></a></li>
+        <li><a href="07-redis-caching.html"><span class="nav-num">07</span><span class="nav-text">Redis &mdash; khái niệm &amp; case study</span></a></li>
+        <li><a href="08-scalability-pagination.html"><span class="nav-num">08</span><span class="nav-text">Scalability &amp; Pagination</span></a></li>
+        <li><a href="09-database-index.html"><span class="nav-num">09</span><span class="nav-text">Index &mdash; cơ chế &amp; đánh đổi</span></a></li>
+        <li><a href="10-background-job.html"><span class="nav-num">10</span><span class="nav-text">Background Job</span></a></li>
+        <li><a href="11-multi-tenant.html"><span class="nav-num">11</span><span class="nav-text">Multi-tenant</span></a></li>
+        <li><a href="12-api-design.html"><span class="nav-num">12</span><span class="nav-text">API Design</span></a></li>
+        <li><a href="13-normalization-denormalization.html"><span class="nav-num">13</span><span class="nav-text">Normalization &amp; Denormalization</span></a></li>
+        <li><a href="14-excel-import-optimization.html" class="active"><span class="nav-num">14</span><span class="nav-text">Import Excel tối ưu</span></a></li>
+      </ul>
+    </div>
+
+    <div class="nav-block">
+      <p class="nav-label">Trong trang này</p>
+      <div id="pageToc"></div>
+    </div>
+  </aside>
+  <main>
+    <div class="crumb">
+      <a href="index.html">Advanced Backend</a>
+      <span class="sep">/</span>
+      <span>Câu 14</span>
+    </div>
+
+    <section class="qa" id="q14">
+      <div class="q-tag"><span class="n">14</span> Câu hỏi ứng dụng thường gặp</div>
+      <h2 class="q-title">"Import Excel nhiều dòng để insert/upsert — FE và BE cần làm gì để tối ưu?"</h2>
+
+      <h3 class="sub">14.1 — Vấn đề gốc: file nhiều dòng không nên xử lý đồng bộ trong 1 request</h3>
+      <p>File Excel càng nhiều dòng, thời gian đọc + validate + insert càng lâu — nếu xử lý ngay trong 1 request HTTP, client phải chờ, dễ timeout, và giữ chiếm connection/tài nguyên server suốt thời gian đó (đúng vấn đề đã học ở mục 4.1). Nguyên tắc: <b>import file luôn nên xử lý bất đồng bộ</b>, áp dụng lại đúng tinh thần Background Job (Câu 10) và Queue (Câu 4).</p>
+
+      <h3 class="sub">14.2 — Kiến trúc tổng thể FE-BE: Upload → Background Job → Validate toàn bộ → Chia chunk insert/upsert → Polling tiến độ → Báo cáo kết quả</h3>
+      <pre><code>React (FE)                    NestJS (BE)
+    │                              │
+    │  1. Upload file              │
+    ├─────────────────────────────►│  Lưu file tạm, đẩy job vào QUEUE
+    │  ◄── 202 Accepted, jobId ─────┤  (không xử lý ngay trong request)
+    │                              │
+    │                              │  Background Worker bắt đầu xử lý job:
+    │                              │
+    │                              │  Bước A — VALIDATE TOÀN BỘ FILE TRƯỚC
+    │                              │    A1. Đọc hết rows từ file (theo stream)
+    │                              │    A2. Validate FORMAT từng dòng (rỗng, sai kiểu...)
+    │                              │    A3. Check TRÙNG NỘI BỘ trong file (2 dòng cùng tên)
+    │                              │    A4. Check TRÙNG VỚI DB — 1 CÂU QUERY DUY NHẤT
+    │                              │        (gộp toàn bộ tên cần check vào 1 lần IN(...))
+    │                              │    → CÓ ĐẦY ĐỦ danh sách: dòng nào hợp lệ, dòng nào lỗi
+    │                              │
+    │                              │  Bước B — CHỈ SAU KHI validate xong hết,
+    │                              │           MỚI chia rows hợp lệ thành CHUNK để ghi DB
+    │                              │    Chunk 1 (200 dòng) → transaction riêng → COMMIT
+    │                              │    Chunk 2 (200 dòng) → transaction riêng → COMMIT
+    │                              │    ... (tuần tự, mỗi chunk 1 transaction độc lập)
+    │                              │    → sau mỗi chunk: cập nhật job.progress()
+    │                              │
+    │  2. Poll trạng thái          │
+    ├─────────────────────────────►│
+    │  ◄── { progress: 45%, ... } ──┤
+    │        (lặp lại)             │
+    │                              │
+    │  3. Khi xong                 │
+    │  ◄── { status: done,         │
+    │        success: 650,         │
+    │        failed: 50,           │
+    │        errorFile: "..." } ───┤</code></pre>
+      <div class="callout">
+        <span class="callout-label">Vì sao phải validate xong TOÀN BỘ rồi mới chia chunk, không validate xen kẽ theo từng chunk</span>
+        <p>Nếu để mỗi chunk tự validate và tự query DB check trùng riêng, sẽ có 2 vấn đề: (1) <b>N+1 query</b> — 5 chunk thì 5 lần query check trùng thay vì gộp 1 lần (mục 6.4); (2) <b>không phát hiện được trùng lặp giữa các chunk khác nhau</b> — ví dụ tên "A" xuất hiện ở cả chunk 1 và chunk 3, nếu mỗi chunk tự check riêng lẻ (transaction độc lập, không biết gì về chunk khác), chunk chạy sau sẽ âm thầm ghi đè lên chunk chạy trước qua upsert mà không có cảnh báo gì. Validate toàn bộ trước — bao gồm cả bước dò trùng ngay trong chính file — giải quyết dứt điểm cả 2 vấn đề trước khi bắt đầu ghi bất kỳ dòng nào vào DB.</p>
+      </div>
+
+      <h4 class="subsub">BE — Controller nhận file, đẩy job, trả về ngay</h4>
+      <pre><code>@Controller('imports')
+export class ImportController {
+  constructor(@InjectQueue('excel-import') private importQueue: Queue) {}
+
+  @Post('products')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadFile(@UploadedFile() file: Express.Multer.File) {
+    const filePath = await this.storageService.saveTemp(file);
+    const job = await this.importQueue.add('process-import', { filePath });
+    return { jobId: job.id, status: 'processing' }; // trả ngay lập tức
+  }
+
+  @Get('products/:jobId/status')
+  async getStatus(@Param('jobId') jobId: string) {
+    const job = await this.importQueue.getJob(jobId);
+    return { jobId, state: await job.getState(), progress: job.progress(), result: job.returnvalue };
+  }
+}</code></pre>
+
+      <h4 class="subsub">FE — Upload rồi polling tiến độ</h4>
+      <pre><code>function ImportProducts() {
+  const [jobId, setJobId] = useState(null);
+  const [result, setResult] = useState(null);
+
+  const handleUpload = async (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const res = await fetch('/api/imports/products', { method: 'POST', body: formData });
+    const data = await res.json(); // { jobId }
+    setJobId(data.jobId);
+  };
+
+  return (
+    <div>
+      <input type="file" accept=".xlsx" onChange={(e) => handleUpload(e.target.files[0])} />
+      {jobId && <ProgressTracker jobId={jobId} onDone={setResult} />}
+      {result && <ImportResult result={result} />}
+    </div>
+  );
+}
+
+function ProgressTracker({ jobId, onDone }) {
+  const [progress, setProgress] = useState(0);
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      const res = await fetch(`/api/imports/products/${jobId}/status`);
+      const data = await res.json();
+      setProgress(data.progress);
+      if (data.state === 'completed') {
+        clearInterval(interval);
+        onDone(data.result); // { total, success, failed, errorFileUrl }
+      }
+    }, 1500); // poll mỗi 1.5s — không cần quá dày
+    return () => clearInterval(interval);
+  }, [jobId]);
+  return <progress value={progress} max={100}>{progress}%</progress>;
+}</code></pre>
+
+      <h3 class="sub">14.3 — Tối ưu xử lý ở BE: validate toàn bộ trước, rồi mới chia chunk để ghi</h3>
+      <p>4 kỹ thuật quan trọng để 700 dòng hay 100.000 dòng đều xử lý mượt và không dính trùng lặp ngầm:</p>
+      <ul>
+        <li><b>Đọc file theo Stream</b> thay vì load hết vào RAM 1 lần (<code>ExcelJS.stream.xlsx.WorkbookReader</code>) — tránh tốn bộ nhớ khi file lớn.</li>
+        <li><b>Check trùng NGAY TRONG FILE</b> trước — 2 dòng cùng tên trong chính file Excel phải được phát hiện, không để chúng lọt qua chunk khác nhau rồi âm thầm ghi đè lên nhau.</li>
+        <li><b>Gộp check trùng với DB thành 1 câu query duy nhất</b> (<code>WHERE name IN (...)</code>), chạy 1 lần cho toàn bộ file — tránh N+1 (mục 6.4).</li>
+        <li><b>Chỉ sau khi có đầy đủ danh sách dòng hợp lệ, mới chia chunk để ghi</b> — mỗi chunk bọc transaction riêng, chạy tuần tự, độc lập với nhau (không cần đọc lại dữ liệu chunk trước, vì mọi thứ cần biết đã được xác định xong ở bước validate).</li>
+      </ul>
+      <pre><code>@Process('process-import')
+async handleImport(job: Job<{ filePath: string }>) {
+  // ===== BƯỚC A: ĐỌC + VALIDATE TOÀN BỘ FILE TRƯỚC =====
+  const reader = new ExcelJS.stream.xlsx.WorkbookReader(job.data.filePath, {});
+  const rawRows = [];
+  for await (const worksheet of reader) {
+    for await (const row of worksheet) {
+      if (row.number === 1) continue;
+      rawRows.push({ name: row.getCell(1).value, price: row.getCell(2).value, rowNumber: row.number });
+    }
+  }
+
+  const errors = [];
+
+  // A1. Validate FORMAT từng dòng
+  const formatValidRows = rawRows.filter(row => {
+    if (!row.name || typeof row.price !== 'number' || row.price <= 0) {
+      errors.push({ row: row.rowNumber, message: 'Dữ liệu không hợp lệ' });
+      return false;
+    }
+    return true;
+  });
+
+  // A2. Check TRÙNG NGAY TRONG FILE — tránh trùng giữa các chunk khác nhau âm thầm ghi đè
+  const seenInFile = new Map<string, number>();
+  const dedupedRows = [];
+  for (const row of formatValidRows) {
+    if (seenInFile.has(row.name)) {
+      errors.push({ row: row.rowNumber, message: `Trùng với dòng ${seenInFile.get(row.name)} trong file` });
+      continue;
+    }
+    seenInFile.set(row.name, row.rowNumber);
+    dedupedRows.push(row);
+  }
+
+  // A3. Check TRÙNG VỚI DB — 1 CÂU QUERY DUY NHẤT cho toàn bộ file
+  const existing = await this.productRepo.find({ where: { name: In(dedupedRows.map(r => r.name)) } });
+  const existingMap = new Map(existing.map(p => [p.name, p]));
+  // (existingMap dùng để phân biệt insert mới hay update — không phải để loại bỏ,
+  //  vì đây là bảng cho phép upsert theo đúng nghiệp vụ)
+
+  // ===== BƯỚC B: CHỈ SAU KHI VALIDATE XONG HẾT, MỚI CHIA CHUNK ĐỂ GHI =====
+  const chunkSize = 200;
+  let successCount = 0;
+
+  for (let i = 0; i < dedupedRows.length; i += chunkSize) {
+    const chunk = dedupedRows.slice(i, i + chunkSize);
+
+    // Mỗi chunk 1 transaction ĐỘC LẬP — không đọc lại dữ liệu chunk trước,
+    // vì mọi thứ cần biết (hợp lệ hay không, trùng hay không) đã xác định XONG ở Bước A
+    await this.dataSource.transaction(async (manager) => {
+      for (const row of chunk) {
+        await manager.upsert(Product, { name: row.name, price: row.price }, ['name']);
+      }
+    });
+
+    successCount += chunk.length;
+    await job.progress(Math.min(Math.round(((i + chunkSize) / dedupedRows.length) * 100), 100));
+  }
+
+  return { total: rawRows.length, success: successCount, failed: errors.length, errors };
+}</code></pre>
+
+      <div class="callout">
+        <span class="callout-label">Concurrency Limiter — nếu muốn tăng tốc bằng chạy chunk song song</span>
+        <p>Ở trên các chunk chạy <b>tuần tự</b> (an toàn, đơn giản). Nếu file cực lớn (hàng trăm nghìn dòng) và cần nhanh hơn, có thể cho nhiều chunk chạy <b>song song</b> — nhưng phải giới hạn số lượng chạy cùng lúc, nếu không sẽ tràn connection pool DB (mục 1.6) khi có quá nhiều transaction mở cùng lúc. <b>Concurrency Limiter</b> là cơ chế giới hạn này — giống 1 "cổng soát vé" chỉ cho tối đa N tác vụ chạy cùng lúc, tác vụ thứ N+1 phải đợi tới khi 1 trong N tác vụ đang chạy xong.</p>
+        <pre><code>import pLimit from 'p-limit';
+const limit = pLimit(5); // tối đa 5 chunk chạy song song cùng lúc
+
+const promises = chunks.map(chunk => limit(() => processChunk(chunk)));
+await Promise.all(promises); // dù có 20 chunk, luôn chỉ 5 cái chạy cùng lúc</code></pre>
+        <p>Điều kiện bắt buộc để chạy song song an toàn: các chunk chạy cùng lúc <b>không được đụng vào cùng 1 record</b> — nhờ bước check trùng nội bộ file đã làm ở Bước A, mỗi <code>name</code> chỉ xuất hiện đúng 1 lần trong toàn bộ <code>dedupedRows</code>, nên chia chunk kiểu gì cũng đảm bảo không có 2 chunk nào cùng đụng vào 1 record — an toàn để chạy song song nếu muốn.</p>
+      </div>
+
+      <h3 class="sub">14.4 — Validate: FE làm gì, BE làm gì — 3 loại validate</h3>
+      <p>Nguyên tắc chung: <b>validate cả 2 phía</b>, nhưng vai trò khác nhau — FE để phản hồi nhanh (UX), BE luôn là <b>nguồn xác nhận cuối cùng</b> vì validate ở FE hoàn toàn có thể bị bypass (gọi thẳng API bằng Postman, sửa code JS) — đúng nguyên tắc "không tin dữ liệu đầu vào" đã áp dụng xuyên suốt (Câu 11, Câu 13).</p>
+      <table>
+        <thead><tr><th>Loại validate</th><th>Ví dụ</th><th>FE làm được không</th><th>BE bắt buộc?</th></tr></thead>
+        <tbody>
+          <tr><td><b>Kiểu dữ liệu / format</b></td><td>Ô không được rỗng, đúng định dạng số/email, độ dài chuỗi</td><td>Có — làm ngay, không cần gọi API</td><td>Vẫn phải làm lại (không tin FE)</td></tr>
+          <tr><td><b>Business rule nhiều cột</b></td><td>Giá khuyến mãi phải nhỏ hơn giá gốc, ngày kết thúc phải sau ngày bắt đầu</td><td>Có thể, để phản hồi nhanh</td><td><b>Bắt buộc</b> — sai là hỏng dữ liệu thật</td></tr>
+          <tr><td><b>Check với DB (unique, tồn tại)</b></td><td>Mã sản phẩm không được trùng với DB đã có</td><td><b>Không</b> — FE không có quyền truy cập DB</td><td><b>Chỉ có thể làm ở BE</b></td></tr>
+        </tbody>
+      </table>
+      <div class="callout">
+        <span class="callout-label">Vì sao check "unique với DB" tuyệt đối không thể để FE tự làm</span>
+        <p>FE không có cách nào biết chắc "mã này đã tồn tại chưa" mà không hỏi ngược BE — và ngay cả khi FE gọi API hỏi trước, vẫn có khả năng <b>race condition</b> giữa lúc hỏi xong và lúc thực sự submit (y hệt bài toán race condition ở Câu 1, chỉ khác ngữ cảnh "check tồn tại" thay vì "check số dư"). Check unique chỉ đáng tin khi BE tự làm ngay tại thời điểm insert/upsert.</p>
+      </div>
+
+      <h4 class="subsub">Luồng thực tế: file → parse → preview → validate nhanh ở FE → submit → validate đầy đủ ở BE</h4>
+      <pre><code>FE:
+1. User chọn file → FE đọc file NGAY TẠI TRÌNH DUYỆT (thư viện SheetJS/xlsx),
+   CHƯA upload lên server → hiển thị PREVIEW bảng dữ liệu cho user xem trước
+2. FE chạy validate NHANH loại 1 (rỗng, sai định dạng) trên dữ liệu preview
+   → tô đỏ ngay ô lỗi, KHÔNG cần gọi API — phản hồi tức thì
+3. User sửa lỗi hiển thị → bấm "Import" → LÚC NÀY mới upload file lên BE
+
+BE:
+4. Validate lại TOÀN BỘ từ đầu (không tin dữ liệu FE đã "sạch"):
+   loại 1 (rỗng/format) → loại 2 (business rule) → loại 3 (unique với DB, gộp 1 query)
+5. Trả về lỗi theo từng dòng, kèm số dòng trong Excel gốc để user dễ đối chiếu</code></pre>
+      <div class="callout">
+        <span class="callout-label">Bài học: message lỗi giữa FE và BE phải khớp nhau</span>
+        <p>Nếu rule/message validate ở FE và BE không khớp nhau, user gặp tình huống form "pass" ở FE nhưng bị BE từ chối với thông báo khác hẳn — gây khó hiểu và mất niềm tin. Nên định nghĩa rule validate dùng chung cho cả 2 phía (ví dụ 1 schema Zod/Yup dùng được cả FE lẫn BE nếu cùng viết TypeScript), tránh tình trạng FE nói "hợp lệ" nhưng BE lại từ chối vì lý do không giống những gì FE đã kiểm tra.</p>
+      </div>
+
+      <h3 class="sub">14.5 — Tóm gọn việc gì FE lo, việc gì BE lo</h3>
+      <table>
+        <thead><tr><th></th><th>FE (React)</th><th>BE (NestJS)</th></tr></thead>
+        <tbody>
+          <tr><td>Upload</td><td>Gửi file qua <code>FormData</code>, không tự làm nặng thêm</td><td>Nhận file, lưu tạm, đẩy job vào queue ngay, trả response tức thì</td></tr>
+          <tr><td>Validate sơ bộ</td><td>Đọc file tại trình duyệt, preview + validate loại 1 (rỗng/format) để phản hồi nhanh</td><td>Validate lại toàn bộ — không tin FE, đây là nguồn xác nhận cuối cùng</td></tr>
+          <tr><td>Xử lý nặng</td><td>Không làm gì — chỉ chờ và hiển thị tiến độ</td><td>Worker đọc theo stream, validate theo batch, upsert theo chunk có transaction</td></tr>
+          <tr><td>Check unique/DB</td><td>Không thể làm chắc chắn (không có quyền truy cập DB)</td><td>Duy nhất nơi làm được, gộp 1 câu query để tránh N+1</td></tr>
+          <tr><td>Trải nghiệm khi file lớn</td><td>Poll tiến độ (hoặc WebSocket), progress bar, không block UI</td><td>Cập nhật <code>job.progress()</code> sau mỗi chunk để FE có gì hiển thị</td></tr>
+          <tr><td>Báo lỗi</td><td>Hiển thị số dòng thành công/lỗi, cho tải file lỗi chi tiết</td><td>Sinh file lỗi riêng thay vì trả hàng nghìn lỗi text thẳng trong JSON</td></tr>
+        </tbody>
+      </table>
+
+      <div class="interview-line">
+        <span class="callout-label">Trả lời mẫu khi phỏng vấn</span>
+        <p>"Với file Excel nhiều dòng, em không xử lý đồng bộ trong request — đẩy vào background job, trả 202 ngay, FE poll tiến độ tương tự bài toán queue ở Câu 4. Ở BE em đọc file theo stream để tránh tốn RAM, gộp check trùng thành 1 câu query IN thay vì N+1, và upsert theo chunk có transaction riêng để lỗi 1 chunk không ảnh hưởng chunk khác. Về validate, em chia theo 3 loại: format cơ bản làm cả FE lẫn BE để UX nhanh, business rule nhiều cột bắt buộc BE enforce lại, còn check unique với DB thì chỉ có thể và chỉ nên làm ở BE vì FE không có quyền truy cập DB và dễ dính race condition nếu cố check trước ở phía client."</p>
+      </div>
+    </section>
+
+    <nav class="pager">
+      <a class="prev" href="13-normalization-denormalization.html"><span class="pager-dir">← Câu trước</span><span class="pager-title">13. Normalization &amp; Denormalization</span></a>
+      <a class="next" href="index.html"><span class="pager-dir">Hoàn thành →</span><span class="pager-title">Về mục lục Advanced Backend</span></a>
+    </nav>
+  </main>
+</div>
+
+<footer>
+  Interview Knowledge — sổ tay ôn phỏng vấn tổng hợp từ ghi chép cá nhân.
+  Ưu tiên trả lời theo cấu trúc: vấn đề → giải pháp → vì sao chọn cách này thay vì cách khác.
+</footer>
+
+<script src="../assets/search-index.js" defer></script>
+<script src="../assets/js/main.js" defer></script>
+</body>
+</html>

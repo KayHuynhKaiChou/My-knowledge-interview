@@ -88,7 +88,7 @@
   <button class="mobile-toggle" id="navToggle" aria-label="Mở mục lục">☰ Mục lục</button>
   <aside class="sidebar" id="sidebar">
     <div class="brand">Advanced Backend</div>
-    <div class="brand-sub">13 mục &middot; sổ tay ôn phỏng vấn</div>
+    <div class="brand-sub">14 mục &middot; sổ tay ôn phỏng vấn</div>
 
     <div class="nav-block">
       <p class="nav-label">Nội dung</p>
@@ -106,6 +106,7 @@
         <li><a href="11-multi-tenant.html"><span class="nav-num">11</span><span class="nav-text">Multi-tenant</span></a></li>
         <li><a href="12-api-design.html"><span class="nav-num">12</span><span class="nav-text">API Design</span></a></li>
         <li><a href="13-normalization-denormalization.html"><span class="nav-num">13</span><span class="nav-text">Normalization &amp; Denormalization</span></a></li>
+        <li><a href="14-excel-import-optimization.html"><span class="nav-num">14</span><span class="nav-text">Import Excel tối ưu</span></a></li>
       </ul>
     </div>
 
@@ -129,10 +130,60 @@
       <h3 class="sub">9.1 — Index là gì (nhắc lại nhanh)</h3>
       <p>Index giống hệt mục lục ở cuối 1 cuốn sách dày — thay vì phải lật từng trang để tìm 1 từ khoá (full table scan), bạn tra mục lục rồi nhảy thẳng tới đúng trang. Về bản chất, DB duy trì 1 cấu trúc dữ liệu riêng (thường là B-Tree) lưu sẵn giá trị của (các) cột được đánh index kèm theo con trỏ trỏ tới vị trí thật của row trong bảng — giúp tra cứu nhanh hơn quét tuần tự rất nhiều lần khi bảng lớn.</p>
 
-      <h3 class="sub">9.2 — Composite Index: gộp nhiều cột vào 1 index</h3>
-      <p>Composite index (compound index) là gộp <b>2 hoặc nhiều cột</b> vào chung 1 index thay vì tạo riêng từng index cho từng cột.</p>
+      <h3 class="sub">9.2 Composite Index</h3>
+
+      <h4 class="subsub">1. Composite Index là gì</h4>
+      <p>Là 1 index được tạo từ <b>sự kết hợp của nhiều cột</b> lại thành 1 cấu trúc dữ liệu duy nhất (thay vì tạo riêng từng index cho từng cột), giúp DB tra cứu nhanh khi câu query cần lọc/sắp xếp theo nhiều cột đó cùng lúc.</p>
       <pre><code>CREATE INDEX idx_account_created ON transactions (account_id, created_at);</code></pre>
-      <p><b>Thứ tự cột quyết định index có dùng được hay không.</b> Index này giúp nhanh khi lọc theo <code>account_id</code> đứng trước, hoặc cả 2 cột theo đúng thứ tự — nhưng vô dụng nếu query chỉ lọc theo <code>created_at</code> mà bỏ qua <code>account_id</code>, vì index được sắp xếp theo cột đầu trước (xem lại ví dụ đầy đủ ở mục 6.1). Nguyên tắc: giống mục lục sách theo "Chương → Trang" — biết chương thì tra trang nhanh, chỉ có số trang mà không biết chương thì mục lục này không giúp được gì.</p>
+
+      <h4 class="subsub">2. Thứ tự cột rất quan trọng — Leftmost Prefix Rule</h4>
+      <p>DB sắp xếp dữ liệu trong composite index theo cột <b>đầu tiên trước</b>, rồi mới tới cột thứ 2 trong phạm vi từng nhóm giá trị của cột đầu. Composite index chỉ dùng được khi câu query có điều kiện bắt đầu từ <b>cột trái nhất (leftmost)</b> trở đi — không thể "nhảy cóc" dùng riêng cột đứng sau mà bỏ qua cột đứng trước.</p>
+      <pre><code>CREATE INDEX idx_account_created ON transactions (account_id, created_at);
+
+-- ✅ DÙNG ĐƯỢC — có account_id (cột đầu)
+WHERE account_id = 123
+
+-- ✅ DÙNG ĐƯỢC — có đủ cả 2 cột, đúng thứ tự
+WHERE account_id = 123 AND created_at > '2026-01-01'
+
+-- ❌ KHÔNG DÙNG ĐƯỢC — chỉ có created_at, thiếu account_id (bỏ qua cột đầu)
+WHERE created_at > '2026-01-01'</code></pre>
+      <p>Đổi thứ tự cột khi tạo index = tạo ra 1 index hoàn toàn khác, phục vụ pattern query khác. <code>(account_id, created_at)</code> và <code>(created_at, account_id)</code> là 2 index khác nhau, không thay thế được cho nhau.</p>
+
+      <h4 class="subsub">3. Case mà nhiều index đơn lẻ KHÔNG làm được — vì chỉ dùng được 1 cột tại 1 thời điểm</h4>
+      <p>Nếu chỉ tạo 2 index đơn riêng biệt cho 2 cột, DB <b>chỉ chọn được 1 trong 2</b> để tra cứu chính, cột còn lại phải lọc thêm bằng cách quét thủ công trên tập kết quả vừa tìm được — không tối ưu bằng cách gộp cả 2 điều kiện vào 1 lần tra cứu duy nhất.</p>
+      <pre><code>SELECT * FROM orders WHERE user_id = 1001 AND status = 'shipped';</code></pre>
+      <div class="code-label bad">Chỉ có 2 index đơn — DB phải lọc thêm 1 bước phụ</div>
+      <pre class="bad"><code>CREATE INDEX idx_user   ON orders (user_id);
+CREATE INDEX idx_status ON orders (status);
+-- DB dùng idx_user để tìm đơn của user 1001, SAU ĐÓ phải quét thủ công
+-- để lọc tiếp status = 'shipped' trên đúng những dòng đó — tốn thêm 1 bước</code></pre>
+      <div class="code-label good">Composite — gộp cả 2 điều kiện vào 1 lần tra cứu duy nhất</div>
+      <pre class="good"><code>CREATE INDEX idx_user_status ON orders (user_id, status);
+-- DB nhảy thẳng tới đúng vùng dữ liệu thoả CẢ 2 điều kiện cùng lúc,
+-- không cần bước lọc thủ công phía sau</code></pre>
+
+      <h4 class="subsub">4. Chỉ nên dùng khi nhu cầu kết hợp nhiều cột xảy ra THƯỜNG XUYÊN hoặc LUÔN CÓ</h4>
+      <p>Nếu 2 cột chỉ thỉnh thoảng mới được lọc cùng nhau, hoặc thường được lọc <b>độc lập, tách rời nhau</b>, nên tách thành các index đơn riêng biệt — gộp composite trong trường hợp này sẽ làm mất tác dụng của cột đứng sau, phí phạm.</p>
+      <p><b>Ví dụ: lấy danh sách tin nhắn trong 1 cuộc hội thoại — nhu cầu này LUÔN CÓ, không phải "thỉnh thoảng":</b></p>
+      <pre><code>-- Mọi lần load tin nhắn của 1 conversation ĐỀU cần lọc theo conversation_id,
+-- sắp xếp theo thời gian gửi mới nhất trước, kèm id làm tie-breaker cho cursor pagination
+SELECT * FROM messages
+WHERE conversation_id = 123
+ORDER BY sent_at DESC, id DESC
+LIMIT 20;</code></pre>
+      <pre class="good"><code>CREATE INDEX idx_conversation_sent_id ON messages (conversation_id, sent_at DESC, id DESC);</code></pre>
+      <p>Đây là composite hợp lý vì: <b>không có trường hợp nào</b> load tin nhắn mà không biết <code>conversation_id</code> (luôn phải scope theo 1 cuộc hội thoại cụ thể), và <b>luôn</b> cần sort theo <code>sent_at</code> mới nhất trước, kèm <code>id</code> để cursor pagination không bị trùng/sót khi <code>sent_at</code> bị trùng giá trị (mục 8.3). 3 cột này <b>luôn đi cùng nhau trong mọi câu query thực tế</b> của tính năng "xem tin nhắn 1 conversation" — đây chính là điều kiện đủ để chọn composite thay vì tách riêng.</p>
+
+      <div class="callout">
+        <span class="callout-label">Myth cần tránh</span>
+        <p>Quyết định composite hay không <b>không dựa vào</b> số lượng field hay kích thước bảng ("bảng >100 triệu dòng thì nên composite cho nhanh" là hiểu sai) — mà dựa vào <b>pattern truy vấn thực tế</b>: các cột đó có luôn xuất hiện cùng nhau trong query hay không, và độ chọn lọc (selectivity) của từng cột.</p>
+      </div>
+
+      <div class="interview-line">
+        <span class="callout-label">Tóm 1 câu để nhớ</span>
+        <p>"Composite index không phải 'cứ nhiều cột thì nên gộp' — chỉ nên gộp khi các cột đó thực sự luôn xuất hiện cùng nhau trong pattern truy vấn thật của hệ thống, và phải đặt đúng thứ tự theo cách câu query sẽ lọc/sắp xếp — sai 1 trong 2 điều kiện này, composite sẽ vô dụng hoặc lãng phí hơn so với việc chỉ dùng index đơn."</p>
+      </div>
 
       <h3 class="sub">9.3 — Index tăng tốc chủ yếu 3 nhóm thao tác</h3>
       <div class="grid-2">

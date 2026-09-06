@@ -88,7 +88,7 @@
   <button class="mobile-toggle" id="navToggle" aria-label="Mở mục lục">☰ Mục lục</button>
   <aside class="sidebar" id="sidebar">
     <div class="brand">Advanced Backend</div>
-    <div class="brand-sub">13 mục &middot; sổ tay ôn phỏng vấn</div>
+    <div class="brand-sub">14 mục &middot; sổ tay ôn phỏng vấn</div>
 
     <div class="nav-block">
       <p class="nav-label">Nội dung</p>
@@ -106,6 +106,7 @@
         <li><a href="11-multi-tenant.html" class="active"><span class="nav-num">11</span><span class="nav-text">Multi-tenant</span></a></li>
         <li><a href="12-api-design.html"><span class="nav-num">12</span><span class="nav-text">API Design</span></a></li>
         <li><a href="13-normalization-denormalization.html"><span class="nav-num">13</span><span class="nav-text">Normalization &amp; Denormalization</span></a></li>
+        <li><a href="14-excel-import-optimization.html"><span class="nav-num">14</span><span class="nav-text">Import Excel tối ưu</span></a></li>
       </ul>
     </div>
 
@@ -212,9 +213,32 @@ async findEmployeeById(tenantId: number, employeeId: number) {
         <p>Chỉ cần 1 chỗ trong code quên thêm điều kiện <code>tenant_id</code>, dữ liệu của công ty này có thể lộ sang công ty khác — hậu quả nghiêm trọng cho 1 SaaS B2B. Cách phòng ngừa thực tế: dùng <b>Row-Level Security (RLS)</b> của PostgreSQL để DB tự động lọc theo <code>tenant_id</code> ở tầng database, không phụ thuộc hoàn toàn vào việc lập trình viên nhớ thêm điều kiện ở tầng code; hoặc dùng 1 base repository/base query builder dùng chung, tự động inject <code>tenant_id</code> vào mọi query, tránh lặp lại thủ công dễ sót ở từng chỗ gọi.</p>
       </div>
 
+      <h3 class="sub">11.5 — Nhược điểm của Multi-tenant</h3>
+      <ul>
+        <li><b>Rủi ro rò rỉ dữ liệu chéo giữa các tenant</b> — nghiêm trọng nhất. Với Shared database (Pool model), chỉ cần 1 chỗ trong code quên lọc <code>tenant_id</code>, dữ liệu công ty A có thể lộ sang công ty B — lỗi bảo mật có thể dẫn tới mất hợp đồng, kiện tụng, mất uy tín hoàn toàn.</li>
+        <li><b>"Noisy neighbor"</b> — 1 tenant dùng quá tải ảnh hưởng tenant khác. Vì nhiều tenant dùng chung hạ tầng (database, connection pool, CPU server — mục 1.6), nếu 1 tenant có traffic đột biến (chạy báo cáo nặng, bị tấn công DDoS), toàn bộ tenant khác dùng chung hệ thống đều bị chậm theo dù không liên quan gì tới sự cố đó.</li>
+        <li><b>Khó tuỳ biến sâu cho từng khách hàng riêng lẻ</b> — thêm logic rẽ nhánh riêng cho 1 tenant lớn (nhiều <code>if (tenantId === X)</code> rải rác) làm code phức tạp dần theo thời gian, khó bảo trì lâu dài.</li>
+        <li><b>Migration/deploy rủi ro cao hơn</b> — dùng chung 1 codebase và thường là 1 database, mỗi lần deploy hoặc chạy migration schema ảnh hưởng TẤT CẢ tenant cùng lúc; nếu migration có bug, mọi khách hàng đang dùng hệ thống đều gặp sự cố cùng lúc — khác với single-tenant có thể rollout dần theo từng khách (canary release).</li>
+        <li><b>Khó đáp ứng compliance/pháp lý nghiêm ngặt</b> — 1 số ngành (ngân hàng, y tế, chính phủ) yêu cầu dữ liệu nằm trên hạ tầng vật lý tách biệt hoàn toàn, đôi khi phải ở khu vực địa lý cụ thể (data residency) — nhiều công ty SaaS phải làm riêng 1 "enterprise tier" chạy single-tenant chỉ để phục vụ nhóm khách hàng này.</li>
+        <li><b>Backup/restore riêng cho 1 tenant khó khăn</b> (với Pool model) — nếu 1 khách hàng lỡ xoá nhầm dữ liệu và yêu cầu khôi phục về thời điểm trước đó, không thể restore riêng dữ liệu của 1 tenant mà không ảnh hưởng tenant khác, vì restore cả DB sẽ làm dữ liệu mọi tenant khác cũng quay về thời điểm cũ.</li>
+        <li><b>Query dễ chậm dần khi số lượng tenant và dữ liệu tăng lên</b> — mọi tenant cùng đọc/ghi vào cùng 1 bảng vật lý, bảng càng lớn (gộp dữ liệu hàng nghìn tenant) càng cần tối ưu kỹ (composite index đúng thứ tự với <code>tenant_id</code> làm cột đầu — mục 9.2, hoặc partition theo <code>tenant_id</code> — mục 6.2).</li>
+      </ul>
+      <table>
+        <thead><tr><th>Nhược điểm</th><th>Ảnh hưởng chính</th></tr></thead>
+        <tbody>
+          <tr><td>Rò rỉ dữ liệu chéo</td><td>Bảo mật — nghiêm trọng nhất</td></tr>
+          <tr><td>Noisy neighbor</td><td>Hiệu năng — 1 tenant ảnh hưởng tenant khác</td></tr>
+          <tr><td>Khó tuỳ biến riêng</td><td>Kỹ thuật — code phức tạp dần theo thời gian</td></tr>
+          <tr><td>Deploy/migration rủi ro cao</td><td>Vận hành — ảnh hưởng tất cả khách hàng cùng lúc</td></tr>
+          <tr><td>Khó đáp ứng compliance</td><td>Pháp lý — 1 số ngành không chấp nhận</td></tr>
+          <tr><td>Backup/restore riêng lẻ khó</td><td>Vận hành — đặc biệt với Pool model</td></tr>
+          <tr><td>Query chậm dần theo scale</td><td>Hiệu năng — cần tối ưu index/partition kỹ hơn</td></tr>
+        </tbody>
+      </table>
+
       <div class="interview-line">
         <span class="callout-label">Trả lời mẫu khi phỏng vấn</span>
-        <p>"Multi-tenant là kiến trúc 1 hệ thống phục vụ nhiều khách hàng khác nhau nhưng dùng chung codebase và hạ tầng, mỗi khách hàng là 1 tenant với dữ liệu tách biệt. Em chọn giữa 3 mô hình tuỳ quy mô: database riêng cho từng tenant nếu cần cách ly mạnh và số lượng khách ít, schema riêng nếu cần cân bằng, hoặc shared schema với cột tenant_id nếu cần scale số lượng tenant lớn và tiết kiệm chi phí. Với shared schema, rủi ro lớn nhất là quên lọc tenant_id gây rò rỉ dữ liệu chéo, nên em luôn xác định tenant từ JWT đã xác thực chứ không tin dữ liệu FE tự gửi lên, và cân nhắc dùng Row-Level Security ở tầng DB làm lớp bảo vệ thứ 2 phòng khi code có sai sót."</p>
+        <p>"Multi-tenant là kiến trúc 1 hệ thống phục vụ nhiều khách hàng khác nhau nhưng dùng chung codebase và hạ tầng, mỗi khách hàng là 1 tenant với dữ liệu tách biệt. Em chọn giữa 3 mô hình tuỳ quy mô: database riêng cho từng tenant nếu cần cách ly mạnh và số lượng khách ít, schema riêng nếu cần cân bằng, hoặc shared schema với cột tenant_id nếu cần scale số lượng tenant lớn và tiết kiệm chi phí. Nhược điểm lớn nhất của shared schema là rủi ro rò rỉ dữ liệu chéo nếu code quên lọc tenant_id, và noisy neighbor — 1 tenant dùng quá tải ảnh hưởng tenant khác vì dùng chung hạ tầng. Ngoài ra deploy hay migration cũng rủi ro hơn vì ảnh hưởng tất cả khách hàng cùng lúc, và khó đáp ứng compliance nghiêm ngặt đòi hỏi cách ly hạ tầng vật lý hoàn toàn — những trường hợp đó em vẫn phải cân nhắc single-tenant dù tốn chi phí vận hành hơn. Để giảm rủi ro rò rỉ dữ liệu, em luôn xác định tenant từ JWT đã xác thực và cân nhắc dùng Row-Level Security ở tầng DB làm lớp bảo vệ thứ 2."</p>
       </div>
     </section>
 

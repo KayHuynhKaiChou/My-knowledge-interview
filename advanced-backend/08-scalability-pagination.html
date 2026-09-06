@@ -88,7 +88,7 @@
   <button class="mobile-toggle" id="navToggle" aria-label="Mở mục lục">☰ Mục lục</button>
   <aside class="sidebar" id="sidebar">
     <div class="brand">Advanced Backend</div>
-    <div class="brand-sub">13 mục &middot; sổ tay ôn phỏng vấn</div>
+    <div class="brand-sub">14 mục &middot; sổ tay ôn phỏng vấn</div>
 
     <div class="nav-block">
       <p class="nav-label">Nội dung</p>
@@ -106,6 +106,7 @@
         <li><a href="11-multi-tenant.html"><span class="nav-num">11</span><span class="nav-text">Multi-tenant</span></a></li>
         <li><a href="12-api-design.html"><span class="nav-num">12</span><span class="nav-text">API Design</span></a></li>
         <li><a href="13-normalization-denormalization.html"><span class="nav-num">13</span><span class="nav-text">Normalization &amp; Denormalization</span></a></li>
+        <li><a href="14-excel-import-optimization.html"><span class="nav-num">14</span><span class="nav-text">Import Excel tối ưu</span></a></li>
       </ul>
     </div>
 
@@ -147,27 +148,36 @@ Trang 2 (OFFSET 5, LIMIT 5): DB tính lại từ đầu — giờ thứ tự th�
   → OFFSET 5 giờ lại trúng ngay vào nó lần nữa.</code></pre>
       <p>Ngược lại, nếu có <b>xoá</b> bớt dữ liệu giữa các lần load, sẽ xảy ra chiều ngược lại — <b>mất hẳn 1 record</b>, không hiển thị ở trang nào cả, vì offset bị "hụt" đi so với vị trí thực tế.</p>
 
-      <h3 class="sub">8.3 — Cursor-based giải quyết cả 2 vấn đề trên như thế nào</h3>
-      <p>Thay vì nói "bỏ qua N row", cursor nói "lấy các row <b>sau</b> row cụ thể này" — dùng chính giá trị dữ liệu thật (không phải vị trí đếm) làm điều kiện lọc:</p>
+      <h3 class="sub">8.3 — Cursor là gì, và giải quyết cả 2 vấn đề trên như thế nào</h3>
+      <p><b>Cursor</b> là 1 "con trỏ đánh dấu vị trí" — chính là giá trị <b>thật</b> của (các) cột đang dùng để sắp xếp, lấy từ row <b>cuối cùng</b> trong danh sách rows đã load ở lần trước đó.</p>
       <div class="code-label good">Cursor-based — ổn định ở mọi độ sâu</div>
       <pre class="good"><code>SELECT * FROM comments
 WHERE created_at < '2026-08-27T10:00:00'
 ORDER BY created_at DESC LIMIT 20;</code></pre>
-      <p>Vì so sánh dựa trên <b>giá trị thật của row cuối cùng đã thấy</b>, dù có bao nhiêu row mới được chèn thêm ở đâu đó, nó không ảnh hưởng tới kết quả của trang tiếp theo — không bị trùng, không bị mất record.</p>
+      <p>Vì so sánh dựa trên <b>giá trị thật của row cuối cùng đã thấy</b>, dù có bao nhiêu row mới được chèn thêm hay xoá đi ở đâu đó, nó không ảnh hưởng tới kết quả của trang tiếp theo — không bị trùng, không bị mất record như offset ở mục 8.2.</p>
 
-      <h4 class="subsub">Vì sao chỉ dùng created_at chưa đủ — cần composite cursor (created_at + id)</h4>
-      <p><code>created_at</code> có thể bị <b>trùng giá trị</b> giữa nhiều record (2 comment tạo cùng 1 mili giây, hoặc DB chỉ lưu độ chính xác tới giây). Nếu chỉ dùng <code>created_at</code> làm điều kiện, những record có cùng giá trị có thể bị <b>bỏ sót</b> hoặc <b>lặp lại</b> giữa các trang. Giải pháp: kết hợp <code>created_at</code> + <code>id</code> làm điều kiện lọc, vì <code>id</code> luôn duy nhất, đảm bảo thứ tự tuyệt đối dù <code>created_at</code> có bị trùng:</p>
-      <pre class="good"><code>SELECT * FROM comments
-WHERE (created_at, id) < ('2026-08-27T10:00:00', 458)
-ORDER BY created_at DESC, id DESC
+      <div class="callout">
+        <span class="callout-label">Cursor gồm (những) field nào — phụ thuộc hoàn toàn vào ORDER BY hiện tại</span>
+        <p>Cursor không phải lúc nào cũng chỉ có 1 giá trị. Nó phải chứa <b>đúng (các) cột đang được dùng để <code>ORDER BY</code></b> tại thời điểm query — sort theo bao nhiêu cột thì cursor cần mang theo bấy nhiêu giá trị, cộng thêm 1 cột <b>duy nhất</b> (thường là <code>id</code>) làm <b>tie-breaker</b> phòng khi các cột sort chính bị trùng giá trị giữa nhiều row.</p>
+      </div>
+      <div class="callout">
+        <span class="callout-label">Cursor chỉ thực sự nhanh hơn offset khi cột đó có index</span>
+        <p>Nếu cột dùng làm cursor <b>không có index</b>, cả cursor lẫn offset đều phải quét toàn bảng để tìm điều kiện lọc — tốc độ tương đương nhau, cursor lúc này <b>không nhanh hơn gì</b>. Sự khác biệt hiệu năng chỉ rõ ràng khi có index: offset vẫn phải "đếm bỏ" đủ N row dù có index, còn cursor tận dụng được <b>index seek</b> để nhảy thẳng tới đúng vị trí cần, không phụ thuộc đang ở "trang" sâu tới đâu.</p>
+      </div>
+
+      <h4 class="subsub">Ví dụ: sort theo <code>price</code> và <code>created_at</code> — composite cursor gồm <code>id</code>, <code>price</code>, <code>created_at</code></h4>
+      <p>Giả sử danh sách sản phẩm được sort theo giá giảm dần, cùng giá thì sort theo ngày tạo mới nhất trước. Cả <code>price</code> lẫn <code>created_at</code> đều có thể <b>trùng giá trị</b> giữa nhiều sản phẩm (nhiều sản phẩm cùng giá, hoặc tạo cùng lúc khi seed dữ liệu) — nếu chỉ dùng 2 cột này, những record trùng nhau có thể bị <b>bỏ sót</b> hoặc <b>lặp lại</b> giữa các trang. Giải pháp: cursor phải mang theo đủ cả 3 giá trị — <code>price</code>, <code>created_at</code> (đúng 2 cột đang <code>ORDER BY</code>) và <code>id</code> làm tie-breaker cuối cùng, vì <code>id</code> luôn duy nhất, đảm bảo thứ tự tuyệt đối dù 2 cột kia có bị trùng cỡ nào:</p>
+      <pre class="good"><code>SELECT * FROM products
+WHERE (price, created_at, id) < (250000, '2026-08-27T10:00:00', 458)
+ORDER BY price DESC, created_at DESC, id DESC
 LIMIT 20;</code></pre>
-      <p><code>(created_at, id) &lt; (X, Y)</code> nghĩa là: nhỏ hơn theo <code>created_at</code> trước, nếu bằng nhau thì so tiếp theo <code>id</code> — đảm bảo thứ tự nhất quán tuyệt đối, không có 2 record nào "hoà" nhau để gây trùng/sót.</p>
+      <p><code>(price, created_at, id) &lt; (X, Y, Z)</code> nghĩa là: so sánh <code>price</code> trước, bằng nhau thì so tiếp <code>created_at</code>, vẫn bằng nhau nữa thì so tiếp <code>id</code> — đảm bảo thứ tự nhất quán tuyệt đối, không có 2 record nào "hoà" nhau hoàn toàn để gây trùng/sót. Đây cũng chính là composite index cần tạo, theo đúng thứ tự <code>(price, created_at, id)</code>, để cursor tận dụng được index seek như lưu ý ở trên.</p>
 
       <h4 class="subsub">Vì sao cần "encode" cursor thành 1 chuỗi</h4>
-      <p>Thay vì bắt Frontend tự quản lý và gửi lại 2 giá trị riêng (<code>created_at</code> và <code>id</code>) mỗi lần gọi trang tiếp theo, Backend <b>gộp 2 giá trị đó lại, encode thành 1 chuỗi duy nhất</b> (thường bằng Base64) — để FE chỉ cần lưu và gửi lại <b>1 chuỗi cursor duy nhất</b>, không cần biết bên trong nó chứa gì (che giấu cấu trúc dữ liệu thật, tránh FE tự ý sửa/đoán giá trị); và BE có thể đổi cấu trúc cursor sau này mà không phá vỡ hợp đồng API với FE.</p>
-      <pre><code>Dữ liệu thật: { createdAt: "2026-08-27T10:00:00.000Z", id: 458 }
+      <p>Thay vì bắt Frontend tự quản lý và gửi lại từng giá trị riêng lẻ (<code>price</code>, <code>created_at</code>, <code>id</code>) mỗi lần gọi trang tiếp theo, Backend <b>gộp các giá trị đó lại, encode thành 1 chuỗi duy nhất</b> (thường bằng Base64) — để FE chỉ cần lưu và gửi lại <b>1 chuỗi cursor duy nhất</b>, không cần biết bên trong nó chứa gì (che giấu cấu trúc dữ liệu thật, tránh FE tự ý sửa/đoán giá trị); và BE có thể đổi cấu trúc cursor sau này (thêm/bớt cột sort) mà không phá vỡ hợp đồng API với FE.</p>
+      <pre><code>Dữ liệu thật: { price: 250000, createdAt: "2026-08-27T10:00:00.000Z", id: 458 }
         ↓ JSON.stringify rồi Base64 encode
-Cursor gửi cho FE: "eyJjcmVhdGVkQXQiOiIyMDI2LTA4LTI3VDEwOjAwOjAwLjAwMFoiLCJpZCI6NDU4fQ=="</code></pre>
+Cursor gửi cho FE: "eyJwcmljZSI6MjUwMDAwLCJjcmVhdGVkQXQiOiIyMDI2LTA4LTI3VDEwOjAwOjAwLjAwMFoiLCJpZCI6NDU4fQ=="</code></pre>
 
       <h3 class="sub">8.4 — Code mẫu NestJS: giao tiếp FE-BE cho cả 2 cách (load comment 1 bài viết)</h3>
 
@@ -279,14 +289,6 @@ và gửi lại y nguyên ở lần gọi tiếp theo. Khi nextCursor = null →
         <span class="callout-label">Trả lời mẫu khi phỏng vấn</span>
         <p>"Em chọn cursor-based cho feed/infinite-scroll vì 2 lý do: offset càng sâu DB càng phải quét bỏ nhiều row nên chậm dần, và offset dễ bị lệch dữ liệu (trùng hoặc mất record) nếu có insert/delete xen giữa các lần load — vì nó dựa vào vị trí đếm chứ không dựa vào giá trị thật. Cursor thì dùng chính giá trị của record cuối cùng đã thấy làm điều kiện lọc tiếp, nên không bị ảnh hưởng bởi thay đổi dữ liệu ở giữa. Em dùng composite cursor gồm created_at và id thay vì chỉ created_at, để tránh trùng khi nhiều record có cùng thời gian tạo, rồi encode gộp 2 giá trị đó thành 1 chuỗi base64 để FE chỉ cần cầm và gửi lại, không cần biết cấu trúc bên trong."</p>
       </div>
-
-      <h3 class="sub">8.5 — Chẩn đoán feature search/filter chậm — thứ tự kiểm tra</h3>
-      <ol>
-        <li><code>EXPLAIN ANALYZE</code> — có dùng index không hay full table scan.</li>
-        <li>Kiểm tra N+1 qua query log.</li>
-        <li>Filter phức tạp (<code>OR</code>, <code>LIKE '%...%'</code>) không tận dụng index → cân nhắc Elasticsearch nếu data lớn.</li>
-        <li>Đo riêng thời gian serialize response so với thời gian query DB để biết nghẽn ở đâu.</li>
-      </ol>
     </section>
 
     <nav class="pager">
