@@ -126,12 +126,15 @@
       <div class="q-tag"><span class="n">8</span> Câu hỏi ứng dụng thường gặp</div>
       <h2 class="q-title">"API trả về danh sách 10.000 record — offset hay cursor-based pagination?"</h2>
 
-      <h3 class="sub">8.1 — Lý do 1: Offset tốn hiệu năng — DB phải quét bỏ N row mỗi lần</h3>
-      <div class="code-label bad">Offset — chậm dần khi page càng sâu</div>
-      <pre class="bad"><code>SELECT * FROM comments ORDER BY created_at DESC LIMIT 20 OFFSET 10000;</code></pre>
-      <p>DB không thể "nhảy thẳng" tới row thứ 10000 — dù có index, nó vẫn phải <b>duyệt qua đủ 10000 row đầu tiên rồi mới bỏ đi</b>, chỉ lấy 20 row tiếp theo. Càng phân trang sâu (offset càng lớn), thời gian query càng tăng tuyến tính — trang 1 nhanh, trang 500 chậm hẳn.</p>
+      <h3 class="sub">8.1 — Offset-based là gì, cách triển khai</h3>
+      <p>Offset-based là kỹ thuật chia nhỏ dữ liệu trả về bằng cách đếm và bỏ qua N record đầu tiên, dùng <code>LIMIT</code> và <code>OFFSET</code> ,FE chỉ cần gửi số trang, BE tự tính ra offset tương ứng. Sau đó lấy dữ liệu tiếp theo từ vị trí đã đc xác định bời offset</p>
+      <pre><code>SELECT * FROM comments ORDER BY created_at DESC LIMIT 20 OFFSET 10000;</code></pre>
 
-      <h3 class="sub">8.2 — Lý do 2: Offset gây lệch dữ liệu khi có insert/delete xen giữa các lần load</h3>
+      <h3 class="sub">8.2 — 2 nhược điểm hiện tại của Offset-based</h3>
+      <h4 class="subsub">Nhược điểm 1 — tốn hiệu năng: DB phải quét bỏ N row mỗi lần</h4>
+      <p>DB không thể "nhảy thẳng" tới row thứ 10000 — dù có index, nó vẫn phải <b>duyệt qua đủ 10000 row đầu tiên rồi mới bỏ đi</b>, chỉ lấy 20 row tiếp theo (như câu query ở mục 8.1). Càng phân trang sâu (offset càng lớn), thời gian query càng tăng tuyến tính — trang 1 nhanh, trang 500 chậm hẳn.</p>
+
+      <h4 class="subsub">Nhược điểm 2 — gây lệch dữ liệu khi có insert/delete xen giữa các lần load</h4>
       <p>Đây là lỗi tinh vi, dễ bị bỏ qua. Ví dụ load danh sách comment, sắp mới nhất lên đầu:</p>
       <pre class="bad"><code>Trang 1 (OFFSET 0, LIMIT 5): comment [10, 9, 8, 7, 6]  (id giảm dần theo thời gian)
 
@@ -177,102 +180,11 @@ ORDER_BY cm.sentAt DESC, cm.id DESC // dùng index thì lệnh này DB ko chạy
         ↓ JSON.stringify rồi Base64 encode
 Cursor gửi cho FE: "eyJwcmljZSI6MjUwMDAwLCJjcmVhdGVkQXQiOiIyMDI2LTA4LTI3VDEwOjAwOjAwLjAwMFoiLCJpZCI6NDU4fQ=="</code></pre>
 
-      <h3 class="sub">8.4 — Code mẫu NestJS: giao tiếp FE-BE cho cả 2 cách (load comment 1 bài viết)</h3>
-
-      <h4 class="subsub">Offset-based</h4>
-      <pre><code>// comment.controller.ts
-@Controller('posts/:postId/comments')
-export class CommentController {
-  constructor(private commentService: CommentService) {}
-
-  @Get()
-  async getComments(
-    @Param('postId') postId: string,
-    @Query('page') page = 1,
-    @Query('limit') limit = 20,
-  ) {
-    return this.commentService.findByOffset(postId, +page, +limit);
-  }
-}</code></pre>
-      <pre><code>// comment.service.ts
-async findByOffset(postId: string, page: number, limit: number) {
-  const skip = (page - 1) * limit;
-
-  const [data, total] = await this.commentRepo.findAndCount({
-    where: { postId },
-    order: { createdAt: 'DESC', id: 'DESC' },
-    skip,          // TypeORM tự dịch thành OFFSET
-    take: limit,   // và LIMIT
-  });
-
-  return {
-    data,
-    pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
-  };
-}</code></pre>
-      <p><b>FE gọi:</b></p>
-      <pre><code>GET /posts/5/comments?page=1&limit=20
-GET /posts/5/comments?page=2&limit=20   ← FE tự tính số trang tiếp theo, tự quản lý "page"</code></pre>
-
-      <h4 class="subsub">Cursor-based</h4>
-      <pre><code>// comment.controller.ts
-@Get()
-async getComments(
-  @Param('postId') postId: string,
-  @Query('cursor') cursor?: string,   // optional — lần đầu load thì không có
-  @Query('limit') limit = 20,
-) {
-  return this.commentService.findByCursor(postId, cursor, +limit);
-}</code></pre>
-      <pre><code>// comment.service.ts
-async findByCursor(postId: string, cursor: string | undefined, limit: number) {
-  const qb = this.commentRepo.createQueryBuilder('c')
-    .where('c.postId = :postId', { postId })
-    .orderBy('c.createdAt', 'DESC')
-    .addOrderBy('c.id', 'DESC')
-    .take(limit + 1); // lấy dư 1 record để biết còn trang tiếp theo hay không
-
-  if (cursor) {
-    const { createdAt, id } = this.decodeCursor(cursor);
-    // điều kiện composite: lấy record "sau" đúng vị trí cursor trỏ tới
-    qb.andWhere(
-      '(c.createdAt < :createdAt) OR (c.createdAt = :createdAt AND c.id < :id)',
-      { createdAt, id },
-    );
-  }
-
-  const rows = await qb.getMany();
-  const hasNextPage = rows.length > limit;
-  const data = hasNextPage ? rows.slice(0, limit) : rows;
-
-  const nextCursor = hasNextPage
-    ? this.encodeCursor(data[data.length - 1])   // encode từ record CUỐI trang này
-    : null;
-
-  return { data, nextCursor };
-}
-
-private encodeCursor(record: Comment): string {
-  const payload = JSON.stringify({ createdAt: record.createdAt, id: record.id });
-  return Buffer.from(payload).toString('base64');
-}
-
-private decodeCursor(cursor: string): { createdAt: string; id: number } {
-  const payload = Buffer.from(cursor, 'base64').toString('utf-8');
-  return JSON.parse(payload);
-}</code></pre>
-      <p><b>FE gọi — luồng giao tiếp:</b></p>
-      <pre><code>Lần 1 (load trang đầu — CHƯA có cursor):
-  GET /posts/5/comments?limit=20
-  → Response: { data: [...20 comment...], nextCursor: "eyJjcmVhdGVkQXQiOi..." }
-
-Lần 2 (user cuộn xuống / bấm "xem thêm" — FE lấy nextCursor từ response trước, gửi lại):
-  GET /posts/5/comments?limit=20&cursor=eyJjcmVhdGVkQXQiOi...
-  → Response: { data: [...20 comment tiếp theo...], nextCursor: "eyJ..." (hoặc null nếu hết) }
-
-FE không cần biết bên trong cursor chứa gì — chỉ cần "cầm" chuỗi BE trả về
-và gửi lại y nguyên ở lần gọi tiếp theo. Khi nextCursor = null → hết dữ liệu, ẩn nút "xem thêm".</code></pre>
-
+      <h3 class="sub">8.4 — Khi nào dùng cursor-based, khi nào dùng offset-based</h3>
+      <ul>
+        <li><b>Dùng offset-based</b> khi cần cho user nhảy tới trang bất kỳ (<code>?page=50</code>), cần hiển thị tổng số trang/tổng số record, hoặc dataset không quá lớn và ít bị insert/delete liên tục — ví dụ trang quản trị nội bộ, bảng dữ liệu ít thay đổi.</li>
+        <li><b>Dùng cursor-based</b> khi là feed/infinite-scroll (không cần nhảy trang, chỉ cuộn tiếp), dataset lớn và phân trang sâu, hoặc dữ liệu thay đổi liên tục (insert/delete xen kẽ) cần tránh trùng/mất record như 2 nhược điểm ở mục 8.2.</li>
+      </ul>
       <table>
         <thead><tr><th></th><th>Offset-based</th><th>Cursor-based</th></tr></thead>
         <tbody>
