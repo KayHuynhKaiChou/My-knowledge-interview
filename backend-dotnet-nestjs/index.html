@@ -88,26 +88,27 @@
   <button class="mobile-toggle" id="navToggle" aria-label="Mở mục lục">☰ Mục lục</button>
   <aside class="sidebar" id="sidebar">
     <div class="brand">Backend — .NET &amp; NestJS</div>
-    <div class="brand-sub">15 mục &middot; sổ tay ôn phỏng vấn</div>
+    <div class="brand-sub">16 mục &middot; sổ tay ôn phỏng vấn</div>
 
     <div class="nav-block">
       <p class="nav-label">Nội dung</p>
       <ul class="nav-list">
         <li><a href="#4-tinh-chat-oop"><span class="nav-num">01</span><span class="nav-text">4 tính chất OOP</span></a></li>
-        <li><a href="#stack-voi-heap"><span class="nav-num">02</span><span class="nav-text">Stack với Heap</span></a></li>
-        <li><a href="#ado-net"><span class="nav-num">03</span><span class="nav-text">ADO.NET</span></a></li>
-        <li><a href="#chuc-nang-cua-addcontrollers"><span class="nav-num">04</span><span class="nav-text">Chức năng của AddControllers</span></a></li>
-        <li><a href="#adddbcontext"><span class="nav-num">05</span><span class="nav-text">AddDbContext</span></a></li>
-        <li><a href="#lazy-loading-va-eager-loading"><span class="nav-num">06</span><span class="nav-text">Lazy Loading và Eager Loading</span></a></li>
-        <li><a href="#dac-diem-chinh-cua-record"><span class="nav-num">07</span><span class="nav-text">Đặc điểm chính của record</span></a></li>
-        <li><a href="#jwt"><span class="nav-num">08</span><span class="nav-text">JWT</span></a></li>
-        <li><a href="#express-multer-file"><span class="nav-num">09</span><span class="nav-text">Express.Multer.File</span></a></li>
-        <li><a href="#decorator"><span class="nav-num">10</span><span class="nav-text">Decorator</span></a></li>
-        <li><a href="#guard"><span class="nav-num">11</span><span class="nav-text">Guard</span></a></li>
-        <li><a href="#api"><span class="nav-num">12</span><span class="nav-text">API</span></a></li>
-        <li><a href="#restful-api"><span class="nav-num">13</span><span class="nav-text">Restful API</span></a></li>
-        <li><a href="#graphql"><span class="nav-num">14</span><span class="nav-text">GraphQL</span></a></li>
-        <li><a href="#module"><span class="nav-num">15</span><span class="nav-text">Module</span></a></li>
+        <li><a href="#interface-va-abstract-class"><span class="nav-num">02</span><span class="nav-text">Interface và Abstract Class</span></a></li>
+        <li><a href="#stack-voi-heap"><span class="nav-num">03</span><span class="nav-text">Stack với Heap</span></a></li>
+        <li><a href="#ado-net"><span class="nav-num">04</span><span class="nav-text">ADO.NET</span></a></li>
+        <li><a href="#chuc-nang-cua-addcontrollers"><span class="nav-num">05</span><span class="nav-text">Chức năng của AddControllers</span></a></li>
+        <li><a href="#adddbcontext"><span class="nav-num">06</span><span class="nav-text">AddDbContext</span></a></li>
+        <li><a href="#lazy-loading-va-eager-loading"><span class="nav-num">07</span><span class="nav-text">Lazy Loading và Eager Loading</span></a></li>
+        <li><a href="#dac-diem-chinh-cua-record"><span class="nav-num">08</span><span class="nav-text">Đặc điểm chính của record</span></a></li>
+        <li><a href="#jwt"><span class="nav-num">09</span><span class="nav-text">JWT</span></a></li>
+        <li><a href="#express-multer-file"><span class="nav-num">10</span><span class="nav-text">Express.Multer.File</span></a></li>
+        <li><a href="#decorator"><span class="nav-num">11</span><span class="nav-text">Decorator</span></a></li>
+        <li><a href="#guard"><span class="nav-num">12</span><span class="nav-text">Guard</span></a></li>
+        <li><a href="#api"><span class="nav-num">13</span><span class="nav-text">API</span></a></li>
+        <li><a href="#restful-api"><span class="nav-num">14</span><span class="nav-text">Restful API</span></a></li>
+        <li><a href="#graphql"><span class="nav-num">15</span><span class="nav-text">GraphQL</span></a></li>
+        <li><a href="#module"><span class="nav-num">16</span><span class="nav-text">Module</span></a></li>
       </ul>
     </div>
   </aside>
@@ -140,8 +141,72 @@ abstract class Vehicle { public abstract void Drive(); }</code></pre>
       <pre><code>====================================================================</code></pre>
     </section>
 
-    <section class="qa" id="stack-voi-heap" data-nav="Stack với Heap">
+    <section class="qa" id="interface-va-abstract-class" data-nav="Interface và Abstract Class">
       <div class="q-tag"><span class="n">2</span> Kiến thức nền</div>
+      <h2 class="q-title">So sánh Interface và Abstract Class</h2>
+      <p>Cả 2 đều dùng để định nghĩa 1 "khuôn mẫu" bắt buộc các lớp con phải tuân theo, nhưng khác nhau ở việc có chứa code thực thi sẵn hay không, và số lượng có thể áp dụng cùng lúc cho 1 class.</p>
+      <table>
+        <thead><tr><th></th><th>Interface</th><th>Abstract Class</th></tr></thead>
+        <tbody>
+          <tr><td>Chứa code thực thi</td><td>Không — chỉ khai báo chữ ký method, không có phần thân (thuần "hợp đồng")</td><td>Có thể — vừa có method đã viết sẵn code dùng chung, vừa có method trừu tượng (<code>abstract</code>) bắt buộc lớp con tự viết</td></tr>
+          <tr><td>Số lượng implement/kế thừa</td><td>1 class có thể <code>implement</code> nhiều interface cùng lúc</td><td>1 class chỉ <code>extends</code> được đúng 1 abstract class (kế thừa đơn)</td></tr>
+          <tr><td>Field/thuộc tính</td><td>Không chứa field có giá trị khởi tạo (chỉ có thể khai báo hằng số)</td><td>Có thể chứa field, constructor, thuộc tính đã khởi tạo giá trị</td></tr>
+          <tr><td>Mục đích chính</td><td>Thống nhất chữ ký giữa các class hoàn toàn khác nhau về logic (dễ swap qua dependency injection)</td><td>Chia sẻ code chung giữa các class có quan hệ họ hàng thật sự</td></tr>
+        </tbody>
+      </table>
+
+      <h4 class="subsub">Ví dụ Interface — nhiều cổng thanh toán khác nhau, chỉ cần thống nhất chữ ký</h4>
+      <pre><code>public interface IPaymentGateway
+{
+    Task&lt;PaymentResult&gt; ChargeAsync(decimal amount);
+}
+
+public class StripeGateway : IPaymentGateway
+{
+    public Task&lt;PaymentResult&gt; ChargeAsync(decimal amount) { /* gọi API Stripe */ }
+}
+
+public class MomoGateway : IPaymentGateway
+{
+    public Task&lt;PaymentResult&gt; ChargeAsync(decimal amount) { /* gọi API Momo */ }
+}
+// StripeGateway và MomoGateway hoàn toàn khác nhau về cách thực thi,
+// chỉ cần cùng implement IPaymentGateway để service gọi được qua DI mà không cần biết đang dùng cổng nào</code></pre>
+
+      <h4 class="subsub">Ví dụ Abstract Class — nhiều repository dùng chung logic retry</h4>
+      <pre><code>public abstract class BaseRepository&lt;T&gt;
+{
+    // Method đã có sẵn code dùng chung cho MỌI repository con
+    protected async Task&lt;T&gt; ExecuteWithRetryAsync(Func&lt;Task&lt;T&gt;&gt; query, int maxRetry = 3)
+    {
+        for (int i = 0; i &lt; maxRetry; i++)
+        {
+            try { return await query(); }
+            catch (DbException) when (i &lt; maxRetry - 1) { }
+        }
+        throw new Exception("Retry hết lượt vẫn thất bại");
+    }
+
+    // Method trừu tượng — bắt buộc lớp con tự viết câu query cụ thể
+    public abstract Task&lt;T&gt; GetByIdAsync(int id);
+}
+
+public class UserRepository : BaseRepository&lt;User&gt;
+{
+    public override Task&lt;User&gt; GetByIdAsync(int id)
+        =&gt; ExecuteWithRetryAsync(() =&gt; _db.Users.FindAsync(id));
+}
+// UserRepository không cần viết lại logic retry — thừa hưởng sẵn từ BaseRepository,
+// chỉ cần tự viết phần khác nhau: câu query GetByIdAsync</code></pre>
+
+      <div class="interview-line">
+        <span class="callout-label">Câu trả lời mẫu khi phỏng vấn</span>
+        <p>"Interface là hợp đồng thuần tuý, chỉ định nghĩa các method phải có mà không chứa code thực thi, và 1 class có thể implement nhiều interface cùng lúc. Abstract class thì vừa có thể chứa method đã có sẵn code dùng chung, vừa có method trừu tượng bắt buộc lớp con phải tự viết, nhưng chỉ hỗ trợ kế thừa đơn — 1 class chỉ extends được 1 abstract class. Em chọn interface khi các class implement hoàn toàn khác nhau về logic, chỉ cần thống nhất chữ ký để dễ swap qua dependency injection — ví dụ nhiều cổng thanh toán khác nhau. Em chọn abstract class khi các class có quan hệ họ hàng thật sự và cần chia sẻ code chung, ví dụ nhiều loại repository đều cần logic retry giống nhau, chỉ khác câu query cụ thể."</p>
+      </div>
+    </section>
+
+    <section class="qa" id="stack-voi-heap" data-nav="Stack với Heap">
+      <div class="q-tag"><span class="n">3</span> Kiến thức nền</div>
       <h2 class="q-title">Stack với Heap</h2>
       <p><a href="https://viblo.asia/p/non-alloc-c-1-struct-voi-class-khac-nhau-the-nao-optimize-code-voi-value-type-va-span-trong-c-obA46yBwVKv" target="_blank" rel="noopener">https://viblo.asia/p/non-alloc-c-1-struct-voi-class-khac-nhau-the-nao-optimize-code-voi-value-type-va-span-trong-c-obA46yBwVKv</a></p>
       <p>Các chương trình khi hoạt động cần sử dụng bộ nhớ trên RAM. Trước tiên ta hãy nhớ về khái niệm cấp phát (allocate) và thu hồi (deallocate) vùng nhớ</p>
@@ -155,7 +220,7 @@ abstract class Vehicle { public abstract void Drive(); }</code></pre>
     </section>
 
     <section class="qa" id="ado-net" data-nav="ADO.NET">
-      <div class="q-tag"><span class="n">3</span> Kiến thức nền</div>
+      <div class="q-tag"><span class="n">4</span> Kiến thức nền</div>
       <h2 class="q-title">ADO.NET</h2>
       <p>là tập hợp các thư viện lớp qua đó cho phép ứng dụng tương tác (get, create,update, delete) với các nguồn dữ liệu (Như SQLServer, XML, MySQL, Oracle Database ...).</p>
       <p><a href="https://bb.ccc.dddd.maya.vn/ado-net-gioi-thieu-ado-net-va-ket-noi-sql-server-voi-sqlconnection.html" target="_blank" rel="noopener">https://bb.ccc.dddd.maya.vn/ado-net-gioi-thieu-ado-net-va-ket-noi-sql-server-voi-sqlconnection.html</a></p>
@@ -172,7 +237,7 @@ Navigation property:</code></pre>
     </section>
 
     <section class="qa" id="chuc-nang-cua-addcontrollers" data-nav="Chức năng của AddControllers">
-      <div class="q-tag"><span class="n">4</span> Kiến thức nền</div>
+      <div class="q-tag"><span class="n">5</span> Kiến thức nền</div>
       <h2 class="q-title">Chức năng của AddControllers</h2>
       <ul>
         <li>Đăng ký Controller: Phương thức này thêm tất cả các controller của ứng dụng vào DI container. Controller có thể là:</li>
@@ -198,7 +263,7 @@ Navigation property:</code></pre>
     </section>
 
     <section class="qa" id="adddbcontext" data-nav="AddDbContext">
-      <div class="q-tag"><span class="n">5</span> Kiến thức nền</div>
+      <div class="q-tag"><span class="n">6</span> Kiến thức nền</div>
       <h2 class="q-title">AddDbContext</h2>
       <p>code:</p>
       <pre><code>services.AddDbContext&lt;DatabaseContext&gt;(option =&gt;
@@ -211,7 +276,7 @@ services.AddDbContext&lt;DatabaseContext&gt;(...): Đăng ký DatabaseContext v�
     </section>
 
     <section class="qa" id="lazy-loading-va-eager-loading" data-nav="Lazy Loading và Eager Loading">
-      <div class="q-tag"><span class="n">6</span> Kiến thức nền</div>
+      <div class="q-tag"><span class="n">7</span> Kiến thức nền</div>
       <h2 class="q-title">Lazy Loading và Eager Loading</h2>
       <figure class="doc-figure"><img src="../assets/img/backend-dotnet-nestjs-lazy-loading-va-eager-loading-01.png" alt="Minh hoạ" loading="lazy"></figure>
       <pre><code>===========================================================</code></pre>
@@ -222,7 +287,7 @@ Record</code></pre>
     </section>
 
     <section class="qa" id="dac-diem-chinh-cua-record" data-nav="Đặc điểm chính của record">
-      <div class="q-tag"><span class="n">7</span> Kiến thức nền</div>
+      <div class="q-tag"><span class="n">8</span> Kiến thức nền</div>
       <h2 class="q-title">Đặc điểm chính của record</h2>
       <ul>
         <li>Tính bất biến (Immutable):</li>
@@ -238,7 +303,7 @@ Record</code></pre>
     </section>
 
     <section class="qa" id="jwt" data-nav="JWT">
-      <div class="q-tag"><span class="n">8</span> Kiến thức nền</div>
+      <div class="q-tag"><span class="n">9</span> Kiến thức nền</div>
       <h2 class="q-title">JWT</h2>
       <p>https://200lab.io/blog/jwt-la-gi?srsltid=AfmBOop5EboB46epFVuXgqSDilr9PZnvtQdd0li_N5fRO_lD1o_UcZ2Y</p>
       <p><b>``````````````````````````````````````````` ………………``````````````````````````````````````````</b></p>
@@ -246,14 +311,14 @@ Record</code></pre>
     </section>
 
     <section class="qa" id="express-multer-file" data-nav="Express.Multer.File">
-      <div class="q-tag"><span class="n">9</span> Kiến thức nền</div>
+      <div class="q-tag"><span class="n">10</span> Kiến thức nền</div>
       <h2 class="q-title">Express.Multer.File</h2>
       <p>là kiểu dữ liệu (interface) mà NestJS dùng để mô tả một file đã được upload thông qua middleware Multer (mặc định của NestJS để xử lý multipart/form-data).</p>
       <figure class="doc-figure"><img src="../assets/img/backend-dotnet-nestjs-express-multer-file-01.png" alt="Minh hoạ" loading="lazy"></figure>
     </section>
 
     <section class="qa" id="decorator" data-nav="Decorator">
-      <div class="q-tag"><span class="n">10</span> Kiến thức nền</div>
+      <div class="q-tag"><span class="n">11</span> Kiến thức nền</div>
       <h2 class="q-title">Decorator</h2>
       <ul>
         <li>là một hàm đặc biệt được dùng để thêm hành vi (metadata hoặc logic) vào<b> class, property, method, accessor</b> hoặc<b> parameter</b>, mà không thay đổi mã gốc của đối tượng đó. Decorator thường dùng trong các framework như Angular, NestJS, hoặc để xây dựng hệ thống DI (Dependency Injection).</li>
@@ -262,7 +327,7 @@ Record</code></pre>
     </section>
 
     <section class="qa" id="guard" data-nav="Guard">
-      <div class="q-tag"><span class="n">11</span> Kiến thức nền</div>
+      <div class="q-tag"><span class="n">12</span> Kiến thức nền</div>
       <h2 class="q-title">Guard</h2>
       <ul>
         <li>là một thành phần dùng để <b>kiểm soát quyền truy cập</b> đến các route (API endpoint). Nó được sử dụng để xác định xem <b>một request có được phép thực hiện hay không</b> – thường dùng cho xác thực (authentication) và phân quyền (authorization).</li>
@@ -271,13 +336,13 @@ Record</code></pre>
     </section>
 
     <section class="qa" id="api" data-nav="API">
-      <div class="q-tag"><span class="n">12</span> Kiến thức nền</div>
+      <div class="q-tag"><span class="n">13</span> Kiến thức nền</div>
       <h2 class="q-title">API</h2>
       <p>một "cầu nối" cho phép các ứng dụng phần mềm khác nhau giao tiếp và trao đổi dữ liệu với nhau một cách có quy tắc.</p>
     </section>
 
     <section class="qa" id="restful-api" data-nav="Restful API">
-      <div class="q-tag"><span class="n">13</span> Kiến thức nền</div>
+      <div class="q-tag"><span class="n">14</span> Kiến thức nền</div>
       <h2 class="q-title">Restful API</h2>
       <ul>
         <li>là một tiêu chuẩn dùng trong việc thiết kế các API cho các ứng dụng web để quản lý các resource.</li>
@@ -292,7 +357,7 @@ Record</code></pre>
     </section>
 
     <section class="qa" id="graphql" data-nav="GraphQL">
-      <div class="q-tag"><span class="n">14</span> Kiến thức nền</div>
+      <div class="q-tag"><span class="n">15</span> Kiến thức nền</div>
       <h2 class="q-title">GraphQL</h2>
       <ul>
         <li>là một ngôn ngữ truy vấn API cho phép client truy vấn chính xác những dữ liệu mà client cần</li>
@@ -305,7 +370,7 @@ Record</code></pre>
     </section>
 
     <section class="qa" id="module" data-nav="Module">
-      <div class="q-tag"><span class="n">15</span> SQL</div>
+      <div class="q-tag"><span class="n">16</span> SQL</div>
       <h2 class="q-title">Module</h2>
       <p>Trong NestJS, <b>Module</b> là một class được đánh dấu bằng decorator @Module().</p>
       <p>Mỗi ứng dụng NestJS đều có ít nhất một module gọi là <b>Root Module</b> (thường là AppModule). Root module này là điểm bắt đầu để NestJS xây dựng biểu đồ ứng dụng (application graph)</p>
