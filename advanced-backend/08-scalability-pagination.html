@@ -149,33 +149,31 @@ Trang 2 (OFFSET 5, LIMIT 5): DB tính lại từ đầu — giờ thứ tự th�
       <p>Ngược lại, nếu có <b>xoá</b> bớt dữ liệu giữa các lần load, sẽ xảy ra chiều ngược lại — <b>mất hẳn 1 record</b>, không hiển thị ở trang nào cả, vì offset bị "hụt" đi so với vị trí thực tế.</p>
 
       <h3 class="sub">8.3 — Cursor là gì, và giải quyết cả 2 vấn đề trên như thế nào</h3>
-      <p><b>Cursor</b> là 1 "con trỏ đánh dấu vị trí" — chính là giá trị <b>thật</b> của (các) cột đang dùng để sắp xếp, lấy từ row <b>cuối cùng</b> trong danh sách rows đã load ở lần trước đó.</p>
-      <div class="code-label good">Cursor-based — ổn định ở mọi độ sâu</div>
-      <pre class="good"><code>SELECT * FROM comments
-WHERE created_at < '2026-08-27T10:00:00'
-ORDER BY created_at DESC LIMIT 20;</code></pre>
-      <p>Vì so sánh dựa trên <b>giá trị thật của row cuối cùng đã thấy</b>, dù có bao nhiêu row mới được chèn thêm hay xoá đi ở đâu đó, nó không ảnh hưởng tới kết quả của trang tiếp theo — không bị trùng, không bị mất record như offset ở mục 8.2.</p>
+      <p><b>Cursor</b> là kỹ thuật chia nhỏ dữ liệu trả về bằng cách dùng 1 con trỏ cursor lưu giá trị duy nhất từ các column (timestamp, id) của row <b>cuối cùng</b> trong danh sách rows đã load ở lần trước đó làm mốc để lấy tiếp dữ liệu của trang kế tiếp.</p>
+      
+      <p>Vì so sánh dựa trên <b>con trỏ cursor lưu giá trị duy nhất từ các column (timestamp, id) của row cuối cùng đã thấy</b>, dù có bao nhiêu row mới được chèn thêm hay xoá đi ở đâu đó, nó không ảnh hưởng tới kết quả của trang tiếp theo — không bị trùng, không bị mất record như offset ở mục 8.2.</p>
 
-      <div class="callout">
-        <span class="callout-label">Cursor gồm (những) field nào — phụ thuộc hoàn toàn vào ORDER BY hiện tại</span>
-        <p>Cursor không phải lúc nào cũng chỉ có 1 giá trị. Nó phải chứa <b>đúng (các) cột đang được dùng để <code>ORDER BY</code></b> tại thời điểm query — sort theo bao nhiêu cột thì cursor cần mang theo bấy nhiêu giá trị, cộng thêm 1 cột <b>duy nhất</b> (thường là <code>id</code>) làm <b>tie-breaker</b> phòng khi các cột sort chính bị trùng giá trị giữa nhiều row.</p>
-      </div>
-      <div class="callout">
-        <span class="callout-label">Cursor chỉ thực sự nhanh hơn offset khi cột đó có index</span>
-        <p>Nếu cột dùng làm cursor <b>không có index</b>, cả cursor lẫn offset đều phải quét toàn bảng để tìm điều kiện lọc — tốc độ tương đương nhau, cursor lúc này <b>không nhanh hơn gì</b>. Sự khác biệt hiệu năng chỉ rõ ràng khi có index: offset vẫn phải "đếm bỏ" đủ N row dù có index, còn cursor tận dụng được <b>index seek</b> để nhảy thẳng tới đúng vị trí cần, không phụ thuộc đang ở "trang" sâu tới đâu.</p>
-      </div>
-
-      <h4 class="subsub">Ví dụ: sort theo <code>price</code> và <code>created_at</code> — composite cursor gồm <code>id</code>, <code>price</code>, <code>created_at</code></h4>
-      <p>Giả sử danh sách sản phẩm được sort theo giá giảm dần, cùng giá thì sort theo ngày tạo mới nhất trước. Cả <code>price</code> lẫn <code>created_at</code> đều có thể <b>trùng giá trị</b> giữa nhiều sản phẩm (nhiều sản phẩm cùng giá, hoặc tạo cùng lúc khi seed dữ liệu) — nếu chỉ dùng 2 cột này, những record trùng nhau có thể bị <b>bỏ sót</b> hoặc <b>lặp lại</b> giữa các trang. Giải pháp: cursor phải mang theo đủ cả 3 giá trị — <code>price</code>, <code>created_at</code> (đúng 2 cột đang <code>ORDER BY</code>) và <code>id</code> làm tie-breaker cuối cùng, vì <code>id</code> luôn duy nhất, đảm bảo thứ tự tuyệt đối dù 2 cột kia có bị trùng cỡ nào:</p>
-      <pre class="good"><code>SELECT * FROM products
-WHERE (price, created_at, id) < (250000, '2026-08-27T10:00:00', 458)
-ORDER BY price DESC, created_at DESC, id DESC
-LIMIT 20;</code></pre>
-      <p><code>(price, created_at, id) &lt; (X, Y, Z)</code> nghĩa là: so sánh <code>price</code> trước, bằng nhau thì so tiếp <code>created_at</code>, vẫn bằng nhau nữa thì so tiếp <code>id</code> — đảm bảo thứ tự nhất quán tuyệt đối, không có 2 record nào "hoà" nhau hoàn toàn để gây trùng/sót. Đây cũng chính là composite index cần tạo, theo đúng thứ tự <code>(price, created_at, id)</code>, để cursor tận dụng được index seek như lưu ý ở trên.</p>
+      <h4 class="subsub">Ví dụ: api get list messages từ 1 conversation</h4>
+      <ul>
+        <li>Dùng cursor composition (SENT_AT DESC, ID DESC) =&gt; có thể tạo composition index (CONVERSATION_ID, SENT_AT DESC, ID DESC) để tăng tốc độ cho cursor</li>
+        <li>CONVERSATION_ID là so sánh = , còn SENT_AT, ID la so sánh &lt;</li>
+      </ul>
+      <p>+ cursor composition chỉ chứa những cột mang tính so sánh (vì cursor là dùng so sánh dựa vào record cuối hoặc record đầu) ở WHERE và sort ở ORDER_BY.<br>dùng ASC ở ORDER_BY =&gt; dùng "&gt;" ở WHERE, dùng DESC ở ORDER_BY =&gt; dùng "&lt;" ở WHERE.</p>
+      <p>+ cursor composition bắt buộc có 1 cột unique làm tie breaker , nếu ko có thì phải dùng cột id, và cột này phải luôn nằm cuối</p>
+      <p>+ khi dùng cursor thì nên có composition index kèm theo để tăng tốc độ (tùy nhu cầu sử dụng api)</p>
+      <p>+ composition index sẽ chứa các cột mang tính so sánh &gt;,&lt;,=</p>
+      <p>+ các cột mang tính so sánh &gt;,&lt; đều nằm ở cả composition cursor và composition index.</p>
+      <p>+ đã dùng so sánh &gt;,&lt; thì các cột này phải cùng có DESC, ASC ở ORDER_BY</p>
+      <p>+ trong composition index, những Col với phép so sánh bằng phải luôn nằm ở vị trí đầu , ví dụ status == 'PENDING', conversation_id == '123'</p>
+      <pre><code>WHERE cm.conversation_id = :conversationId AND (
+  (cm.sentAt < :cursorSentAt) OR
+  (cm.sentAt = :cursorSentAt AND cm.id < :cursorId)
+)
+ORDER_BY cm.sentAt DESC, cm.id DESC // dùng index thì lệnh này DB ko chạy vì lấy từ list msg từ index đã sort sẵn => đỡ tốn performance</code></pre>
 
       <h4 class="subsub">Vì sao cần "encode" cursor thành 1 chuỗi</h4>
-      <p>Thay vì bắt Frontend tự quản lý và gửi lại từng giá trị riêng lẻ (<code>price</code>, <code>created_at</code>, <code>id</code>) mỗi lần gọi trang tiếp theo, Backend <b>gộp các giá trị đó lại, encode thành 1 chuỗi duy nhất</b> (thường bằng Base64) — để FE chỉ cần lưu và gửi lại <b>1 chuỗi cursor duy nhất</b>, không cần biết bên trong nó chứa gì (che giấu cấu trúc dữ liệu thật, tránh FE tự ý sửa/đoán giá trị); và BE có thể đổi cấu trúc cursor sau này (thêm/bớt cột sort) mà không phá vỡ hợp đồng API với FE.</p>
-      <pre><code>Dữ liệu thật: { price: 250000, createdAt: "2026-08-27T10:00:00.000Z", id: 458 }
+      <p>Thay vì bắt Frontend tự quản lý và gửi lại từng giá trị riêng lẻ (<code>conversation_id</code>, <code>send_at</code>, <code>id</code>) mỗi lần gọi trang tiếp theo, Backend <b>gộp các giá trị đó lại, encode thành 1 chuỗi duy nhất</b> (thường bằng Base64) — để FE chỉ cần lưu và gửi lại <b>1 chuỗi cursor duy nhất</b>, không cần biết bên trong nó chứa gì (che giấu cấu trúc dữ liệu thật, tránh FE tự ý sửa/đoán giá trị); và BE có thể đổi cấu trúc cursor sau này (thêm/bớt cột sort) mà không phá vỡ hợp đồng API với FE.</p>
+      <pre><code>Dữ liệu thật: { conversation_id: 205, send_at: "2026-08-27T10:00:00.000Z", id: 458 }
         ↓ JSON.stringify rồi Base64 encode
 Cursor gửi cho FE: "eyJwcmljZSI6MjUwMDAwLCJjcmVhdGVkQXQiOiIyMDI2LTA4LTI3VDEwOjAwOjAwLjAwMFoiLCJpZCI6NDU4fQ=="</code></pre>
 
