@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="14 câu hỏi chuyên sâu về concurrency, lock, idempotency, saga, queue, cache, index, API design, normalization và import Excel tối ưu — kèm code và câu trả lời mẫu.">
+<meta name="description" content="15 câu hỏi chuyên sâu về concurrency, lock, idempotency, saga, queue, cache, index, API design, normalization, import Excel và access/refresh token — kèm code và câu trả lời mẫu.">
 <title>Advanced Backend — Interview Knowledge</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -88,7 +88,7 @@
   <button class="mobile-toggle" id="navToggle" aria-label="Mở mục lục">☰ Mục lục</button>
   <aside class="sidebar" id="sidebar">
     <div class="brand">Advanced Backend</div>
-    <div class="brand-sub">14 mục &middot; sổ tay ôn phỏng vấn</div>
+    <div class="brand-sub">15 mục &middot; sổ tay ôn phỏng vấn</div>
 
     <div class="nav-block">
       <p class="nav-label">Nội dung</p>
@@ -107,13 +107,14 @@
         <li><a href="12-api-design.html"><span class="nav-num">12</span><span class="nav-text">API Design</span></a></li>
         <li><a href="13-normalization-denormalization.html"><span class="nav-num">13</span><span class="nav-text">Normalization &amp; Denormalization</span></a></li>
         <li><a href="14-excel-import-optimization.html"><span class="nav-num">14</span><span class="nav-text">Import Excel tối ưu</span></a></li>
+        <li><a href="15-access-refresh-token.html"><span class="nav-num">15</span><span class="nav-text">Access Token &amp; Refresh Token</span></a></li>
       </ul>
     </div>
   </aside>
   <main>
     <div class="hero">
       <div class="hero-kicker">Interview prep · Backend / Payment System</div>
-      <h1>Advanced Backend — 14 câu hỏi phỏng vấn thường gặp</h1>
+      <h1>Advanced Backend — 15 câu hỏi phỏng vấn thường gặp</h1>
       <p class="lede">Từ bài toán kinh điển “2 request cùng trừ tiền 1 tài khoản” cho tới idempotency, saga, queue, cache, index và API design. Mỗi câu hỏi là một trang riêng, kèm ví dụ code, so sánh thực tế và câu trả lời mẫu dùng được ngay khi phỏng vấn.</p>
     </div>
 
@@ -188,6 +189,11 @@
         <span class="card-num">CÂU 14</span>
         <h3>Import Excel tối ưu</h3>
         <p>File Excel nhiều dòng: background job, đọc theo stream, gộp check trùng thành 1 query, chunk + transaction, và validate FE/BE.</p>
+      </a>
+      <a class="topic-card" href="15-access-refresh-token.html">
+        <span class="card-num">CÂU 15</span>
+        <h3>Access Token &amp; Refresh Token</h3>
+        <p>Flow access/refresh token chuẩn, và 3 cách logout 1 thiết bị hoặc tất cả thiết bị: blacklist token qua Redis, token version, revoked_at.</p>
       </a>
     </div>
   </main>

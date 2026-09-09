@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="User bấm nút thanh toán 2 lần do mạng chậm — tránh trừ tiền 2 lần thế nào?">
-<title>02. Idempotency — Advanced Backend</title>
+<meta name="description" content="Flow access token / refresh token, và 3 cách logout 1 thiết bị hoặc tất cả thiết bị: blacklist token qua Redis, token version, và revoked_at.">
+<title>15. Access Token &amp; Refresh Token — Advanced Backend</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
@@ -94,7 +94,7 @@
       <p class="nav-label">Nội dung</p>
       <ul class="nav-list">
         <li><a href="01-race-condition-lock-deadlock.html"><span class="nav-num">01</span><span class="nav-text">Race Condition, Lock &amp; Deadlock</span></a></li>
-        <li><a href="02-idempotency.html" class="active"><span class="nav-num">02</span><span class="nav-text">Idempotency</span></a></li>
+        <li><a href="02-idempotency.html"><span class="nav-num">02</span><span class="nav-text">Idempotency</span></a></li>
         <li><a href="03-distributed-transaction-saga.html"><span class="nav-num">03</span><span class="nav-text">Transaction xuyên service</span></a></li>
         <li><a href="04-queue-async-processing.html"><span class="nav-num">04</span><span class="nav-text">Queue &amp; Async Processing</span></a></li>
         <li><a href="05-rate-limiting.html"><span class="nav-num">05</span><span class="nav-text">Rate Limiting</span></a></li>
@@ -107,8 +107,7 @@
         <li><a href="12-api-design.html"><span class="nav-num">12</span><span class="nav-text">API Design</span></a></li>
         <li><a href="13-normalization-denormalization.html"><span class="nav-num">13</span><span class="nav-text">Normalization &amp; Denormalization</span></a></li>
         <li><a href="14-excel-import-optimization.html"><span class="nav-num">14</span><span class="nav-text">Import Excel tối ưu</span></a></li>
-        <li><a href="15-access-refresh-token.html"><span class="nav-num">15</span><span class="nav-text">Access Token &amp; Refresh Token</span></a></li>
-        <li><a href="15-access-refresh-token.html"><span class="nav-num">15</span><span class="nav-text">Access Token &amp; Refresh Token</span></a></li>
+        <li><a href="15-access-refresh-token.html" class="active"><span class="nav-num">15</span><span class="nav-text">Access Token &amp; Refresh Token</span></a></li>
       </ul>
     </div>
 
@@ -121,31 +120,67 @@
     <div class="crumb">
       <a href="index.html">Advanced Backend</a>
       <span class="sep">/</span>
-      <span>Câu 02</span>
+      <span>Câu 15</span>
     </div>
 
-    <section class="qa" id="q2">
-      <div class="q-tag"><span class="n">2</span> Câu hỏi ứng dụng thường gặp</div>
-      <h2 class="q-title">"User bấm nút thanh toán 2 lần do mạng chậm — tránh trừ tiền 2 lần thế nào?"</h2>
-      <div class="callout answer">
-        <span class="callout-label">Đáp án</span>
-        <p>Dùng <b>Idempotency Key</b>: client generate 1 UUID duy nhất cho mỗi thao tác, gửi kèm header. Server lưu key này kèm kết quả xử lý; nếu key đã tồn tại và đã hoàn tất, trả lại y nguyên kết quả cũ thay vì xử lý lại.</p>
-      </div>
-      <pre><code>1. Client gửi request kèm header: Idempotency-Key: uuid-v4
-2. Server check bảng idempotency_keys WHERE key = X
-   - Nếu có & status = completed → trả lại response đã lưu, KHÔNG xử lý lại
-   - Nếu chưa có → INSERT key với status = processing (cột key có UNIQUE constraint)
-3. Xử lý giao dịch thật
-4. Update record: status = completed + lưu response</code></pre>
-      <h3 class="sub">2 request cùng key đến gần như đồng thời thì sao?</h3>
-      <p>Dựa vào <b>UNIQUE constraint</b> trên cột <code>idempotency_key</code> ở DB. Request đến sau sẽ bị lỗi duplicate-key khi INSERT → catch exception, chờ hoặc trả kết quả của request đầu (hoặc 409 bảo client thử lại).</p>
-      <h3 class="sub">Idempotency key nên lưu bao lâu?</h3>
-      <p>Thường 24 giờ — đủ để cover retry do mạng chậm/timeout client, không giữ mãi gây phình dữ liệu. Hết hạn thì cho phép request với key đó chạy như request mới.</p>
+    <section class="qa" id="q15">
+      <div class="q-tag"><span class="n">15</span> Câu hỏi ứng dụng thường gặp</div>
+      <h2 class="q-title">Access token &amp; refresh token</h2>
+
+      <h3 class="sub">15.1 — Flow handle access token và refresh token</h3>
+      <pre><code>Step 1: User login success ở 1 device =&gt; BE response về thông tin user này kèm 2 field là access token
+và refresh token để lưu ở FE
+
+Step 2: Intercaptor chặn ở trước lúc gửi req cho BE với logic là lấy access token đc lưu trong local storage/cookie và đính kèm vào request header
+Authorization: Bearer token. Bên cạnh đó ở Intercaptor chặn ở trước lúc FE nhận response từ BE
+
+Step 3: Nếu status của response là 401 thì sẽ gọi 1 api refresh token , api này nhận refresh token từ FE lưu ở cookie
+
+Step 4: ở api refresh token , nếu refresh token còn hạn hoặc chưa bị revoke (tức revoked_at là null) thì return về 1 cặp token mới gồm access và refresh token.
+Do đó ko dùng lại refresh token cũ nữa , cả FE và BE đều cập nhật
+
+Step 5: chạy lại các api đã bị 401 trước đó với access token mới ở req header Authorization</code></pre>
+
+      <h3 class="sub">15.2 — Logout ở 1 thiết bị và logout ở all thiết bị mà user đó đang đăng nhập theo phương pháp blacklist token</h3>
+      <p>Cách thực hiện:</p>
+      <pre><code>Step 1: User login ở 1 device thông qua api login
+
+Step 2: BE sẽ sinh ra 1 cặp access token và refresh token , refresh token sẽ lưu ở DB tương ứng với device của user.
+Còn payload của access token JWT sẽ lưu {id, role, ext, id_jwt}. Bên cạnh đó BE sẽ lưu {userId: 123, id_jwt: abc} vào redis với TTL bằng đúng TTL của access token. Lưu ý là ko chỉ login , cứ logic nào liên quan đến vc sinh ra access token mới.
+
+Step 3: Khi click logout, gọi api logout
+- Nếu 1 thiết bị: BE sẽ revoke refresh token của device đó
+- Nếu nhiều thiết bị: BE sẽ revoke all refresh token thuộc về user này
+=&gt; nếu dừng lại ở revoke refresh token thì các phiên đăng nhập của user này vẫn còn vì access token chưa hết hạn,
+do đó nếu muốn tự logout sau khi gửi 1 request private (cần authorization) sẽ cần step 4
+
+Step 4: giả sử phiên đăng nhập của user trên device macbook , 1 request từ device macbook gửi tới BE . In the middleware , BE sẽ đọc header Authorization và decode jwt access token
+
+Step5: sau khi encode xong , lấy đc id_jwt.
+- Nếu 1 thiết bị: BE sẽ so sánh id_jwt từ macbook với id_jwt đc lưu ở redis với thời gian
+- Nếu nhiều thiết bị: BE sẽ lấy các id_jwt của user đưa vào 1 list , list này ng ta gọi là blacklist token. sau đó sẽ check là id_jwt macbook này có nằm trong blacklist ko , nếu có thì trả status 401</code></pre>
+
+      <h3 class="sub">15.3 — Logout ở 1 thiết bị và logout ở all thiết bị mà user đó đang đăng nhập theo phương pháp token version</h3>
+      <p>Cách thực hiện:</p>
+      <pre><code>Step 1: User login ở 1 device thông qua api login
+
+Step 2: BE sẽ sinh ra 1 cặp access token và refresh token , refresh token sẽ lưu ở DB tương ứng với device của user. Sẽ có thêm 1 cột là token_version ở bản user và đồng thời nhúng luôn token_version hiện tại vào payload của JWT access token.
+
+Step 3: Khi click logout trên 1 hay nhiều device , BE sẽ tăng token_version lên 1
+
+Step 4: giả sử phiên đăng nhập của user trên device macbook , 1 request từ device macbook gửi tới BE . In the middleware , BE sẽ đọc header Authorization và decode jwt access token
+
+Step 5: sau khi encode xong , lấy đc token_version. Dù 1 hay nhiều thiết bị thì sẽ đầu đi check token version đc lưu trong DB hiện tại có bằng token version đc lưu trong JWT hay ko ở middleware , nếu không bằng thì trả status 401</code></pre>
+
+      <h3 class="sub">15.4 — Logout ở 1 thiết bị và logout ở all thiết bị mà user đó đang đăng nhập theo phương pháp token version nhưng cách làm khác</h3>
+      <pre><code>- Step tương tự , chỉ khác là thay vì sinh ra 1 cột token_version thì sẽ lưu thời gian user nhấn logout hay thời gian thực hiện revoke 1 hoặc nhiều refresh token lại ở redis theo user id.
+
+- Giả sử phiên đăng nhập của user trên device macbook , 1 request từ device macbook gửi tới BE . In the middleware , BE sẽ đọc header Authorization và decode jwt access token. Lúc này sẽ lấy ngày tạo access token so sánh với revoked_at , nếu ngày tạo access token &lt; revoked_at thì trả status 401</code></pre>
     </section>
 
     <nav class="pager">
-      <a class="prev" href="01-race-condition-lock-deadlock.html"><span class="pager-dir">← Câu trước</span><span class="pager-title">01. Race Condition, Lock &amp; Deadlock</span></a>
-      <a class="next" href="03-distributed-transaction-saga.html"><span class="pager-dir">Câu tiếp theo →</span><span class="pager-title">03. Transaction xuyên service</span></a>
+      <a class="prev" href="14-excel-import-optimization.html"><span class="pager-dir">← Câu trước</span><span class="pager-title">14. Import Excel tối ưu</span></a>
+      <a class="next" href="index.html"><span class="pager-dir">Hoàn thành →</span><span class="pager-title">Về mục lục Advanced Backend</span></a>
     </nav>
   </main>
 </div>
