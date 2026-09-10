@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="17 câu hỏi chuyên sâu về concurrency, lock, idempotency, saga, queue, cache, index, API design, normalization, import Excel, access/refresh token và multipart upload S3 — kèm code và câu trả lời mẫu.">
-<title>Advanced Backend — Interview Knowledge</title>
+<meta name="description" content="Flow chung khi FE upload file nặng lên S3 qua BE — InitiateMultipartUpload, UploadPart, CompleteMultipartUpload.">
+<title>17. S3 Multipart Upload — Flow chung — Advanced Backend</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
@@ -109,105 +109,50 @@
         <li><a href="14-excel-import-optimization.html"><span class="nav-num">14</span><span class="nav-text">Import Excel tối ưu</span></a></li>
         <li><a href="15-access-refresh-token.html"><span class="nav-num">15</span><span class="nav-text">Access Token &amp; Refresh Token</span></a></li>
         <li><a href="16-mobile-upload-s3-multipart.html"><span class="nav-num">16</span><span class="nav-text">Mobile Upload File lên S3</span></a></li>
-        <li><a href="17-s3-multipart-upload-flow.html"><span class="nav-num">17</span><span class="nav-text">S3 Multipart Upload — Flow chung</span></a></li>
+        <li><a href="17-s3-multipart-upload-flow.html" class="active"><span class="nav-num">17</span><span class="nav-text">S3 Multipart Upload — Flow chung</span></a></li>
       </ul>
+    </div>
+
+    <div class="nav-block">
+      <p class="nav-label">Trong trang này</p>
+      <div id="pageToc"></div>
     </div>
   </aside>
   <main>
-    <div class="hero">
-      <div class="hero-kicker">Interview prep · Backend / Payment System</div>
-      <h1>Advanced Backend — 17 câu hỏi phỏng vấn thường gặp</h1>
-      <p class="lede">Từ bài toán kinh điển “2 request cùng trừ tiền 1 tài khoản” cho tới idempotency, saga, queue, cache, index và API design. Mỗi câu hỏi là một trang riêng, kèm ví dụ code, so sánh thực tế và câu trả lời mẫu dùng được ngay khi phỏng vấn.</p>
+    <div class="crumb">
+      <a href="index.html">Advanced Backend</a>
+      <span class="sep">/</span>
+      <span>Câu 17</span>
     </div>
 
-    <p class="nav-label">Mục lục</p>
-    <div class="topic-grid">
-      <a class="topic-card" href="01-race-condition-lock-deadlock.html">
-        <span class="card-num">CÂU 01</span>
-        <h3>Race Condition, Lock &amp; Deadlock</h3>
-        <p>Hai request cùng trừ tiền một tài khoản: khoảng hở đọc&ndash;ghi, pessimistic vs optimistic lock, và cách tránh deadlock.</p>
-      </a>
-      <a class="topic-card" href="02-idempotency.html">
-        <span class="card-num">CÂU 02</span>
-        <h3>Idempotency</h3>
-        <p>User bấm thanh toán 2 lần do mạng chậm &mdash; idempotency key, unique constraint và retry an toàn.</p>
-      </a>
-      <a class="topic-card" href="03-distributed-transaction-saga.html">
-        <span class="card-num">CÂU 03</span>
-        <h3>Transaction xuyên service</h3>
-        <p>Order &ndash; payment &ndash; inventory: saga, outbox pattern, compensation thay cho distributed transaction.</p>
-      </a>
-      <a class="topic-card" href="04-queue-async-processing.html">
-        <span class="card-num">CÂU 04</span>
-        <h3>Queue &amp; Async Processing</h3>
-        <p>1000 request thanh toán cùng lúc: tách xử lý đồng bộ sang hàng đợi, worker, backpressure và retry.</p>
-      </a>
-      <a class="topic-card" href="05-rate-limiting.html">
-        <span class="card-num">CÂU 05</span>
-        <h3>Rate Limiting</h3>
-        <p>Chặn spam rút tiền / đặt hàng: fixed window, sliding window, token bucket và nơi đặt rate limit.</p>
-      </a>
-      <a class="topic-card" href="06-database-query-optimization.html">
-        <span class="card-num">CÂU 06</span>
-        <h3>Tối ưu Database &amp; Query</h3>
-        <p>Bảng transaction log hàng chục triệu row: index, partition, archive và cách đọc EXPLAIN.</p>
-      </a>
-      <a class="topic-card" href="07-redis-caching.html">
-        <span class="card-num">CÂU 07</span>
-        <h3>Redis &mdash; khái niệm &amp; case study</h3>
-        <p>Redis dùng ở đâu trong dự án thật: cache, lock phân tán, rate limit, session và hàng đợi nhẹ.</p>
-      </a>
-      <a class="topic-card" href="08-scalability-pagination.html">
-        <span class="card-num">CÂU 08</span>
-        <h3>Scalability &amp; Pagination</h3>
-        <p>API trả về 10.000 record: offset vs cursor-based pagination, chi phí thực tế của mỗi cách.</p>
-      </a>
-      <a class="topic-card" href="09-database-index.html">
-        <span class="card-num">CÂU 09</span>
-        <h3>Index &mdash; cơ chế &amp; đánh đổi</h3>
-        <p>B-Tree hoạt động ra sao, composite index, và cái giá phải trả khi index quá nhiều.</p>
-      </a>
-      <a class="topic-card" href="10-background-job.html">
-        <span class="card-num">CÂU 10</span>
-        <h3>Background Job</h3>
-        <p>Khi nào tách tác vụ ra chạy nền thay vì xử lý ngay trong request, và cách đảm bảo job không mất.</p>
-      </a>
-      <a class="topic-card" href="11-multi-tenant.html">
-        <span class="card-num">CÂU 11</span>
-        <h3>Multi-tenant</h3>
-        <p>Shared schema, schema riêng hay database riêng &mdash; chọn theo quy mô và yêu cầu cách ly dữ liệu.</p>
-      </a>
-      <a class="topic-card" href="12-api-design.html">
-        <span class="card-num">CÂU 12</span>
-        <h3>API Design</h3>
-        <p>REST vs GraphQL vs gRPC, versioning, idempotent method và chuẩn hoá format response / error.</p>
-      </a>
-      <a class="topic-card" href="13-normalization-denormalization.html">
-        <span class="card-num">CÂU 13</span>
-        <h3>Normalization &amp; Denormalization</h3>
-        <p>Chuẩn hoá để giữ dữ liệu nhất quán, phi chuẩn hoá để tối ưu tốc độ đọc và cách kiểm soát dữ liệu dư thừa.</p>
-      </a>
-      <a class="topic-card" href="14-excel-import-optimization.html">
-        <span class="card-num">CÂU 14</span>
-        <h3>Import Excel tối ưu</h3>
-        <p>File Excel nhiều dòng: background job, đọc theo stream, gộp check trùng thành 1 query, chunk + transaction, và validate FE/BE.</p>
-      </a>
-      <a class="topic-card" href="15-access-refresh-token.html">
-        <span class="card-num">CÂU 15</span>
-        <h3>Access Token &amp; Refresh Token</h3>
-        <p>Flow access/refresh token chuẩn, và 3 cách logout 1 thiết bị hoặc tất cả thiết bị: blacklist token qua Redis, token version, revoked_at.</p>
-      </a>
-      <a class="topic-card" href="16-mobile-upload-s3-multipart.html">
-        <span class="card-num">CÂU 16</span>
-        <h3>Mobile Upload File lên S3</h3>
-        <p>Flow mobile upload file nặng lên S3 qua BE (ZCC): API /initiate, /chunks, /complete và cách quản lý ETag/part number.</p>
-      </a>
-      <a class="topic-card" href="17-s3-multipart-upload-flow.html">
-        <span class="card-num">CÂU 17</span>
-        <h3>S3 Multipart Upload — Flow chung</h3>
-        <p>Flow chung để trả lời interview: InitiateMultipartUpload, UploadPart, CompleteMultipartUpload.</p>
-      </a>
-    </div>
+    <section class="qa" id="q17">
+      <div class="q-tag"><span class="n">17</span> Câu hỏi ứng dụng thường gặp</div>
+      <h2 class="q-title">Flow chung khi FE upload file nặng lên S3 qua BE (để trả lời interview)</h2>
+
+      <h3 class="sub">BƯỚC 1 — Khởi tạo (InitiateMultipartUpload)</h3>
+      <pre><code>BE gọi S3 → "tôi muốn bắt đầu 1 multipart upload cho file X"
+S3 trả về: UploadId = "xyz123" (mã định danh phiên upload này)</code></pre>
+
+      <h3 class="sub">BƯỚC 2 — Upload TỪNG PART (UploadPart) — lặp lại cho mỗi phần</h3>
+      <pre><code>BE chia file thành nhiều chunk (ví dụ mỗi chunk 100MB)
+Với mỗi chunk:
+  BE gửi chunk kèm UploadId + PartNumber (1, 2, 3...) lên S3
+  S3 nhận, LƯU LẠI PHẦN NÀY, trả về ETag của đúng phần này
+  BE tự lưu lại (Redis/RAM): { partNumber: 1, etag: "aaa111" }
+    (đây là bước bạn nói đúng — LƯU để dùng ở bước 3, không phải để
+     "báo S3 biết", mà để BE tự nhớ lại và gửi đúng, đủ ở bước 3)</code></pre>
+
+      <h3 class="sub">BƯỚC 3 — Hoàn tất (CompleteMultipartUpload)</h3>
+      <pre><code>BE gửi lên S3: UploadId + TOÀN BỘ danh sách {partNumber, etag} đã lưu được
+S3 ĐỐI CHIẾU với những gì S3 tự nhớ từ Bước 2
+→ KHỚP ĐỦ → S3 GHÉP các part lại thành 1 object hoàn chỉnh
+→ S3 trả về ETag CUỐI CÙNG của file đã ghép (khác với ETag từng part riêng lẻ)</code></pre>
+    </section>
+
+    <nav class="pager">
+      <a class="prev" href="16-mobile-upload-s3-multipart.html"><span class="pager-dir">← Câu trước</span><span class="pager-title">16. Mobile Upload File lên S3</span></a>
+      <a class="next" href="index.html"><span class="pager-dir">Hoàn thành →</span><span class="pager-title">Về mục lục Advanced Backend</span></a>
+    </nav>
   </main>
 </div>
 
