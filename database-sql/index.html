@@ -88,23 +88,22 @@
   <button class="mobile-toggle" id="navToggle" aria-label="Mở mục lục">☰ Mục lục</button>
   <aside class="sidebar" id="sidebar">
     <div class="brand">Database &amp; SQL</div>
-    <div class="brand-sub">12 mục &middot; sổ tay ôn phỏng vấn</div>
+    <div class="brand-sub">11 mục &middot; sổ tay ôn phỏng vấn</div>
 
     <div class="nav-block">
       <p class="nav-label">Nội dung</p>
       <ul class="nav-list">
         <li><a href="#union-union-all"><span class="nav-num">01</span><span class="nav-text">UNION (UNION ALL)</span></a></li>
         <li><a href="#select-into"><span class="nav-num">02</span><span class="nav-text">SELECT INTO</span></a></li>
-        <li><a href="#view"><span class="nav-num">03</span><span class="nav-text">VIEW</span></a></li>
-        <li><a href="#common-table-expression"><span class="nav-num">04</span><span class="nav-text">Common table expression</span></a></li>
-        <li><a href="#store-procedure-function"><span class="nav-num">05</span><span class="nav-text">STORE PROCEDURE, FUNCTION</span></a></li>
-        <li><a href="#transaction-trong-sql"><span class="nav-num">06</span><span class="nav-text">Transaction trong SQL</span></a></li>
-        <li><a href="#trigger"><span class="nav-num">07</span><span class="nav-text">Trigger</span></a></li>
-        <li><a href="#index"><span class="nav-num">08</span><span class="nav-text">Index</span></a></li>
-        <li><a href="#some-va-every-trong-quan-he-1-n-o-where-prisma"><span class="nav-num">09</span><span class="nav-text">some và every trong quan hệ 1-n ở where prisma</span></a></li>
-        <li><a href="#schema-prisma-file"><span class="nav-num">10</span><span class="nav-text">schema.prisma file</span></a></li>
-        <li><a href="#acid"><span class="nav-num">11</span><span class="nav-text">ACID</span></a></li>
-        <li><a href="#giua-cursor-va-pagination-tai-sao-lai-uu-tien-dung-cursor-ho"><span class="nav-num">12</span><span class="nav-text">giữa cursor và pagination , tại sao lại ưu t…</span></a></li>
+        <li><a href="#view-va-cte"><span class="nav-num">03</span><span class="nav-text">VIEW và CTE</span></a></li>
+        <li><a href="#store-procedure-function"><span class="nav-num">04</span><span class="nav-text">STORE PROCEDURE, FUNCTION</span></a></li>
+        <li><a href="#transaction-trong-sql"><span class="nav-num">05</span><span class="nav-text">Transaction trong SQL</span></a></li>
+        <li><a href="#trigger"><span class="nav-num">06</span><span class="nav-text">Trigger</span></a></li>
+        <li><a href="#index"><span class="nav-num">07</span><span class="nav-text">Index</span></a></li>
+        <li><a href="#some-va-every-trong-quan-he-1-n-o-where-prisma"><span class="nav-num">08</span><span class="nav-text">some và every trong quan hệ 1-n ở where prisma</span></a></li>
+        <li><a href="#schema-prisma-file"><span class="nav-num">09</span><span class="nav-text">schema.prisma file</span></a></li>
+        <li><a href="#acid"><span class="nav-num">10</span><span class="nav-text">ACID</span></a></li>
+        <li><a href="#giua-cursor-va-pagination-tai-sao-lai-uu-tien-dung-cursor-ho"><span class="nav-num">11</span><span class="nav-text">giữa cursor và pagination , tại sao lại ưu t…</span></a></li>
       </ul>
     </div>
   </aside>
@@ -141,18 +140,19 @@ SELECT name, email FROM employees;</code></pre>
       <pre><code>SELECT * INTO CloneProduct
 FROM Product
 WHERE 1=1</code></pre>
+      <p><b>Khi nào dùng SELECT INTO:</b></p>
+      <ul>
+        <li>Archive dữ liệu copy dữ liệu cũ sang bảng riêng trước khi xoá khỏi bảng chính.</li>
+        <li>Backup nhanh trước khi làm thao tác nguy hiểm — ví dụ trước khi chạy 1 migration lớn, tạo snapshot bảng hiện tại để lỡ có sai sót còn khôi phục lại được.</li>
+        <li>Tạo bảng tạm để xử lý dữ liệu phức tạp theo nhiều bước — thay vì viết 1 câu SQL khổng lồ với nhiều subquery lồng nhau, tách ra nhiều bước, mỗi bước lưu kết quả trung gian vào 1 bảng tạm rồi xử lý tiếp.</li>
+      </ul>
     </section>
 
-    <section class="qa" id="view" data-nav="VIEW">
+    <section class="qa" id="view-va-cte" data-nav="VIEW và CTE">
       <div class="q-tag"><span class="n">3</span> SQL</div>
-      <h2 class="q-title">VIEW</h2>
+      <h2 class="q-title">VIEW và CTE (Common Table Expression)</h2>
       <p>Là một bảng ảo hiển thị dữ liệu động từ truy vấn.</p>
       <figure class="doc-figure"><img src="../assets/img/database-sql-view-01.png" alt="Minh hoạ" loading="lazy"></figure>
-    </section>
-
-    <section class="qa" id="common-table-expression" data-nav="Common table expression">
-      <div class="q-tag"><span class="n">4</span> SQL</div>
-      <h2 class="q-title">Common table expression</h2>
       <ul>
         <li>CTE là một truy vấn tạm thời được định nghĩa bằng WITH, giúp câu SQL dễ đọc hơn và có thể tái sử dụng trong cùng một truy vấn.</li>
         <li>Ex:</li>
@@ -165,30 +165,24 @@ WHERE 1=1</code></pre>
 SELECT c.name, hro.total_amount
 FROM customers as c
 JOIN HighRevenueOrders as hro ON c.customer_id = hro.customer_id;</code></pre>
+      <p>VIEW và CTE giống nhau ở việc là tạo 1 common query bằng cách đặt tên để tái sử dụng và tránh lặp đi lặp lại truy vấn, nhưng khác nhau ở phạm vi tồn tại. câu query đc tạo bởi VIEW sẽ lưu trực tiếp ở database. CTE chỉ tồn tại trong phạm vi đúng 1 câu query đang chạy, chạy xong là mất, không dùng lại được ở câu query khác. Em dùng VIEW khi logic đó cần tái sử dụng xuyên suốt nhiều phần của ứng dụng, còn CTE khi chỉ cần làm 1 câu SQL phức tạp dễ đọc hơn hoặc tránh lặp lại subquery nhiều lần trong cùng 1 lệnh.</p>
     </section>
 
     <section class="qa" id="store-procedure-function" data-nav="STORE PROCEDURE, FUNCTION">
-      <div class="q-tag"><span class="n">5</span> SQL</div>
+      <div class="q-tag"><span class="n">4</span> SQL</div>
       <h2 class="q-title">STORE PROCEDURE, FUNCTION</h2>
       <p>Là tập hợp 1 hay nhiều câu lệnh T-SQL thành 1 nhóm để hoàn thành 1 tác vụ</p>
-      <p><b>Feature</b></p>
-      <p><b>Store procedure</b></p>
-      <p><b>Function</b></p>
-      <p>Trả về giá trị</p>
-      <p>Không hoặc có (thông qua OUTPUT nếu có)</p>
-      <p>Luôn phải trả về 1 giá trị</p>
-      <p>Có thể dùng trong SELECT / WHERE / HAVING</p>
-      <p>không</p>
-      <p>có</p>
-      <p>Thực hiện INSERT, UPDATE, DELETE?</p>
-      <p>Có</p>
-      <p>không</p>
-      <pre><code>Có thể bắt đầu TRANSACTION?</code></pre>
-      <p>Có</p>
-      <p>không</p>
-      <p>Có thể dùng try-catch</p>
-      <p>Có</p>
-      <p>không</p>
+      <table>
+        <thead><tr><th>Feature</th><th>Store procedure</th><th>Function</th></tr></thead>
+        <tbody>
+          <tr><td>Trả về giá trị</td><td>Không hoặc có (thông qua OUTPUT nếu có)</td><td>Luôn phải trả về 1 giá trị</td></tr>
+          <tr><td>sử dụng INSERT, UPDATE, DELETE trong thân hàm</td><td>Có</td><td>không</td></tr>
+          <tr><td>sử dụng SELECT / WHERE / HAVING trong thân hàm</td><td>Có</td><td>Có</td></tr>
+          <tr><td>Có thể dùng trong SELECT / WHERE / HAVING</td><td>không</td><td>có</td></tr>
+          <tr><td>Có thể bắt đầu TRANSACTION?</td><td>Có</td><td>không</td></tr>
+          <tr><td>Có thể dùng try-catch</td><td>Có</td><td>không</td></tr>
+        </tbody>
+      </table>
       <ul>
         <li>Ex :</li>
         <li>Store procedure</li>
@@ -201,7 +195,7 @@ JOIN HighRevenueOrders as hro ON c.customer_id = hro.customer_id;</code></pre>
     </section>
 
     <section class="qa" id="transaction-trong-sql" data-nav="Transaction trong SQL">
-      <div class="q-tag"><span class="n">6</span> SQL</div>
+      <div class="q-tag"><span class="n">5</span> SQL</div>
       <h2 class="q-title">Transaction trong SQL</h2>
       <ul>
         <li>là tiến trình thực hiện một nhóm các câu lệnh SQL. Các câu lệnh này được thực thi một cách tuần tự và độc lập.</li>
@@ -211,7 +205,7 @@ JOIN HighRevenueOrders as hro ON c.customer_id = hro.customer_id;</code></pre>
     </section>
 
     <section class="qa" id="trigger" data-nav="Trigger">
-      <div class="q-tag"><span class="n">7</span> SQL</div>
+      <div class="q-tag"><span class="n">6</span> SQL</div>
       <h2 class="q-title">Trigger</h2>
       <ul>
         <li>Là 1 đoạn thủ tục SQL đc thực thi tự động khi 1 sự kiện xảy ra trên 1 table hoặc view</li>
@@ -224,7 +218,7 @@ JOIN HighRevenueOrders as hro ON c.customer_id = hro.customer_id;</code></pre>
     </section>
 
     <section class="qa" id="index" data-nav="Index">
-      <div class="q-tag"><span class="n">8</span> SQL</div>
+      <div class="q-tag"><span class="n">7</span> SQL</div>
       <h2 class="q-title">Index</h2>
       <ul>
         <li>là một cấu trúc dữ liệu được tạo trên một hoặc nhiều cột của bảng để tăng tốc độ truy vấn dữ liệu</li>
@@ -237,7 +231,7 @@ JOIN HighRevenueOrders as hro ON c.customer_id = hro.customer_id;</code></pre>
     </section>
 
     <section class="qa" id="some-va-every-trong-quan-he-1-n-o-where-prisma" data-nav="some và every trong quan hệ 1-n ở where prisma">
-      <div class="q-tag"><span class="n">9</span> SQL</div>
+      <div class="q-tag"><span class="n">8</span> SQL</div>
       <h2 class="q-title">some và every trong quan hệ 1-n ở where prisma</h2>
       <figure class="doc-figure"><img src="../assets/img/database-sql-some-va-every-trong-quan-he-1-n-o-where-prisma-01.png" alt="Minh hoạ" loading="lazy"></figure>
       <p>Nếu dùng every thì :</p>
@@ -265,27 +259,68 @@ JOIN HighRevenueOrders as hro ON c.customer_id = hro.customer_id;</code></pre>
     </section>
 
     <section class="qa" id="schema-prisma-file" data-nav="schema.prisma file">
-      <div class="q-tag"><span class="n">10</span> SQL</div>
+      <div class="q-tag"><span class="n">9</span> SQL</div>
       <h2 class="q-title">schema.prisma file</h2>
       <figure class="doc-figure"><img src="../assets/img/database-sql-schema-prisma-file-01.png" alt="Minh hoạ" loading="lazy"></figure>
       <figure class="doc-figure"><img src="../assets/img/database-sql-schema-prisma-file-02.png" alt="Minh hoạ" loading="lazy"></figure>
     </section>
 
     <section class="qa" id="acid" data-nav="ACID">
-      <div class="q-tag"><span class="n">11</span> SQL</div>
+      <div class="q-tag"><span class="n">10</span> SQL</div>
       <h2 class="q-title">ACID</h2>
-      <p>là bộ 4 tiêu chuẩn vàng (Atomicity, Consistency, Isolation, Durability) đảm bảo mọi giao dịch (transaction) được xử lý an toàn và chính xác. Nếu một phần giao dịch thất bại, toàn bộ hệ thống sẽ tự động khôi phục lại trạng thái ban đầu.</p>
-      <p>4 thuộc tính cốt lõi bao gồm:</p>
-      <ul>
-        <li><b>Atomicity (Tính nguyên tử):</b> Hoạt động theo quy tắc "Tất cả hoặc không". Nếu một bước trong giao dịch bị lỗi, toàn bộ giao dịch sẽ bị hủy bỏ và phục hồi (rollback), không có thay đổi nào được lưu lại.</li>
-        <li><b>Consistency (Tính nhất quán):</b> Đảm bảo dữ liệu luôn tuân thủ các quy tắc, ràng buộc và cấu trúc của hệ thống trước và sau khi giao dịch hoàn tất (commit).</li>
-        <li><b>Isolation (Tính cô lập):</b> Các giao dịch thực hiện cùng lúc không được làm ảnh hưởng đến nhau. Mọi thay đổi từ một giao dịch đang chạy sẽ bị ẩn đối với các giao dịch khác cho đến khi hoàn tất.</li>
-        <li><b>Durability (Tính bền vững):</b> Khi một giao dịch được xác nhận (commit) thành công, dữ liệu sẽ được lưu vĩnh viễn trên ổ cứng và không bị mất ngay cả khi hệ thống sập hoặc mất điện.</li>
-      </ul>
+      <p>ACID là 4 tính chất mà 1 transaction phải đảm bảo để giao dịch an toàn, đúng đắn — đây là nền tảng lý thuyết đứng sau mọi ví dụ transaction đã dùng xuyên suốt (Câu 1, mục 13.3). Để mình đi từng chữ, mỗi cái kèm 1 ví dụ cụ thể dễ hình dung.</p>
+
+      <h4 class="subsub">A — Atomicity (Tính nguyên tử): tất cả cùng thành công, hoặc tất cả cùng thất bại</h4>
+      <p>Trong 1 transaction, mọi câu lệnh được coi là 1 khối không thể chia nhỏ — hoặc toàn bộ đều thực hiện thành công, hoặc nếu có bất kỳ bước nào lỗi, toàn bộ bị huỷ bỏ (rollback), không có tình trạng "làm được nửa chừng".</p>
+      <pre><code>-- Ví dụ chuyển tiền (đã dùng ở mục 3.1)
+BEGIN;
+UPDATE account SET balance = balance - 1000000 WHERE id = 1;  -- trừ tiền A
+UPDATE account SET balance = balance + 1000000 WHERE id = 2;  -- cộng tiền B
+COMMIT;</code></pre>
+      <p>Nếu dòng thứ 2 bị lỗi (ví dụ account 2 không tồn tại), Atomicity đảm bảo dòng thứ 1 cũng bị huỷ theo — không có chuyện A đã bị trừ tiền nhưng B lại không nhận được, tiền "biến mất" khỏi hệ thống.</p>
+
+      <h4 class="subsub">C — Consistency (Tính nhất quán): dữ liệu luôn đúng theo mọi ràng buộc đã định nghĩa, trước và sau transaction</h4>
+      <p>Sau khi transaction hoàn tất (dù commit hay rollback), dữ liệu phải luôn thoả mãn mọi ràng buộc đã khai báo trong DB — constraint, foreign key, unique, check condition... Không có transaction nào được phép để lại dữ liệu ở trạng thái "vi phạm quy tắc".</p>
+      <pre><code>-- Ràng buộc: balance KHÔNG ĐƯỢC ÂM
+ALTER TABLE account ADD CONSTRAINT chk_balance CHECK (balance &gt;= 0);
+
+BEGIN;
+UPDATE account SET balance = balance - 6000000 WHERE id = 1;
+-- Giả sử balance hiện tại chỉ có 5.000.000
+-- → Kết quả sẽ là -1.000.000 → VI PHẠM CHECK CONSTRAINT
+COMMIT;
+-- → DB TỰ ĐỘNG CHẶN, transaction bị lỗi và rollback,
+--   vì Consistency không cho phép dữ liệu rơi vào trạng thái vi phạm ràng buộc</code></pre>
+      <p>Đây chính là lý do mục 1.2 luôn nhấn mạnh viết <code>WHERE balance &gt;= 6000000</code> — không chỉ để tránh race condition, mà còn để chủ động đảm bảo Consistency, không để DB phải tự chặn bằng constraint.</p>
+
+      <h4 class="subsub">I — Isolation (Tính cô lập): các transaction chạy đồng thời không được "nhìn thấy" trạng thái dở dang của nhau</h4>
+      <p>Đây chính là khái niệm đứng sau toàn bộ Câu 1 — race condition, pessimistic lock, optimistic lock. 2 transaction chạy cùng lúc phải hoạt động như thể chúng chạy tuần tự, không đan xen vào nhau, dù thực tế có thể chạy song song.</p>
+      <pre><code>-- Transaction A:
+BEGIN;
+UPDATE account SET balance = balance - 6000000 WHERE id = 1;
+-- CHƯA COMMIT — đang giữa chừng
+
+-- Transaction B (chạy song song, đọc cùng lúc):
+SELECT balance FROM account WHERE id = 1;
+-- Isolation đảm bảo B KHÔNG THẤY giá trị "đang bị trừ dở" của A
+-- B chỉ thấy balance CŨ (trước khi A commit) hoặc phải ĐỢI tuỳ mức isolation level</code></pre>
+      <p>Đây chính là lý do cần các kỹ thuật <code>FOR UPDATE</code>, atomic UPDATE (mục 1.2, 1.3) — để đảm bảo đúng tính Isolation này, tránh 1 transaction đọc/ghi đè lên dữ liệu "nửa vời" của transaction khác.</p>
+
+      <h4 class="subsub">D — Durability (Tính bền vững): 1 khi đã COMMIT, dữ liệu không bao giờ mất, kể cả khi server sập ngay sau đó</h4>
+      <p>Ngay sau khi COMMIT trả về thành công, dữ liệu đó được ghi xuống ổ đĩa vĩnh viễn — dù server bị mất điện, crash, hay restart đột ngột ngay lập tức sau khi COMMIT, dữ liệu đã commit đó vẫn còn nguyên, không bị mất.</p>
+      <pre><code>BEGIN;
+UPDATE account SET balance = balance - 6000000 WHERE id = 1;
+COMMIT;   -- ← ngay khi dòng này chạy xong và trả về thành công
+
+-- GIẢ SỬ 1 GIÂY SAU, SERVER BỊ MẤT ĐIỆN ĐỘT NGỘT
+-- → Durability đảm bảo: khi server khởi động lại, balance VẪN đã bị trừ đúng,
+--   KHÔNG quay lại giá trị cũ, vì dữ liệu đã được ghi bền vững xuống đĩa
+--   TRƯỚC KHI COMMIT báo thành công cho client</code></pre>
+      <p>Đây là lý do DB không chỉ ghi vào RAM rồi báo commit ngay (nhanh nhưng rủi ro mất dữ liệu) — nó phải đảm bảo dữ liệu thực sự nằm trên ổ đĩa (hoặc ít nhất trong write-ahead log đã flush) trước khi trả kết quả "COMMIT thành công" về cho ứng dụng.</p>
     </section>
 
     <section class="qa" id="giua-cursor-va-pagination-tai-sao-lai-uu-tien-dung-cursor-ho" data-nav="giữa cursor và pagination , tại sao lại ưu t…">
-      <div class="q-tag"><span class="n">12</span> SQL</div>
+      <div class="q-tag"><span class="n">11</span> SQL</div>
       <h2 class="q-title">giữa cursor và pagination , tại sao lại ưu tiên dùng cursor hơn</h2>
       <figure class="doc-figure"><img src="../assets/img/database-sql-giua-cursor-va-pagination-tai-sao-lai-uu-tien-dung-cursor-ho-01.png" alt="Minh hoạ" loading="lazy"></figure>
       <figure class="doc-figure"><img src="../assets/img/database-sql-giua-cursor-va-pagination-tai-sao-lai-uu-tien-dung-cursor-ho-02.png" alt="Minh hoạ" loading="lazy"></figure>
