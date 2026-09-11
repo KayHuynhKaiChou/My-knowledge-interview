@@ -88,7 +88,7 @@
   <button class="mobile-toggle" id="navToggle" aria-label="Mở mục lục">☰ Mục lục</button>
   <aside class="sidebar" id="sidebar">
     <div class="brand">Backend — .NET &amp; NestJS</div>
-    <div class="brand-sub">16 mục &middot; sổ tay ôn phỏng vấn</div>
+    <div class="brand-sub">17 mục &middot; sổ tay ôn phỏng vấn</div>
 
     <div class="nav-block">
       <p class="nav-label">Nội dung</p>
@@ -102,13 +102,14 @@
         <li><a href="#lazy-loading-va-eager-loading"><span class="nav-num">07</span><span class="nav-text">Lazy Loading và Eager Loading</span></a></li>
         <li><a href="#dac-diem-chinh-cua-record"><span class="nav-num">08</span><span class="nav-text">Đặc điểm chính của record</span></a></li>
         <li><a href="#jwt"><span class="nav-num">09</span><span class="nav-text">JWT</span></a></li>
-        <li><a href="#express-multer-file"><span class="nav-num">10</span><span class="nav-text">Express.Multer.File</span></a></li>
-        <li><a href="#decorator"><span class="nav-num">11</span><span class="nav-text">Decorator</span></a></li>
-        <li><a href="#guard"><span class="nav-num">12</span><span class="nav-text">Guard</span></a></li>
-        <li><a href="#api"><span class="nav-num">13</span><span class="nav-text">API</span></a></li>
-        <li><a href="#restful-api"><span class="nav-num">14</span><span class="nav-text">Restful API</span></a></li>
-        <li><a href="#graphql"><span class="nav-num">15</span><span class="nav-text">GraphQL</span></a></li>
-        <li><a href="#module"><span class="nav-num">16</span><span class="nav-text">Module</span></a></li>
+        <li><a href="#multipart-form-data"><span class="nav-num">10</span><span class="nav-text">multipart/form-data</span></a></li>
+        <li><a href="#express-multer-file"><span class="nav-num">11</span><span class="nav-text">Express.Multer.File</span></a></li>
+        <li><a href="#decorator"><span class="nav-num">12</span><span class="nav-text">Decorator</span></a></li>
+        <li><a href="#guard"><span class="nav-num">13</span><span class="nav-text">Guard</span></a></li>
+        <li><a href="#api"><span class="nav-num">14</span><span class="nav-text">API</span></a></li>
+        <li><a href="#restful-api"><span class="nav-num">15</span><span class="nav-text">Restful API</span></a></li>
+        <li><a href="#graphql"><span class="nav-num">16</span><span class="nav-text">GraphQL</span></a></li>
+        <li><a href="#module"><span class="nav-num">17</span><span class="nav-text">Module</span></a></li>
       </ul>
     </div>
   </aside>
@@ -310,15 +311,29 @@ Record</code></pre>
       <p><b>// FE</b></p>
     </section>
 
-    <section class="qa" id="express-multer-file" data-nav="Express.Multer.File">
+    <section class="qa" id="multipart-form-data" data-nav="multipart/form-data">
       <div class="q-tag"><span class="n">10</span> Kiến thức nền</div>
+      <h2 class="q-title">multipart/form-data là gì</h2>
+      <p>multipart/form-data là 1 kiểu Content-Type dùng để gửi dữ liệu form có kèm file, chia request thành nhiều phần ngăn cách bởi boundary, cho phép trộn text và binary trong cùng 1 request. Trong JavaScript, mình tạo dữ liệu này bằng FormData object, và khi gửi đi trình duyệt tự set đúng Content-Type multipart/form-data kèm boundary</p>
+      <p>Dùng khi 1 request cần gửi kèm file (ảnh, video, audio, Excel, PDF...) — dù chỉ gửi mỗi 1 file, hay gửi file kèm thêm các field text khác (như tên, mô tả, category đi cùng ảnh upload). Đây gần như là lựa chọn duy nhất cho việc upload file qua form HTTP truyền thống. Trước kia dùng content-type là application/json không gửi được binary trực tiếp (phải encode base64, làm phình kích thước lên ~33% và tốn CPU encode/decode không cần thiết). Giờ đây multipart/form-data cho phép gửi binary trực tiếp.</p>
+      <p>Ví dụ thực tế cần multipart/form-data:</p>
+      <ul>
+        <li>- Upload avatar (file ảnh + có thể kèm caption)</li>
+        <li>- Import Excel (file + có thể kèm option "ghi đè hay không")</li>
+        <li>- Đăng bài kèm nhiều ảnh (text nội dung + nhiều file ảnh)</li>
+        <li>- Upload audio ghi âm cuộc gọi (file audio)</li>
+      </ul>
+    </section>
+
+    <section class="qa" id="express-multer-file" data-nav="Express.Multer.File">
+      <div class="q-tag"><span class="n">11</span> Kiến thức nền</div>
       <h2 class="q-title">Express.Multer.File</h2>
       <p>là kiểu dữ liệu (interface) mà NestJS dùng để mô tả một file đã được upload thông qua middleware Multer (mặc định của NestJS để xử lý multipart/form-data).</p>
       <figure class="doc-figure"><img src="../assets/img/backend-dotnet-nestjs-express-multer-file-01.png" alt="Minh hoạ" loading="lazy"></figure>
     </section>
 
     <section class="qa" id="decorator" data-nav="Decorator">
-      <div class="q-tag"><span class="n">11</span> Kiến thức nền</div>
+      <div class="q-tag"><span class="n">12</span> Kiến thức nền</div>
       <h2 class="q-title">Decorator</h2>
       <ul>
         <li>là một hàm đặc biệt được dùng để thêm hành vi (metadata hoặc logic) vào<b> class, property, method, accessor</b> hoặc<b> parameter</b>, mà không thay đổi mã gốc của đối tượng đó. Decorator thường dùng trong các framework như Angular, NestJS, hoặc để xây dựng hệ thống DI (Dependency Injection).</li>
@@ -327,7 +342,7 @@ Record</code></pre>
     </section>
 
     <section class="qa" id="guard" data-nav="Guard">
-      <div class="q-tag"><span class="n">12</span> Kiến thức nền</div>
+      <div class="q-tag"><span class="n">13</span> Kiến thức nền</div>
       <h2 class="q-title">Guard</h2>
       <ul>
         <li>là một thành phần dùng để <b>kiểm soát quyền truy cập</b> đến các route (API endpoint). Nó được sử dụng để xác định xem <b>một request có được phép thực hiện hay không</b> – thường dùng cho xác thực (authentication) và phân quyền (authorization).</li>
@@ -336,13 +351,13 @@ Record</code></pre>
     </section>
 
     <section class="qa" id="api" data-nav="API">
-      <div class="q-tag"><span class="n">13</span> Kiến thức nền</div>
+      <div class="q-tag"><span class="n">14</span> Kiến thức nền</div>
       <h2 class="q-title">API</h2>
       <p>một "cầu nối" cho phép các ứng dụng phần mềm khác nhau giao tiếp và trao đổi dữ liệu với nhau một cách có quy tắc.</p>
     </section>
 
     <section class="qa" id="restful-api" data-nav="Restful API">
-      <div class="q-tag"><span class="n">14</span> Kiến thức nền</div>
+      <div class="q-tag"><span class="n">15</span> Kiến thức nền</div>
       <h2 class="q-title">Restful API</h2>
       <ul>
         <li>là một tiêu chuẩn dùng trong việc thiết kế các API cho các ứng dụng web để quản lý các resource.</li>
@@ -357,7 +372,7 @@ Record</code></pre>
     </section>
 
     <section class="qa" id="graphql" data-nav="GraphQL">
-      <div class="q-tag"><span class="n">15</span> Kiến thức nền</div>
+      <div class="q-tag"><span class="n">16</span> Kiến thức nền</div>
       <h2 class="q-title">GraphQL</h2>
       <ul>
         <li>là một ngôn ngữ truy vấn API cho phép client truy vấn chính xác những dữ liệu mà client cần</li>
@@ -370,7 +385,7 @@ Record</code></pre>
     </section>
 
     <section class="qa" id="module" data-nav="Module">
-      <div class="q-tag"><span class="n">16</span> SQL</div>
+      <div class="q-tag"><span class="n">17</span> SQL</div>
       <h2 class="q-title">Module</h2>
       <p>Trong NestJS, <b>Module</b> là một class được đánh dấu bằng decorator @Module().</p>
       <p>Mỗi ứng dụng NestJS đều có ít nhất một module gọi là <b>Root Module</b> (thường là AppModule). Root module này là điểm bắt đầu để NestJS xây dựng biểu đồ ứng dụng (application graph)</p>
