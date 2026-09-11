@@ -88,7 +88,7 @@
   <button class="mobile-toggle" id="navToggle" aria-label="Mở mục lục">☰ Mục lục</button>
   <aside class="sidebar" id="sidebar">
     <div class="brand">Realtime &amp; Socket</div>
-    <div class="brand-sub">11 mục &middot; sổ tay ôn phỏng vấn</div>
+    <div class="brand-sub">12 mục &middot; sổ tay ôn phỏng vấn</div>
 
     <div class="nav-block">
       <p class="nav-label">Nội dung</p>
@@ -100,10 +100,11 @@
         <li><a href="#http"><span class="nav-num">05</span><span class="nav-text">HTTP</span></a></li>
         <li><a href="#websocket"><span class="nav-num">06</span><span class="nav-text">WebSocket</span></a></li>
         <li><a href="#sse-server-sent-events"><span class="nav-num">07</span><span class="nav-text">SSE (Server-Sent Events)</span></a></li>
-        <li><a href="#ocr-optical-character-recognition"><span class="nav-num">08</span><span class="nav-text">OCR (Optical Character Recognition)</span></a></li>
-        <li><a href="#webrtc-web-real-time-communication"><span class="nav-num">09</span><span class="nav-text">WebRTC (Web Real-Time Communication)</span></a></li>
-        <li><a href="#rxjs"><span class="nav-num">10</span><span class="nav-text">RxJS</span></a></li>
-        <li><a href="#reactive-state"><span class="nav-num">11</span><span class="nav-text">Reactive state</span></a></li>
+        <li><a href="#http-sse-websocket"><span class="nav-num">08</span><span class="nav-text">HTTP &amp; SSE &amp; Websocket</span></a></li>
+        <li><a href="#ocr-optical-character-recognition"><span class="nav-num">09</span><span class="nav-text">OCR (Optical Character Recognition)</span></a></li>
+        <li><a href="#webrtc-web-real-time-communication"><span class="nav-num">10</span><span class="nav-text">WebRTC (Web Real-Time Communication)</span></a></li>
+        <li><a href="#rxjs"><span class="nav-num">11</span><span class="nav-text">RxJS</span></a></li>
+        <li><a href="#reactive-state"><span class="nav-num">12</span><span class="nav-text">Reactive state</span></a></li>
       </ul>
     </div>
   </aside>
@@ -177,51 +178,101 @@
     <section class="qa" id="sse-server-sent-events" data-nav="SSE (Server-Sent Events)">
       <div class="q-tag"><span class="n">7</span> Socket &amp; Realtime</div>
       <h2 class="q-title">SSE (Server-Sent Events)</h2>
+      <p>SSE là giao thức cho phép server đẩy dữ liệu liên tục xuống client qua 1 kết nối HTTP giữ mở, nhưng chỉ 1 chiều. Tức là client gửi req đến server, server response cho client rồi lúc sau server vẫn có thể response data mới cho client vì kết nối HTTP vẫn còn mở.</p>
+      <p><b>Case study nên dùng SSE:</b></p>
       <ul>
-        <li>là một công nghệ truyền dữ liệu thời gian thực từ server xuống client, được tiêu chuẩn hóa trong HTML5.</li>
-        <li>SSE hoạt động theo cơ chế một chiều, tức là chỉ cho phép server gửi dữ liệu xuống client thông qua một kết nối HTTP duy nhất. Khi client (thường là trình duyệt) mở một kết nối SSE tới server, server sẽ giữ kết nối đó luôn mở và liên tục gửi các cập nhật mới xuống.</li>
-        <li>Điều này đặc biệt phù hợp cho các ứng dụng cần cập nhật thông tin theo thời gian thực, ví dụ như bảng điều khiển dữ liệu trực tiếp (dashboard), thông báo hệ thống (notifications), hoặc luồng tin tức mới nhất (news feed).</li>
+        <li>Theo dõi tiến độ 1 tác vụ nền, ví dụ import excel nặng — thay vì polling từ FE để nhận % tiến độ.</li>
+        <li>Live dashboard / theo dõi số liệu real-time.</li>
       </ul>
-      <p><b>Đặc điểm</b></p>
-      <pre><code>SSE (Server-Sent Events)
-WebSocket</code></pre>
-      <p><b>Hướng dữ liệu</b></p>
-      <p><b>1 chiều</b> (Server ➔ Client)</p>
-      <p><b>2 chiều</b> (Server ⇆ Client)</p>
-      <p><b>Độ phức tạp</b></p>
-      <p>Đơn giản, dùng HTTP chuẩn.</p>
-      <p>Phức tạp hơn, cần handshake và giao thức riêng (ws://).</p>
-      <p><b>Tự động reconnect</b></p>
-      <p><b>Có sẵn</b> (Native hỗ trợ).</p>
-      <p>Phải tự viết code xử lý.</p>
-      <p><b>Dữ liệu</b></p>
-      <p>Chỉ dạng Text (UTF-8).</p>
-      <p>Hỗ trợ cả Text và Binary (ảnh, âm thanh...).</p>
-      <p><b>Khi nào dùng?</b></p>
-      <p>Thông báo, cập nhật giá Coin/Chứng khoán, <b>ChatGPT trả lời (streaming)</b>.</p>
-      <p>Chat realtime, Game online, Ứng dụng vẽ chung.</p>
+
+      <h4 class="subsub">FE — nhận dữ liệu qua EventSource</h4>
+      <pre><code>const eventSource = new EventSource('/dashboard/stats');
+
+eventSource.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  updateDashboard(data); // cập nhật UI ngay khi có data mới
+};
+
+eventSource.onerror = () => {
+  console.error('SSE connection error');
+};</code></pre>
+
+      <h4 class="subsub">BE NestJS — endpoint SSE bằng decorator @Sse</h4>
+      <pre><code>// dashboard.controller.ts
+import { Controller, Sse, MessageEvent } from '@nestjs/common';
+import { Observable, interval } from 'rxjs';
+import { map } from 'rxjs/operators';
+
+@Controller('dashboard')
+export class DashboardController {
+  @Sse('stats')
+  streamStats(): Observable&lt;MessageEvent&gt; {
+    return interval(2000).pipe(
+      map(() => ({ data: this.getLatestStats() })),
+    );
+  }
+
+  private getLatestStats() {
+    return { activeUsers: Math.floor(Math.random() * 1000), timestamp: Date.now() };
+  }
+}</code></pre>
+    </section>
+
+    <section class="qa" id="http-sse-websocket" data-nav="HTTP &amp; SSE &amp; Websocket">
+      <div class="q-tag"><span class="n">8</span> Socket &amp; Realtime</div>
+      <h2 class="q-title">HTTP &amp; SSE &amp; Websocket</h2>
+
+      <h4 class="subsub">HTTP — mỗi lần cần dữ liệu phải tự hỏi, hỏi xong đóng luôn</h4>
+      <pre><code>Client ──── hỏi ────► Server
+Client ◄─── data ──── Server
+       (ĐÓNG kết nối)
+Client ──── hỏi lại ────► Server   ← phải TỰ hỏi lại (KẾT NỐI MỚI)
+Client ◄─── data mới ──── Server
+       (ĐÓNG kết nối)
+     ↑
+     Server KHÔNG THỂ chủ động báo cho client biết có gì mới —
+     chỉ được "nói" đúng lúc client vừa "hỏi".</code></pre>
+
+      <h4 class="subsub">SSE — chỉ 1 chiều</h4>
+      <pre><code>Client ────(kết nối 1 lần)────► Server
+Client ◄─── data 1 ──────────── Server
+Client ◄─── data 2 ──────────── Server
+Client ◄─── data 3 ──────────── Server
+     ↑
+     Client KHÔNG THỂ gửi gì ngược lại qua ĐÚNG kết nối SSE này.
+     Muốn gửi gì lên server (ví dụ "tôi đã đọc thông báo rồi"),
+     PHẢI mở 1 request HTTP HOÀN TOÀN KHÁC (POST /notifications/read),
+     tách biệt với kết nối SSE đang chạy.</code></pre>
+
+      <h4 class="subsub">WebSocket — thực sự 2 chiều, CÙNG 1 kết nối</h4>
+      <pre><code>Client ────(kết nối 1 lần)────► Server
+Client ◄─── data 1 ──────────── Server
+Client ─── "tôi đã đọc" ───────► Server    ← GỬI NGƯỢC LẠI qua ĐÚNG kênh đó
+Client ◄─── data 2 ──────────── Server
+Client ─── "gõ tin nhắn..." ───► Server    ← GỬI NGƯỢC LẠI tiếp, vẫn CÙNG 1 kết nối
+Client ◄─── data 3 ──────────── Server</code></pre>
     </section>
 
     <section class="qa" id="ocr-optical-character-recognition" data-nav="OCR (Optical Character Recognition)">
-      <div class="q-tag"><span class="n">8</span> Socket &amp; Realtime</div>
+      <div class="q-tag"><span class="n">9</span> Socket &amp; Realtime</div>
       <h2 class="q-title">OCR (Optical Character Recognition)</h2>
       <p>là công nghệ chuyển hình ảnh chứa chữ viết tay, in ấn thành văn bản có thể chỉnh sửa và tìm kiếm</p>
     </section>
 
     <section class="qa" id="webrtc-web-real-time-communication" data-nav="WebRTC (Web Real-Time Communication)">
-      <div class="q-tag"><span class="n">9</span> Socket &amp; Realtime</div>
+      <div class="q-tag"><span class="n">10</span> Socket &amp; Realtime</div>
       <h2 class="q-title">WebRTC (Web Real-Time Communication)</h2>
       <p>là một công nghệ mã nguồn mở cho phép truyền tải âm thanh, video và dữ liệu trực tiếp giữa các trình duyệt web mà không cần cài đặt thêm phần mềm hay plugin trung gian. Công nghệ này giúp kết nối ngang hàng (P2P) nhanh chóng, giảm độ trễ tối đa và được hỗ trợ trên hầu hết các trình duyệt lớn như Chrome, Firefox hay Safari.</p>
     </section>
 
     <section class="qa" id="rxjs" data-nav="RxJS">
-      <div class="q-tag"><span class="n">10</span> Angular / RxJS</div>
+      <div class="q-tag"><span class="n">11</span> Angular / RxJS</div>
       <h2 class="q-title">RxJS</h2>
       <p>is a library for composing asynchronous and event-based programs by using observable sequences</p>
     </section>
 
     <section class="qa" id="reactive-state" data-nav="Reactive state">
-      <div class="q-tag"><span class="n">11</span> Angular / RxJS</div>
+      <div class="q-tag"><span class="n">12</span> Angular / RxJS</div>
       <h2 class="q-title">Reactive state</h2>
       <ul>
         <li>Angular dùng RxJS (thông qua stream)</li>
