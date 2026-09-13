@@ -88,7 +88,7 @@
   <button class="mobile-toggle" id="navToggle" aria-label="Mở mục lục">☰ Mục lục</button>
   <aside class="sidebar" id="sidebar">
     <div class="brand">Backend — .NET &amp; NestJS</div>
-    <div class="brand-sub">17 mục &middot; sổ tay ôn phỏng vấn</div>
+    <div class="brand-sub">18 mục &middot; sổ tay ôn phỏng vấn</div>
 
     <div class="nav-block">
       <p class="nav-label">Nội dung</p>
@@ -110,6 +110,7 @@
         <li><a href="#restful-api"><span class="nav-num">15</span><span class="nav-text">Restful API</span></a></li>
         <li><a href="#graphql"><span class="nav-num">16</span><span class="nav-text">GraphQL</span></a></li>
         <li><a href="#module"><span class="nav-num">17</span><span class="nav-text">Module</span></a></li>
+        <li><a href="#request-lifecycle-trong-nestjs"><span class="nav-num">18</span><span class="nav-text">Request lifecycle trong NestJS</span></a></li>
       </ul>
     </div>
   </aside>
@@ -402,6 +403,34 @@ Record</code></pre>
         <li>là một module đặc biệt trong NestJS được đánh dấu bằng decorator <code>@Global()</code>.</li>
         <li>Hiểu đơn giản: Ở điều kiện bình thường, nếu <code>UsersModule</code> muốn dùng <code>DatabaseService</code> từ <code>DatabaseModule</code>, bạn phải đưa <code>DatabaseModule</code> vào mảng <code>imports</code> của <code>UsersModule</code>. Nhưng nếu <code>DatabaseModule</code> là một <b>Global Module</b>, bạn không cần phải <code>import</code> nó ở bất cứ đâu nữa – mọi module khác trong ứng dụng đều có thể tự do dùng các service mà nó xuất ra.</li>
       </ul>
+    </section>
+
+    <section class="qa" id="request-lifecycle-trong-nestjs" data-nav="Request lifecycle trong NestJS">
+      <div class="q-tag"><span class="n">18</span> NestJS</div>
+      <h2 class="q-title">Request lifecycle trong NestJS</h2>
+      <pre><code>Middleware: Chạy đầu tiên. Nhiệm vụ chính là
++ chặn các request spam (rate limit)
++ điều hướng req đến router handler (controller) tương ứng
+
+Guards: Rào chắn bảo mật (Authentication/Authorization). Nếu người dùng không có quyền, Guard trả về false, request bị chặn ngay lập tức (lỗi 401/403).
+
+Interceptors (Pre-controller): ghi log request
+
+Pipes:
++ Validate (kiểm tra tính hợp lệ của DTO)
++ Transform (ép kiểu dữ liệu đầu vào, ví dụ từ string sang số nguyên). Nếu validate trượt, ném lỗi 400 Bad Request.
+
+Controller (Route Handler):
++ Điểm tiếp nhận request đã được "làm sạch" và gọi service phù hợp.
++ Bên cạnh đó có thể add job vào queue rồi response về 202 accepted khi dùng background job
+
+Service: Xử lý nghiệp vụ lõi (business logic), tính toán, và tương tác với Database thông qua repository.
+
+Interceptors (Post-request):
++ Hứng kết quả do Service/Controller trả ra để format về response chung cho client (ví dụ: bọc tất cả trong format chuẩn { statusCode: 200, data: ... }) trước khi gửi đi.
++ Ghi log tổng thời gian xử lý request này để log warn nếu vượt ngưỡng thời gian quy định
+
+Exception Filters: Nếu có bất kỳ lỗi (Exception) nào văng ra từ các layer trên, Filter sẽ gom lại, format về 1 response lỗi chung cho client và trả về HTTP status code phù hợp.</code></pre>
     </section>
   </main>
 </div>
