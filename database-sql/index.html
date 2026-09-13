@@ -88,7 +88,7 @@
   <button class="mobile-toggle" id="navToggle" aria-label="Mở mục lục">☰ Mục lục</button>
   <aside class="sidebar" id="sidebar">
     <div class="brand">Database &amp; SQL</div>
-    <div class="brand-sub">11 mục &middot; sổ tay ôn phỏng vấn</div>
+    <div class="brand-sub">14 mục &middot; sổ tay ôn phỏng vấn</div>
 
     <div class="nav-block">
       <p class="nav-label">Nội dung</p>
@@ -104,6 +104,9 @@
         <li><a href="#schema-prisma-file"><span class="nav-num">09</span><span class="nav-text">schema.prisma file</span></a></li>
         <li><a href="#acid"><span class="nav-num">10</span><span class="nav-text">ACID</span></a></li>
         <li><a href="#giua-cursor-va-pagination-tai-sao-lai-uu-tien-dung-cursor-ho"><span class="nav-num">11</span><span class="nav-text">giữa cursor và pagination , tại sao lại ưu t…</span></a></li>
+        <li><a href="#lay-list-n-n-kem-mang-con"><span class="nav-num">12</span><span class="nav-text">Lấy list N-N kèm mảng con</span></a></li>
+        <li><a href="#self-referencing-foreign-key"><span class="nav-num">13</span><span class="nav-text">Self-Referencing Foreign Key</span></a></li>
+        <li><a href="#char-va-varchar"><span class="nav-num">14</span><span class="nav-text">CHAR &amp; VARCHAR</span></a></li>
       </ul>
     </div>
   </aside>
@@ -324,6 +327,85 @@ COMMIT;   -- ← ngay khi dòng này chạy xong và trả về thành công
       <h2 class="q-title">giữa cursor và pagination , tại sao lại ưu tiên dùng cursor hơn</h2>
       <figure class="doc-figure"><img src="../assets/img/database-sql-giua-cursor-va-pagination-tai-sao-lai-uu-tien-dung-cursor-ho-01.png" alt="Minh hoạ" loading="lazy"></figure>
       <figure class="doc-figure"><img src="../assets/img/database-sql-giua-cursor-va-pagination-tai-sao-lai-uu-tien-dung-cursor-ho-02.png" alt="Minh hoạ" loading="lazy"></figure>
+    </section>
+
+    <section class="qa" id="lay-list-n-n-kem-mang-con" data-nav="Lấy list N-N kèm mảng con">
+      <div class="q-tag"><span class="n">12</span> SQL</div>
+      <h2 class="q-title">Giả sử bảng student quan hệ N-N với bảng class — có bao nhiêu cách query để lấy 1 list student, mỗi record kèm field classes là mảng các class?</h2>
+      <p><b>Cách 1: dùng group by + aggregate</b></p>
+      <pre><code>SELECT
+    s.id,
+    s.name,
+    JSON_ARRAYAGG(c.name) AS classes
+FROM students s
+LEFT JOIN student_class sc ON s.id = sc.student_id
+LEFT JOIN classes c ON sc.class_id = c.id
+GROUP BY s.id, s.name;</code></pre>
+      <p><b>Cách 2: dùng subquery tại field list (classes) ở SELECT</b></p>
+      <pre><code>SELECT
+    s.id,
+    s.name,
+    (
+        SELECT JSON_ARRAYAGG(c.name) -- Dùng JSON_AGG hoặc ARRAY_AGG nếu là PostgreSQL
+        FROM student_class sc
+        JOIN classes c ON sc.class_id = c.id
+        WHERE sc.student_id = s.id
+    ) AS classes
+FROM students s;</code></pre>
+    </section>
+
+    <section class="qa" id="self-referencing-foreign-key" data-nav="Self-Referencing Foreign Key">
+      <div class="q-tag"><span class="n">13</span> SQL</div>
+      <h2 class="q-title">Self-Referencing Foreign Key là gì? Case study thực tế</h2>
+      <p><b>Self-Referencing Foreign Key</b> là một foreign key nằm ngay trên chính bảng đó, trỏ về primary key của cùng bảng — dùng để biểu diễn quan hệ cây/phân cấp (hierarchy) hoặc quan hệ giữa các row trong cùng 1 bảng, thay vì giữa 2 bảng khác nhau.</p>
+      <pre><code>CREATE TABLE employees (
+  id INT PRIMARY KEY,
+  name VARCHAR(100),
+  manager_id INT NULL REFERENCES employees(id) -- trỏ về chính bảng employees
+);</code></pre>
+      <p><b>Case study thực tế:</b></p>
+      <ul>
+        <li><b>Employee — Manager:</b> mỗi nhân viên có 1 <code>manager_id</code> trỏ tới nhân viên khác (người quản lý trực tiếp) — dùng để dựng sơ đồ tổ chức, hoặc query "ai báo cáo cho ai".</li>
+        <li><b>Category — Subcategory:</b> bảng <code>categories</code> có <code>parent_id</code> trỏ về chính nó — dùng cho menu/danh mục sản phẩm nhiều cấp (category cha, category con, category cháu...).</li>
+        <li><b>Comment — Reply:</b> bảng <code>comments</code> có <code>parent_comment_id</code> — bình luận trả lời 1 bình luận khác, dựng cây thread bình luận (giống Facebook, YouTube).</li>
+        <li><b>Department — Sub-department:</b> phòng ban có <code>parent_department_id</code> — dựng cây cơ cấu tổ chức công ty (phòng lớn chứa phòng nhỏ).</li>
+        <li><b>Folder — File system:</b> bảng <code>folders</code> có <code>parent_folder_id</code> — mô phỏng cây thư mục, folder chứa folder con.</li>
+      </ul>
+      <p>Muốn lấy toàn bộ cây con (hoặc toàn bộ tổ tiên) từ 1 node bất kỳ, dùng <b>Recursive CTE</b> vì độ sâu cây không cố định:</p>
+      <pre><code>WITH RECURSIVE org_chart AS (
+  -- anchor: nhân viên gốc cần tìm cấp dưới
+  SELECT id, name, manager_id
+  FROM employees
+  WHERE id = 1
+
+  UNION ALL
+
+  -- recursive: nối tiếp xuống các cấp dưới
+  SELECT e.id, e.name, e.manager_id
+  FROM employees e
+  JOIN org_chart oc ON e.manager_id = oc.id
+)
+SELECT * FROM org_chart;</code></pre>
+    </section>
+
+    <section class="qa" id="char-va-varchar" data-nav="CHAR &amp; VARCHAR">
+      <div class="q-tag"><span class="n">14</span> SQL</div>
+      <h2 class="q-title">Sự khác nhau giữa CHAR và VARCHAR</h2>
+      <p>Cả 2 đều dùng để lưu chuỗi ký tự, khác nhau chủ yếu ở cách lưu trữ độ dài. n trong <code>CHAR(n)</code>/<code>VARCHAR(n)</code> đều là số ký tự tối đa cho phép, nhưng cách chiếm dung lượng thì khác nhau:</p>
+      <table>
+        <thead><tr><th></th><th>CHAR(n)</th><th>VARCHAR(n)</th></tr></thead>
+        <tbody>
+          <tr><td>Lưu trữ</td><td>Luôn chiếm đủ số byte đã khai báo. Nếu dữ liệu ngắn hơn, hệ thống tự động điền thêm khoảng trắng (padding) vào cuối.</td><td>Chỉ chiếm số byte bằng đúng chiều dài dữ liệu thực tế cộng thêm 1-2 byte (để lưu thông tin độ dài chuỗi).</td></tr>
+          <tr><td>Hiệu suất</td><td>Nhanh hơn một chút (do kích thước cố định, database engine tính toán vị trí lưu trữ trên ổ cứng dễ dàng hơn).</td><td>Chậm hơn một chút (do phải tính toán chiều dài thực tế trước khi đọc/ghi).</td></tr>
+          <tr><td>Tối ưu không gian</td><td>Gây lãng phí dung lượng nếu lưu các chuỗi có độ dài chênh lệch lớn.</td><td>Tối ưu không gian ổ cứng rất tốt.</td></tr>
+          <tr><td>Khi nào dùng</td><td>Giá trị độ dài cố định, biết trước: mã quốc gia (VN, US), giới tính (M/F), mã hash MD5 (32 ký tự)</td><td>Giá trị độ dài thay đổi: tên, email, địa chỉ, mô tả</td></tr>
+        </tbody>
+      </table>
+      <pre><code>CREATE TABLE users (
+  country_code CHAR(2),      -- luôn đúng 2 ký tự: 'VN', 'US'...
+  email VARCHAR(255)         -- tối đa 255 ký tự, nhưng chỉ tốn dung lượng theo độ dài thực
+);</code></pre>
+      <p>Lưu ý: hầu hết DB (MySQL, SQL Server) tự động cắt bỏ khoảng trắng thừa ở cuối khi SELECT giá trị CHAR, nên <code>'VN'</code> và <code>'VN  '</code> đọc ra vẫn giống nhau — nhưng VARCHAR thì giữ nguyên khoảng trắng đã lưu.</p>
     </section>
   </main>
 </div>
