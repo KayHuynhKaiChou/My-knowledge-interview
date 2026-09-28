@@ -213,6 +213,19 @@
     margin:0 0 22px;
     line-height:1.3;
   }
+  h2.q-title .n{
+    font-family:var(--display);
+    font-size:13px;
+    color:var(--bg);
+    background:var(--amber);
+    width:22px; height:22px;
+    border-radius:5px;
+    display:inline-flex; align-items:center; justify-content:center;
+    font-weight:700;
+    vertical-align:middle;
+    margin-right:10px;
+    position:relative; top:-2px;
+  }
   h3.sub{
     font-family:var(--display);
     font-size:16.5px;
@@ -412,6 +425,18 @@
     text-transform:uppercase; color:var(--amber); font-weight:600; margin-bottom:8px; display:block;
   }
   .interview-line p{font-style:italic; margin-bottom:0; color:var(--ink);}
+
+  /* Cap song ngu: cau tieng Anh goc + ban dich tieng Viet, gom trong 1 the
+     de tach khoi phan tren/duoi thay vi trang giay lien mach kho doc */
+  .bilingual{
+    background:var(--bg-card);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:16px 20px;
+    margin:0 0 16px;
+  }
+  .bilingual .en{margin:0 0 10px; color:var(--ink);}
+  .bilingual .vi{margin:0; color:var(--ink-dim); font-style:italic;}
 
   /* mobile top nav toggle */
   .mobile-toggle{display:none;}
