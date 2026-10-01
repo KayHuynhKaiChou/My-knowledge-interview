@@ -1,0 +1,122 @@
+/* Thanh audio dinh (sticky) theo tung muc: tran het chieu ngang cot noi dung,
+   nam sat duoi header nhu mot sub-header, tong xanh teal de tach biet voi
+   card noi dung (xam) va tu dang doc (amber). */
+:root{
+  --dock-bg:#0d2628;
+  --dock-bg-2:#103033;
+  --dock-line:#1f5a56;
+  --dock-accent:#4fd1c5;
+  --dock-ink:#d9f3f0;
+  --dock-ink-dim:#86b9b4;
+}
+
+/* Cat phan nen tran sang phai (::after) o mep man hinh. Dung clip (khong phai
+   hidden) de khong tao scroll container, neu khong sticky se mat tac dung. */
+.shell{overflow-x:clip;}
+
+.audio-dock{
+  position:sticky;
+  top:var(--topbar-h, 56px);
+  z-index:20;
+  /* Keo sat 2 mep cot noi dung (bu lai padding cua main) */
+  margin:0 -48px 24px;
+  padding:10px 48px;
+  background:linear-gradient(180deg, var(--dock-bg-2), var(--dock-bg));
+  border-top:1px solid var(--dock-line);
+  border-bottom:1px solid var(--dock-line);
+  box-shadow:0 12px 24px -12px rgba(0,0,0,.7);
+}
+/* Nen keo dai sang phai toi het man hinh (main co max-width nen con khoang trong) */
+.audio-dock::after{
+  content:"";
+  position:absolute;
+  top:-1px; bottom:-1px; left:100%;
+  width:100vw;
+  background:inherit;
+  border-top:inherit;
+  border-bottom:inherit;
+}
+@media (max-width:700px){ .audio-dock{margin:0 -20px 20px; padding:8px 20px;} }
+@media (max-width:480px){ .audio-dock{margin:0 -16px 20px; padding:8px 16px;} }
+/* Mobile: nut "Muc luc" cung sticky ngay duoi header, dock nam ngay duoi no */
+@media (max-width:900px){ .audio-dock{top:calc(var(--topbar-h, 56px) + 46px);} }
+
+/* ---------------------------------------------------------------- player */
+.ap{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  color:var(--dock-ink);
+  font-family:var(--mono);
+  font-size:12.5px;
+}
+.ap-controls{display:flex; align-items:center; gap:4px; flex:none;}
+.ap-track{display:flex; align-items:center; gap:10px; flex:1; min-width:0;}
+
+.ap-btn{
+  appearance:none;
+  border:1px solid transparent;
+  background:transparent;
+  color:var(--dock-ink-dim);
+  font:inherit;
+  font-weight:600;
+  height:32px;
+  min-width:44px;
+  padding:0 8px;
+  border-radius:8px;
+  cursor:pointer;
+  transition:background-color .15s, color .15s, border-color .15s;
+}
+.ap-btn:hover{color:var(--dock-ink); background:rgba(79,209,197,.12);}
+.ap-btn:focus-visible{outline:2px solid var(--dock-accent); outline-offset:1px;}
+
+.ap-play{
+  width:40px; height:40px; min-width:40px;
+  padding:0;
+  margin:0 6px;
+  border-radius:50%;
+  background:var(--dock-accent);
+  color:var(--dock-bg);
+  display:inline-flex; align-items:center; justify-content:center;
+}
+.ap-play:hover{background:#7fe3d9; color:var(--dock-bg);}
+.ap-play svg{width:18px; height:18px; fill:currentColor;}
+.ap-play .i-pause{display:none;}
+.ap.is-playing .ap-play .i-play{display:none;}
+.ap.is-playing .ap-play .i-pause{display:block;}
+
+.ap-rate{border-color:var(--dock-line); color:var(--dock-ink);}
+
+.ap-time{flex:none; min-width:38px; color:var(--dock-ink-dim); font-variant-numeric:tabular-nums;}
+.ap-time.is-current{color:var(--dock-ink); text-align:right;}
+
+/* Thanh tua: phan da nghe to mau theo bien --p (0-100%) do JS cap nhat */
+.ap-seek{
+  -webkit-appearance:none; appearance:none;
+  flex:1; min-width:0;
+  height:6px;
+  margin:0;
+  border-radius:999px;
+  background:linear-gradient(90deg, var(--dock-accent) var(--p, 0%), rgba(217,243,240,.18) var(--p, 0%));
+  cursor:pointer;
+}
+.ap-seek::-webkit-slider-thumb{
+  -webkit-appearance:none; appearance:none;
+  width:14px; height:14px; border-radius:50%;
+  background:#fff; border:none;
+  box-shadow:0 0 0 3px rgba(79,209,197,.35);
+}
+.ap-seek::-moz-range-thumb{
+  width:14px; height:14px; border-radius:50%;
+  background:#fff; border:none;
+  box-shadow:0 0 0 3px rgba(79,209,197,.35);
+}
+.ap-seek:focus-visible{outline:2px solid var(--dock-accent); outline-offset:4px;}
+
+/* Man hinh hep: nut dieu khien 1 hang, thanh tua xuong hang duoi */
+@media (max-width:600px){
+  .ap{flex-wrap:wrap; gap:6px 10px;}
+  .ap-controls{width:100%; justify-content:space-between;}
+  .ap-btn{min-width:40px; padding:0 4px;}
+  .ap-track{flex-basis:100%;}
+}

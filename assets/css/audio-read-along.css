@@ -1,0 +1,25 @@
+/* Doc theo audio: to sang tu dang doc va doan dang doc.
+   Khung audio dinh nam o audio-dock-player.css. */
+
+/* Khi tu cuon toi doan dang doc, chua khoang cho header + thanh audio */
+.bilingual{scroll-margin-top:calc(var(--topbar-h, 56px) + 84px);}
+@media (max-width:900px){
+  .bilingual{scroll-margin-top:calc(var(--topbar-h, 56px) + 46px + 84px);}
+}
+@media (max-width:600px){
+  .bilingual{scroll-margin-top:calc(var(--topbar-h, 56px) + 46px + 110px);}
+}
+
+.bilingual.is-active{
+  border-color:var(--amber);
+  box-shadow:inset 3px 0 0 var(--amber);
+}
+
+/* Tung tu co timestamp: bam vao de tua audio toi tu do */
+.w{cursor:pointer; border-radius:3px; transition:background-color .12s, color .12s;}
+.w:hover{background:rgba(232,163,61,.18);}
+.w.is-reading{background:var(--amber); color:var(--bg);}
+
+@media (prefers-reduced-motion:reduce){
+  .w{transition:none;}
+}
