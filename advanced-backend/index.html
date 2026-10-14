@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="17 câu hỏi chuyên sâu về concurrency, lock, idempotency, saga, queue, cache, index, API design, normalization, import Excel, access/refresh token và multipart upload S3 — kèm code và câu trả lời mẫu.">
+<meta name="description" content="18 câu hỏi chuyên sâu về concurrency, lock, idempotency, saga, queue, cache, index, API design, normalization, import Excel, access/refresh token multipart upload S3 và Stripe Checkout — kèm code và câu trả lời mẫu.">
 <title>Advanced Backend — Interview Knowledge</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -88,7 +88,7 @@
   <button class="mobile-toggle" id="navToggle" aria-label="Mở mục lục">☰ Mục lục</button>
   <aside class="sidebar" id="sidebar">
     <div class="brand">Advanced Backend</div>
-    <div class="brand-sub">17 mục &middot; sổ tay ôn phỏng vấn</div>
+    <div class="brand-sub">18 mục &middot; sổ tay ôn phỏng vấn</div>
 
     <div class="nav-block">
       <p class="nav-label">Nội dung</p>
@@ -116,8 +116,8 @@
   <main>
     <div class="hero">
       <div class="hero-kicker">Interview prep · Backend / Payment System</div>
-      <h1>Advanced Backend — 17 câu hỏi phỏng vấn thường gặp</h1>
-      <p class="lede">Từ bài toán kinh điển “2 request cùng trừ tiền 1 tài khoản” cho tới idempotency, saga, queue, cache, index và API design. Mỗi câu hỏi là một trang riêng, kèm ví dụ code, so sánh thực tế và câu trả lời mẫu dùng được ngay khi phỏng vấn.</p>
+      <h1>Advanced Backend — 18 câu hỏi phỏng vấn thường gặp</h1>
+      <p class="lede">Từ concurrency, idempotency, saga, queue và cache tới thanh toán qua Stripe Checkout. Mỗi câu hỏi là một trang riêng, kèm ví dụ và câu trả lời mẫu dùng được khi phỏng vấn.</p>
     </div>
 
     <p class="nav-label">Mục lục</p>
@@ -206,6 +206,11 @@
         <span class="card-num">CÂU 17</span>
         <h3>S3 Multipart Upload — Flow chung</h3>
         <p>Flow chung để trả lời interview: InitiateMultipartUpload, UploadPart, CompleteMultipartUpload.</p>
+      </a>
+      <a class="topic-card" href="18-stripe-checkout-webhook.html">
+        <span class="card-num">CÂU 18</span>
+        <h3>Stripe Checkout & Webhook</h3>
+        <p>BE tạo order pending và Checkout Session; FE redirect sang Stripe, còn webhook xác nhận thanh toán và cập nhật đơn hàng.</p>
       </a>
     </div>
   </main>

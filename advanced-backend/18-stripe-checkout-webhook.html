@@ -1,0 +1,205 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Stripe Checkout: tạo phiên thanh toán, redirect khách và xác nhận đơn bằng webhook server-to-server.">
+<title>18. Stripe Checkout &amp; Webhook — Advanced Backend</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body data-root="../">
+
+<header class="topbar">
+  <a class="topbar-brand" href="../index.html" aria-label="Interview Knowledge — trang chủ">
+    <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true">
+      <defs><linearGradient id="ikBadge" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#f0b355"/><stop offset="1" stop-color="#b9752a"/>
+      </linearGradient></defs>
+      <rect x="2" y="2" width="60" height="60" rx="15" fill="url(#ikBadge)"/>
+      <path d="M21 21 L33 32 L21 43" fill="none" stroke="#0b0e13" stroke-width="7"
+            stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M37 43 H46" stroke="#0b0e13" stroke-width="7" stroke-linecap="round"/>
+    </svg>
+    <span class="brand-text">Interview Knowledge</span>
+  </a>
+  <nav class="topbar-nav">
+    <details class="nav-group has-active">
+      <summary>Backend</summary>
+      <div class="nav-dropdown">
+        <a href="../advanced-backend/index.html" class="active">Advanced Backend</a>
+        <a href="../backend-dotnet-nestjs/index.html">.NET &amp; NestJS</a>
+        <a href="../database-sql/index.html">Database &amp; SQL</a>
+        <a href="../backend-infrastructure/index.html">Hạ tầng</a>
+        <a href="../realtime-socket/index.html">Realtime &amp; Socket</a>
+        <a href="../case-studies/index.html">Case studies</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Frontend</summary>
+      <div class="nav-dropdown">
+        <a href="../javascript-core/index.html">JavaScript &amp; TS</a>
+        <a href="../react/index.html">React &amp; State</a>
+        <a href="../nextjs/index.html">Next.js</a>
+        <a href="../css-html/index.html">CSS &amp; HTML</a>
+        <a href="../browser-web-api/index.html">Browser &amp; Web API</a>
+        <a href="../react-native/index.html">React Native</a>
+        <a href="../frontend-tooling/index.html">Frontend Tooling</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Quy trình &amp; Nền tảng</summary>
+      <div class="nav-dropdown">
+        <a href="../git/index.html">Git</a>
+        <a href="../testing-environments/index.html">Testing</a>
+        <a href="../saas-platforms/index.html">SaaS &amp; Nền tảng</a>
+        <a href="../auth-blockchain/index.html">Auth &amp; Blockchain</a>
+      </div>
+    </details>
+    <details class="nav-group">
+      <summary>Khác</summary>
+      <div class="nav-dropdown">
+        <a href="../interview-intro/index.html">English</a>
+        <a href="../project-notes/index.html">Ghi chú dự án</a>
+      </div>
+    </details>
+  </nav>
+  <button class="search-trigger" id="searchTrigger" aria-label="Tìm kiếm nội dung">
+    <span class="search-icon" aria-hidden="true">⌕</span>
+    <span class="search-label">Tìm kiếm</span>
+    <kbd>/</kbd>
+  </button>
+</header>
+
+<div class="search-overlay" id="searchOverlay" hidden>
+  <div class="search-box" role="dialog" aria-label="Tìm kiếm nội dung">
+    <input type="search" id="searchInput" autocomplete="off" spellcheck="false"
+           placeholder="Tìm trong toàn bộ nội dung — closure, saga, index, rebase…">
+    <div class="search-results" id="searchResults"></div>
+    <div class="search-hint">Enter mở mục · ↑↓ chọn · Esc đóng</div>
+  </div>
+</div>
+
+<div class="shell">
+  <button class="mobile-toggle" id="navToggle" aria-label="Mở mục lục">☰ Mục lục</button>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">Advanced Backend</div>
+    <div class="brand-sub">18 mục &middot; sổ tay ôn phỏng vấn</div>
+
+    <div class="nav-block">
+      <p class="nav-label">Nội dung</p>
+      <ul class="nav-list">
+        <li><a href="01-race-condition-lock-deadlock.html"><span class="nav-num">01</span><span class="nav-text">Race Condition, Lock &amp; Deadlock</span></a></li>
+        <li><a href="02-idempotency.html"><span class="nav-num">02</span><span class="nav-text">Idempotency</span></a></li>
+        <li><a href="03-distributed-transaction-saga.html"><span class="nav-num">03</span><span class="nav-text">Transaction xuyên service</span></a></li>
+        <li><a href="04-queue-async-processing.html"><span class="nav-num">04</span><span class="nav-text">Queue &amp; Async Processing</span></a></li>
+        <li><a href="05-rate-limiting.html"><span class="nav-num">05</span><span class="nav-text">Rate Limiting</span></a></li>
+        <li><a href="06-database-query-optimization.html"><span class="nav-num">06</span><span class="nav-text">Tối ưu Database &amp; Query</span></a></li>
+        <li><a href="07-redis-caching.html"><span class="nav-num">07</span><span class="nav-text">Redis &mdash; khái niệm &amp; case study</span></a></li>
+        <li><a href="08-scalability-pagination.html"><span class="nav-num">08</span><span class="nav-text">Scalability &amp; Pagination</span></a></li>
+        <li><a href="09-database-index.html"><span class="nav-num">09</span><span class="nav-text">Index &mdash; cơ chế &amp; đánh đổi</span></a></li>
+        <li><a href="10-background-job.html"><span class="nav-num">10</span><span class="nav-text">Background Job</span></a></li>
+        <li><a href="11-multi-tenant.html"><span class="nav-num">11</span><span class="nav-text">Multi-tenant</span></a></li>
+        <li><a href="12-api-design.html"><span class="nav-num">12</span><span class="nav-text">API Design</span></a></li>
+        <li><a href="13-normalization-denormalization.html"><span class="nav-num">13</span><span class="nav-text">Normalization &amp; Denormalization</span></a></li>
+        <li><a href="14-excel-import-optimization.html"><span class="nav-num">14</span><span class="nav-text">Import Excel tối ưu</span></a></li>
+        <li><a href="15-access-refresh-token.html"><span class="nav-num">15</span><span class="nav-text">Access Token &amp; Refresh Token</span></a></li>
+        <li><a href="16-mobile-upload-s3-multipart.html"><span class="nav-num">16</span><span class="nav-text">Mobile Upload File lên S3</span></a></li>
+        <li><a href="17-s3-multipart-upload-flow.html"><span class="nav-num">17</span><span class="nav-text">S3 Multipart Upload — Flow chung</span></a></li>
+        <li><a href="18-stripe-checkout-webhook.html" class="active"><span class="nav-num">18</span><span class="nav-text">Stripe Checkout & Webhook</span></a></li>
+      </ul>
+    </div>
+
+    <div class="nav-block">
+      <p class="nav-label">Trong trang này</p>
+      <div id="pageToc"></div>
+    </div>
+  </aside>
+  <main>
+    <div class="crumb"><a href="index.html">Advanced Backend</a><span class="sep">/</span><span>Câu 18</span></div>
+    <section class="qa" id="q18">
+      <div class="q-tag"><span class="n">18</span> Câu hỏi ứng dụng thường gặp</div>
+      <h2 class="q-title">Thanh toán đơn hàng qua Stripe Checkout: success URL và webhook khác nhau thế nào?</h2>
+      <div class="callout answer"><span class="callout-label">Đáp án ngắn</span><p>BE tạo order <code>pending</code>, tạo Stripe Checkout Session rồi trả URL cho FE redirect. Stripe đưa trình duyệt về <code>success_url</code>; webhook là request server-to-server để BE xác minh thanh toán và cập nhật order. Không xem query string <code>?result=success</code> là bằng chứng đã trả tiền.</p></div>
+      <h3 class="sub">18.1 — Luồng tổng thể</h3>
+      <pre><code>1. FE → POST /orders (gửi sản phẩm/số lượng; không tự quyết định giá)
+2. BE kiểm tra giỏ hàng và giá từ DB, tạo order status=pending
+3. BE → Stripe API: tạo Checkout Session, gắn success_url, cancel_url và orderId
+4. Stripe → BE: trả session.url
+5. BE → FE: { orderId, checkoutUrl }
+6. FE điều hướng trình duyệt sang checkoutUrl
+7. Stripe chuyển trình duyệt về shop.com/orders/123?session_id={CHECKOUT_SESSION_ID}
+8. Stripe đồng thời POST event đến api.shop.com/webhooks/stripe
+9. BE xác minh chữ ký, xử lý event idempotent và cập nhật order thành paid</code></pre>
+      <p>Với hosted Checkout, BE tạo Session; FE chỉ điều hướng trình duyệt đến URL Stripe trả về. Secret key chỉ ở BE. Giá và line items phải được tính từ dữ liệu đáng tin cậy phía server, không lấy giá FE gửi lên làm nguồn sự thật.</p>
+      <h3 class="sub">18.2 — Tạo order và Checkout Session</h3>
+      <pre class="good"><code>POST /orders
+
+const order = await db.orders.create({
+  userId: auth.userId,
+  status: "pending",
+  totalAmount: await calculateTotalFromDatabase(cartItems),
+  currency: "usd"
+});
+
+const session = await stripe.checkout.sessions.create({
+  mode: "payment",
+  line_items: buildLineItemsFromOrder(order),
+  success_url: `https://shop.com/orders/${order.id}?session_id={CHECKOUT_SESSION_ID}`,
+  cancel_url: `https://shop.com/orders/${order.id}?result=cancel`,
+  client_reference_id: String(order.id),
+  metadata: { orderId: String(order.id) }
+});
+
+await db.orders.update(order.id, { stripeSessionId: session.id });
+return { orderId: order.id, checkoutUrl: session.url };</code></pre>
+      <p>Lưu <code>stripeSessionId</code> và liên kết Session với order bằng <code>metadata</code> hoặc <code>client_reference_id</code> để webhook tìm đúng đơn.</p>
+      <h3 class="sub">18.3 — Success URL chỉ phục vụ trình duyệt</h3>
+      <p>Stripe redirect trình duyệt về <code>success_url</code> khi checkout hoàn tất. Trang kết quả có thể hiển thị “Đang xác nhận thanh toán” và gọi API BE đọc trạng thái. Redirect có thể bị đóng tab, lỗi mạng hoặc đến trước khi webhook được xử lý; khách cũng có thể tự gõ URL. Vì thế <code>?result=success</code> không chứng minh giao dịch thành công.</p>
+      <p>Có thể thêm <code>{CHECKOUT_SESSION_ID}</code> vào success URL để FE gửi Session ID lên BE. Nếu cần hiển thị tức thì, BE truy vấn Stripe từ server và kiểm tra Session thuộc đúng order; FE không tự đổi trạng thái đơn.</p>
+      <h3 class="sub">18.4 — Webhook là endpoint do mình sở hữu</h3>
+      <pre><code>POST https://api.shop.com/webhooks/stripe
+
+Stripe gửi event, ví dụ checkout.session.completed
+BE:
+  1. Đọc raw request body và Stripe-Signature header
+  2. Xác minh chữ ký bằng webhook signing secret (whsec_...)
+  3. Tìm order qua metadata/client_reference_id, đối chiếu session và số tiền
+  4. Trong DB transaction: nếu đơn chưa paid thì cập nhật paid, lưu event/session ID
+  5. Trả HTTP 2xx nhanh chóng để Stripe biết đã nhận event</code></pre>
+      <p>Đăng ký URL HTTPS của BE trong Stripe Dashboard một lần cho mỗi môi trường và chọn event cần nhận. Sau đó Stripe chủ động gọi endpoint khi có event; FE không gọi webhook và không phải cấu hình lại cho từng order.</p>
+      <p>Xác minh chữ ký cần raw body nguyên bản; middleware parse hoặc biến đổi body trước có thể làm chữ ký không khớp. Signing secret phải được giữ ở BE, riêng theo endpoint/môi trường.</p>
+      <h3 class="sub">18.5 — Retry, event trùng và trạng thái</h3>
+      <ul>
+        <li>Stripe có thể retry webhook khi BE lỗi hoặc timeout; lưu <code>event.id</code> với unique constraint và cập nhật order idempotent.</li>
+        <li>Event có thể đến không đúng thứ tự. Chỉ chuyển trạng thái theo quy tắc hợp lệ, không để event cũ đổi <code>paid</code> về <code>pending</code>.</li>
+        <li><code>checkout.session.completed</code> báo Checkout hoàn tất. Với phương thức thanh toán bất đồng bộ, xét event thành công tương ứng như <code>checkout.session.async_payment_succeeded</code> trước khi giao hàng.</li>
+        <li>Nếu tạo order xong nhưng gọi Stripe lỗi, giữ trạng thái chờ/khởi tạo lỗi để retry hoặc xử lý theo chính sách. Dùng idempotency key để retry không sinh thêm giao dịch ngoài ý muốn.</li>
+      </ul>
+      <h3 class="sub">18.6 — Phân biệt hai URL</h3>
+      <table><thead><tr><th></th><th>success_url</th><th>Webhook URL</th></tr></thead><tbody>
+        <tr><td>Đích đến</td><td>Trang web của khách</td><td>API backend cửa hàng</td></tr>
+        <tr><td>Ai gọi</td><td>Trình duyệt được Stripe redirect</td><td>Server Stripe gửi HTTP request</td></tr>
+        <tr><td>Mục đích</td><td>Hiển thị trạng thái cho khách</td><td>Xác minh event, cập nhật order</td></tr>
+        <tr><td>Xác nhận đã thu tiền?</td><td>Không dựa riêng vào URL/query string</td><td>Có, sau khi xác minh chữ ký và đối chiếu dữ liệu</td></tr>
+      </tbody></table>
+      <div class="interview-line"><span class="callout-label">Trả lời mẫu khi phỏng vấn</span><p>“Em tạo order pending, tính giá ở backend rồi tạo Stripe Checkout Session và trả URL cho frontend redirect. Success URL chỉ đưa khách về trang kết quả, không phải bằng chứng thanh toán. Em cấu hình webhook endpoint ở backend, xác minh chữ ký trên raw body, xử lý event idempotent và đối chiếu Session/order/amount trước khi đánh dấu paid. Webhook có retry nên cập nhật DB phải an toàn khi nhận trùng.”</p></div>
+    </section>
+
+    <nav class="pager"><a class="prev" href="17-s3-multipart-upload-flow.html"><span class="pager-dir">← Câu trước</span><span class="pager-title">17. S3 Multipart Upload — Flow chung</span></a><a class="next" href="index.html"><span class="pager-dir">Hoàn thành →</span><span class="pager-title">Về mục lục Advanced Backend</span></a></nav>
+  </main>
+</div>
+
+<footer>
+  Interview Knowledge — sổ tay ôn phỏng vấn tổng hợp từ ghi chép cá nhân.
+  Ưu tiên trả lời theo cấu trúc: vấn đề → giải pháp → vì sao chọn cách này thay vì cách khác.
+</footer>
+
+<script src="../assets/search-index.js" defer></script>
+<script src="../assets/js/main.js" defer></script>
+</body>
+</html>
